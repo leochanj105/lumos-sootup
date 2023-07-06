@@ -28,9 +28,9 @@ import sootup.core.model.Position;
 public class CFAnalysis {
     public final Map<Stmt, Map<Value, Set<Dependency>>> liveIn = new HashMap<>();
     public final Map<Stmt, Map<Value, Set<Dependency>>> liveOut = new HashMap<>();
-    public RWAnalysis rwa;
+    public ReachingDefAnalysis rwa;
 
-    public CFAnalysis(StmtGraph<?> graph, RWAnalysis rwa) {
+    public CFAnalysis(StmtGraph<?> graph, ReachingDefAnalysis rwa) {
         this.rwa = rwa;
         List<Stmt> startingStmts = new ArrayList<>();
         for (Stmt stmt : graph.getNodes()) {

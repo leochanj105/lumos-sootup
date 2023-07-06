@@ -33,8 +33,11 @@ import sootup.core.graph.StmtGraph;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.Value;
+import sootup.core.jimple.common.constant.Constant;
+import sootup.core.jimple.common.constant.IntConstant;
 import sootup.core.jimple.common.ref.JFieldRef;
 import sootup.core.jimple.common.ref.JInstanceFieldRef;
+import sootup.core.jimple.common.stmt.JAssignStmt;
 import sootup.core.jimple.common.stmt.JReturnStmt;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.Body;
@@ -107,6 +110,12 @@ public class App {
                         p(" " + tp2 + "  ?  " + tp2.stmt);
                     }
                 }
+                Stmt stmtx = wsm.getBody().getStmts().get(3);
+                Stmt stmtn = new JAssignStmt<>(((JAssignStmt) stmtx).getLeftOp(),
+                        IntConstant.getInstance(10),
+                        null);
+                p(insertBefore(wsm, stmtx, stmtn));
+                p("----------");
                 p("-----");
                 p(parameters(wsm));
                 p(getReturns(wsm));
@@ -153,6 +162,7 @@ public class App {
                 p(i + " : " + lmap.get(i));
             }
         }
+
         Body body = wsm.getBody();
 
         BodyBuilder builder = Body.builder(body, wsm.getModifiers());
@@ -167,7 +177,7 @@ public class App {
 
         }
 
-        RWAnalysis analysis = new RWAnalysis(cfg);
+        ReachingDefAnalysis analysis = new ReachingDefAnalysis(cfg);
 
         Map<TracePoint, List<TracePoint>> depGraph = new HashMap<>();
         p(nmap + "\n -----");
@@ -213,8 +223,14 @@ public class App {
         }
 
         return depGraph;
-        // }
 
+    }
+
+    public static Body insertBefore(WalaSootMethod wsm, Stmt stmt, Stmt toinsert) {
+        // MutableStmtGraph graph = new MutableBlockStmtGraph(body.getStmtGraph());
+        BodyBuilder builder = Body.builder(wsm.getBody(), wsm.getModifiers());
+        builder.insertBefore(stmt, toinsert);
+        return builder.build();
     }
 
     public static void readParams() {

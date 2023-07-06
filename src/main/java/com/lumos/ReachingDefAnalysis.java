@@ -24,11 +24,11 @@ import sootup.core.jimple.common.stmt.Stmt;
 
 // imp
 
-public class RWAnalysis {
+public class ReachingDefAnalysis {
     public final Map<Stmt, Map<Value, Set<Dependency>>> liveIn = new HashMap<>();
     public final Map<Stmt, Map<Value, Set<Dependency>>> liveOut = new HashMap<>();
 
-    public RWAnalysis(StmtGraph<?> graph) {
+    public ReachingDefAnalysis(StmtGraph<?> graph) {
         List<Stmt> startingStmts = new ArrayList<>();
         for (Stmt stmt : graph.getNodes()) {
             liveIn.put(stmt, Collections.emptyMap());
