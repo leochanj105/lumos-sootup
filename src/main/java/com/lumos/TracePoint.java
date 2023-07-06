@@ -22,7 +22,7 @@ public class TracePoint {
     }
 
     public String toString() {
-        return "[" + (name != null ? name : value.toString()) + ", " + this.lineNumber + "]";
+        return "<" + (name != null ? name : value.toString()) + ", " + this.lineNumber + ">";
     }
 
     public boolean equals(Object obj) {

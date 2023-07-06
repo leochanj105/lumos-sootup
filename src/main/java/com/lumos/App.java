@@ -35,6 +35,7 @@ import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.ref.JFieldRef;
 import sootup.core.jimple.common.ref.JInstanceFieldRef;
+import sootup.core.jimple.common.stmt.JReturnStmt;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.Body;
 import sootup.core.model.SootClass;
@@ -64,8 +65,22 @@ import java.nio.file.Path;
  *
  */
 public class App {
+    public static List<String> processList;
+
+    public static String sourceDirectory;
+    public static String outputDirectory;
+    public static String analyzeResultDirectory;
+    public static boolean showMethod = true;
+    public static boolean showUnit = false;
+    public static String outputFormat = "jimple";
+    public static final String LOG_PREFIX = "LUMOS-LOG";
+
     public static void main(String[] args) {
-        Path path = Paths.get("src/code");
+        readParams();
+        analyzePath("src/code");
+    }
+
+    public static void analyzePath(String path) {
         AnalysisInputLocation<JavaSootClass> inputLocation = new JavaSourcePathAnalysisInputLocation(
                 path.toString());
 
@@ -92,9 +107,37 @@ public class App {
                         p(" " + tp2 + "  ?  " + tp2.stmt);
                     }
                 }
+                p("-----");
+                p(parameters(wsm));
+                p(getReturns(wsm));
+            }
+
+        }
+    }
+
+    public static List<Value> parameters(WalaSootMethod wsm) {
+        // int hasThis = wsm.isStatic() ? 0 : 1;
+        // int methodParamCount = wsm.getParameterCount() + hasThis;
+        List<Value> methodParams = new ArrayList<>();
+        // int count = 0;
+        for (Value v : wsm.getBody().getParameterLocals()) {
+            methodParams.add(v);
+        }
+        if (!wsm.isStatic()) {
+            methodParams.add(0, wsm.getBody().getThisLocal());
+        }
+        return methodParams;
+
+    }
+
+    public static List<TracePoint> getReturns(WalaSootMethod wsm) {
+        List<TracePoint> tps = new ArrayList<>();
+        for (Stmt stmt : wsm.getBody().getStmtGraph()) {
+            if (stmt instanceof JReturnStmt) {
+                tps.add(new TracePoint(stmt, ((JReturnStmt) stmt).getUses().get(0)));
             }
         }
-
+        return tps;
     }
 
     public static Map<TracePoint, List<TracePoint>> analyzeDef(WalaSootMethod wsm) {
@@ -172,6 +215,52 @@ public class App {
         return depGraph;
         // }
 
+    }
+
+    public static void readParams() {
+        String oformat = System.getProperty("outputFormat");
+        if (oformat == null) {
+            outputFormat = "none";
+        } else {
+            outputFormat = oformat;
+        }
+        System.out.println("Output format: " + outputFormat);
+
+        String sdir = System.getProperty("sourceDir");
+        if (sdir == null) {
+            sdir = "";
+        }
+        sourceDirectory = System.getProperty("user.dir") + "/" + sdir;
+        System.out.println("Source directory: " + sourceDirectory);
+
+        String odir = System.getProperty("outputDir");
+        if (odir == null) {
+            odir = "sootOutput";
+        }
+        outputDirectory = System.getProperty("user.dir") + "/" + odir;
+        System.out.println("Output directory: " + outputDirectory);
+
+        String adir = System.getProperty("analyzeDir");
+        if (adir == null) {
+            analyzeResultDirectory = "";
+        } else {
+            analyzeResultDirectory = System.getProperty("user.dir") + "/" + adir;
+            System.out.println("Analyze Result Directory: " + analyzeResultDirectory);
+        }
+
+        String showM = System.getProperty("showMethod");
+        if (showM == null || showM.equals("true")) {
+            showMethod = true;
+        } else {
+            showMethod = false;
+        }
+
+        String showU = System.getProperty("showUnit");
+        if (showU == null || showU.equals("false")) {
+            showUnit = false;
+        } else {
+            showUnit = true;
+        }
     }
 
     public static void p(Object s) {
