@@ -68,6 +68,7 @@ public class RWAnalysis {
                 }
 
                 // This conservatively assume a function call changes all parameters
+                // This is the "safe" data-flow function approach
                 if (stmt.containsInvokeExpr()) {
                     // System.out.println(stmt + " === " + in);
                     AbstractInvokeExpr iexpr = stmt.getInvokeExpr();

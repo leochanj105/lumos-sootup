@@ -21,14 +21,17 @@ import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.expr.AbstractInstanceInvokeExpr;
 import sootup.core.jimple.common.expr.AbstractInvokeExpr;
 import sootup.core.jimple.common.stmt.Stmt;
+import sootup.core.model.Position;
 
 // imp
 
 public class CFAnalysis {
     public final Map<Stmt, Map<Value, Set<Dependency>>> liveIn = new HashMap<>();
     public final Map<Stmt, Map<Value, Set<Dependency>>> liveOut = new HashMap<>();
+    public RWAnalysis rwa;
 
-    public CFAnalysis(StmtGraph<?> graph) {
+    public CFAnalysis(StmtGraph<?> graph, RWAnalysis rwa) {
+        this.rwa = rwa;
         List<Stmt> startingStmts = new ArrayList<>();
         for (Stmt stmt : graph.getNodes()) {
             liveIn.put(stmt, Collections.emptyMap());
@@ -62,6 +65,38 @@ public class CFAnalysis {
                 }
 
                 Map<Value, Set<Dependency>> out = copy(in);
+
+                // Exclude any cf dependency when all values current used
+                // was defined before a CF block
+                List<Dependency> deptoremove = new ArrayList<>();
+                List<Value> valtoremove = new ArrayList<>();
+                for (Value v : out.keySet()) {
+                    for (Dependency dep : out.get(v)) {
+                        boolean outofscode = true;
+                        for (Value vmp : stmt.getUses()) {
+                            for (Dependency dpmp : rwa.getBeforeStmt(stmt).get(vmp)) {
+                                Position rwpos = dpmp.stmt.getPositionInfo().getStmtPosition();
+                                Position cfpos = dep.stmt.getPositionInfo().getStmtPosition();
+                                if (rwpos.compareTo(cfpos) >= 0) {
+                                    outofscode = false;
+                                    break;
+                                }
+                            }
+                            if (!outofscode)
+                                break;
+                        }
+                        if (outofscode) {
+                            valtoremove.add(v);
+                            deptoremove.add(dep);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < valtoremove.size(); i++) {
+                    Value v = valtoremove.get(i);
+                    Dependency dep = deptoremove.get(i);
+                    out.get(v).remove(dep);
+                }
 
                 if (graph.getAllSuccessors(stmt).size() > 1) {
                     for (Value v : stmt.getUses()) {

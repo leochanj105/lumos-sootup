@@ -83,84 +83,94 @@ public class App {
         for (JavaSootMethod sm : ((JavaSootClass) sootClass).getMethods()) {
             WalaSootMethod wsm = (WalaSootMethod) sm;
             if (wsm.toString().contains("some")) {
-                String[][] names = wsm.getDebugInfo().getSourceNamesForValues();
-                Map<Integer, Local> lmap = wsm.localMap;
-                Map<Value, String> nmap = new HashMap<>();
-                for (Integer i : lmap.keySet()) {
-                    if (names[i].length > 0) {
-                        p(i + " : " + lmap.get(i) + " -- " + names[i][0]);
-                        nmap.put(lmap.get(i), names[i][0]);
-                    } else {
-                        p(i + " : " + lmap.get(i));
-                    }
-                }
-                Body body = wsm.getBody();
-
-                BodyBuilder builder = Body.builder(body, wsm.getModifiers());
-
-                // builder.insertBefore(null, null)
-
-                StmtGraph<?> cfg = wsm.getBody().getStmtGraph();
-                // p(cfg instanceof MutableBlockStmtGraph);
-                Set<Value> sv = new HashSet<>();
-                for (Iterator<Stmt> unitIt = cfg.iterator(); unitIt.hasNext();) {
-                    Stmt currStmt = unitIt.next();
-
-                }
-                RWAnalysis analysis = new RWAnalysis(cfg);
-
-                Map<TracePoint, List<TracePoint>> depGraph = new HashMap<>();
-                p(nmap + "\n -----");
-                for (Stmt stmt : cfg.getStmts()) {
-
-                    Map<Value, Set<Dependency>> dmap = analysis.getBeforeStmt(stmt);
-                    for (Value v : stmt.getUsesAndDefs()) {
-                        String name = null;
-                        name = nmap.get(v);
-                        if (v instanceof JInstanceFieldRef) {
-                            JInstanceFieldRef refv = (JInstanceFieldRef) v;
-                            String basename = nmap.get(refv.getBase());
-                            if (basename == null)
-                                basename = refv.getBase().getName();
-                            String refname = refv.getFieldSignature().getName();
-                            name = basename + "." + refname;
-                        }
-
-                        TracePoint tmp = new TracePoint(stmt, v, name);
-                        if (!depGraph.containsKey(tmp)) {
-                            depGraph.put(tmp, new ArrayList<>());
-                        }
-                    }
-                    for (Value v : stmt.getDefs()) {
-                        TracePoint tmp = new TracePoint(stmt, v);
-                        for (Value v2 : stmt.getUses()) {
-                            TracePoint tmp2 = new TracePoint(stmt, v2);
-                            depGraph.get(tmp).add(tmp2);
-                        }
-                    }
-                    for (Value v : stmt.getUses()) {
-                        TracePoint tmp = new TracePoint(stmt, v);
-                        if (dmap.containsKey(v)) {
-                            // p(v + " :: " + dmap.get(v));
-                            for (Dependency dep : dmap.get(v)) {
-                                for (Value v2 : dep.stmt.getUsesAndDefs()) {
-                                    TracePoint tmp2 = new TracePoint(dep.stmt, v2);
-                                    depGraph.get(tmp).add(tmp2);
-                                }
-                            }
-                        }
-                    }
-                }
-                for (TracePoint tp : depGraph.keySet()) {
+                Map<TracePoint, List<TracePoint>> depGMap = analyzeDef(wsm);
+                for (TracePoint tp : depGMap.keySet()) {
                     if (tp.name == null)
                         continue;
                     p(tp + "  ?  " + tp.stmt + " ====> ");
-                    for (TracePoint tp2 : depGraph.get(tp)) {
+                    for (TracePoint tp2 : depGMap.get(tp)) {
                         p(" " + tp2 + "  ?  " + tp2.stmt);
                     }
                 }
             }
         }
+
+    }
+
+    public static Map<TracePoint, List<TracePoint>> analyzeDef(WalaSootMethod wsm) {
+        // if (wsm.toString().contains("some")) {
+        String[][] names = wsm.getDebugInfo().getSourceNamesForValues();
+        Map<Integer, Local> lmap = wsm.localMap;
+        Map<Value, String> nmap = new HashMap<>();
+        for (Integer i : lmap.keySet()) {
+            if (names[i].length > 0) {
+                p(i + " : " + lmap.get(i) + " -- " + names[i][0]);
+                nmap.put(lmap.get(i), names[i][0]);
+            } else {
+                p(i + " : " + lmap.get(i));
+            }
+        }
+        Body body = wsm.getBody();
+
+        BodyBuilder builder = Body.builder(body, wsm.getModifiers());
+
+        // builder.insertBefore(null, null)
+
+        StmtGraph<?> cfg = wsm.getBody().getStmtGraph();
+        // p(cfg instanceof MutableBlockStmtGraph);
+        Set<Value> sv = new HashSet<>();
+        for (Iterator<Stmt> unitIt = cfg.iterator(); unitIt.hasNext();) {
+            Stmt currStmt = unitIt.next();
+
+        }
+
+        RWAnalysis analysis = new RWAnalysis(cfg);
+
+        Map<TracePoint, List<TracePoint>> depGraph = new HashMap<>();
+        p(nmap + "\n -----");
+        for (Stmt stmt : cfg.getStmts()) {
+
+            Map<Value, Set<Dependency>> dmap = analysis.getBeforeStmt(stmt);
+            for (Value v : stmt.getUsesAndDefs()) {
+                String name = null;
+                name = nmap.get(v);
+                if (v instanceof JInstanceFieldRef) {
+                    JInstanceFieldRef refv = (JInstanceFieldRef) v;
+                    String basename = nmap.get(refv.getBase());
+                    if (basename == null)
+                        basename = refv.getBase().getName();
+                    String refname = refv.getFieldSignature().getName();
+                    name = basename + "." + refname;
+                }
+
+                TracePoint tmp = new TracePoint(stmt, v, name);
+                if (!depGraph.containsKey(tmp)) {
+                    depGraph.put(tmp, new ArrayList<>());
+                }
+            }
+            for (Value v : stmt.getDefs()) {
+                TracePoint tmp = new TracePoint(stmt, v);
+                for (Value v2 : stmt.getUses()) {
+                    TracePoint tmp2 = new TracePoint(stmt, v2);
+                    depGraph.get(tmp).add(tmp2);
+                }
+            }
+            for (Value v : stmt.getUses()) {
+                TracePoint tmp = new TracePoint(stmt, v);
+                if (dmap.containsKey(v)) {
+                    // p(v + " :: " + dmap.get(v));
+                    for (Dependency dep : dmap.get(v)) {
+                        for (Value v2 : dep.stmt.getUsesAndDefs()) {
+                            TracePoint tmp2 = new TracePoint(dep.stmt, v2);
+                            depGraph.get(tmp).add(tmp2);
+                        }
+                    }
+                }
+            }
+        }
+
+        return depGraph;
+        // }
 
     }
 
