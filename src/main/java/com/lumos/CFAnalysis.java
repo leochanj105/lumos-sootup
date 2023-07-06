@@ -148,12 +148,6 @@ public class CFAnalysis {
         return liveOut.get(stmt);
     }
 
-    /**
-     * Merge two local sets into one set.
-     *
-     * @return a merged local set
-     */
-
     private Map<Value, Set<Dependency>> merge(@Nonnull Map<Value, Set<Dependency>> set1,
             @Nonnull Map<Value, Set<Dependency>> set2) {
         if (set1.isEmpty()) {
@@ -193,11 +187,6 @@ public class CFAnalysis {
         return set1;
     }
 
-    /**
-     * Check whether two sets contains same locals.
-     *
-     * @return if same return true, else return false;
-     */
     private boolean isNotEqual(@Nonnull Map<Value, Set<Dependency>> set1, @Nonnull Map<Value, Set<Dependency>> set2) {
         if (!set1.keySet().equals(set2.keySet())) {
             return true;

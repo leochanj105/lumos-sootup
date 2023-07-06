@@ -19,13 +19,13 @@ public class Test {
         } else {
             u = 1 / u;
         }
-        u = f(u);
-        System.out.println(u);
+        u = fff("http:" + u + "/" + this);
+        // System.out.println(u);
         return u < 0.9;
     }
 
-    public float f(float x) {
-        return x + 1;
+    public float fff(String x) {
+        return 0.5;
     }
 
 }

@@ -117,20 +117,12 @@ public class ReachingDefAnalysis {
         return liveIn.get(stmt);
     }
 
-    /** Get all live locals after the given stmt. */
-
     public Map<Value, Set<Dependency>> getAfterStmt(@Nonnull Stmt stmt) {
         if (!liveOut.containsKey(stmt)) {
             throw new RuntimeException("Stmt: " + stmt + " is not in StmtGraph!");
         }
         return liveOut.get(stmt);
     }
-
-    /**
-     * Merge two local sets into one set.
-     *
-     * @return a merged local set
-     */
 
     private Map<Value, Set<Dependency>> merge(@Nonnull Map<Value, Set<Dependency>> set1,
             @Nonnull Map<Value, Set<Dependency>> set2) {
@@ -171,11 +163,6 @@ public class ReachingDefAnalysis {
         return set1;
     }
 
-    /**
-     * Check whether two sets contains same locals.
-     *
-     * @return if same return true, else return false;
-     */
     private boolean isNotEqual(@Nonnull Map<Value, Set<Dependency>> set1, @Nonnull Map<Value, Set<Dependency>> set2) {
         if (!set1.keySet().equals(set2.keySet())) {
             return true;

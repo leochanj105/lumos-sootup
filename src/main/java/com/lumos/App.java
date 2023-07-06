@@ -45,6 +45,7 @@ import sootup.core.model.SootClass;
 import sootup.core.model.SootField;
 import sootup.core.model.SootMethod;
 import sootup.core.model.Body.BodyBuilder;
+import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ClassType;
 import sootup.java.bytecode.inputlocation.PathBasedAnalysisInputLocation;
 import sootup.java.core.JavaProject;
@@ -119,8 +120,25 @@ public class App {
                 p("-----");
                 p(parameters(wsm));
                 p(getReturns(wsm));
+                analyzeExchange(wsm);
             }
 
+        }
+    }
+
+    public static void analyzeExchange(WalaSootMethod wsm) {
+        for (Stmt stmt : wsm.getBody().getStmts()) {
+            if (!stmt.containsInvokeExpr())
+                continue;
+            MethodSignature ms = stmt.getInvokeExpr().getMethodSignature();
+            if (!ms.toString().contains("fff(")) // This should be exchange, but I'm testing for now
+                continue;
+
+            // p(ms);
+            ReachingDefAnalysis rda = new ReachingDefAnalysis(wsm.getBody().getStmtGraph());
+            Map<Value, Set<Dependency>> mdep = rda.getBeforeStmt(stmt);
+            Value argURL = stmt.getInvokeExpr().getArg(0);
+            p(mdep.get(argURL));
         }
     }
 
@@ -163,19 +181,18 @@ public class App {
             }
         }
 
-        Body body = wsm.getBody();
+        // Body body = wsm.getBody();
 
-        BodyBuilder builder = Body.builder(body, wsm.getModifiers());
+        // BodyBuilder builder = Body.builder(body, wsm.getModifiers());
 
         // builder.insertBefore(null, null)
 
         StmtGraph<?> cfg = wsm.getBody().getStmtGraph();
         // p(cfg instanceof MutableBlockStmtGraph);
-        Set<Value> sv = new HashSet<>();
-        for (Iterator<Stmt> unitIt = cfg.iterator(); unitIt.hasNext();) {
-            Stmt currStmt = unitIt.next();
-
-        }
+        // Set<Value> sv = new HashSet<>();
+        // for (Iterator<Stmt> unitIt = cfg.iterator(); unitIt.hasNext();) {
+        // Stmt currStmt = unitIt.next();
+        // }
 
         ReachingDefAnalysis analysis = new ReachingDefAnalysis(cfg);
 
@@ -184,6 +201,8 @@ public class App {
         for (Stmt stmt : cfg.getStmts()) {
 
             Map<Value, Set<Dependency>> dmap = analysis.getBeforeStmt(stmt);
+
+            // Create Tracepoints and add description texts from frontend
             for (Value v : stmt.getUsesAndDefs()) {
                 String name = null;
                 name = nmap.get(v);
@@ -201,6 +220,8 @@ public class App {
                     depGraph.put(tmp, new ArrayList<>());
                 }
             }
+
+            // Defs depend on Uses in one line
             for (Value v : stmt.getDefs()) {
                 TracePoint tmp = new TracePoint(stmt, v);
                 for (Value v2 : stmt.getUses()) {
@@ -208,6 +229,8 @@ public class App {
                     depGraph.get(tmp).add(tmp2);
                 }
             }
+
+            // Uses depend on previous reaching defs
             for (Value v : stmt.getUses()) {
                 TracePoint tmp = new TracePoint(stmt, v);
                 if (dmap.containsKey(v)) {
