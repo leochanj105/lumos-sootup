@@ -1,82 +1,179 @@
-// AnalysisInputLocation<JavaSootClass> inputLocation = new
-// PathBasedAnalysisInputLocation(path);
-// p(inputLocation.getClass());
+package com.lumos;
 
-// Previous debugging
-// try {
-// Field privateField =
-// JavaSourcePathAnalysisInputLocation.class.getDeclaredField("classProvider");
-// privateField.setAccessible(true);
-// JavaSourcePathAnalysisInputLocation loc =
-// (JavaSourcePathAnalysisInputLocation) inputLocation;
-// WalaJavaClassProvider wjp = (WalaJavaClassProvider) privateField.get(loc);
-// p(wjp);
-// Method method[] = WalaJavaClassProvider.class.getDeclaredMethods();
-// Method m = null;
-// for (int i = 0; i < method.length; i++) {
-// String meth = new String(method[i].toString());
-// p(meth);
-// if (meth.contains("iterateWalaClasses")) {
-// m = method[i];
-// break;
-// }
-// }
-// // Method m = WalaJavaClassProvider.class.getDeclaredMethod(mname);
-// m.setAccessible(true);
-// Iterator<IClass> it = (Iterator<IClass>) m.invoke(wjp);
-// while (it.hasNext()) {
-// JavaSourceLoaderImpl.JavaClass walaClass = (JavaSourceLoaderImpl.JavaClass)
-// it.next();
-// // p(walaClass);
-// for (IMethod walaMethod : walaClass.getDeclaredMethods()) {
-// ConcreteJavaMethod walam = (ConcreteJavaMethod) walaMethod;
-// if (!walam.toString().contains("some"))
-// continue;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-// p(walaMethod);
-// // p(walaMethod.getClass());
+import javax.annotation.Nonnull;
 
-// DebuggingInformation dinfo = walam.debugInfo();
-// SymbolTable st = walam.symbolTable();
-// // p("!!! " + st.isParameter(1));
-// // p("!!! " + st.isParameter(3));
-// String[][] names = dinfo.getSourceNamesForValues();
-// for (int i = 0; i < names.length; i++) {
-// String[] tmp = names[i];
-// if (tmp.length != 0) {
-// // p(i);
-// for (String s : tmp) {
-// // p(s);
-// }
-// }
-// }
-// // p("-----");
-// // for (int i = 0; i <= st.getMaxValueNumber(); i++) {
-// // p(i + ": " + st.getValueString(i));
-// // if (i < 1)
-// // continue;
-// // p(i + ": " + st.getValue(i));
-// // }
-// // AbstractCFG<?, ?> cfg = walam.cfg();
-// // for (SSAInstruction inst : (SSAInstruction[]) cfg.getInstructions()) {
-// // p(inst);
-// // }
-// }
-// }
+import org.apache.commons.lang3.SerializationUtils;
 
-// } catch (NoSuchFieldException e) {
-// // TODO Auto-generated catch block
-// e.printStackTrace();
-// } catch (SecurityException e) {
-// // TODO Auto-generated catch block
-// e.printStackTrace();
-// } catch (IllegalArgumentException e) {
-// // TODO Auto-generated catch block
-// e.printStackTrace();
-// } catch (IllegalAccessException e) {
-// // TODO Auto-generated catch block
-// e.printStackTrace();
-// } catch (InvocationTargetException e) {
-// // TODO Auto-generated catch block
-// e.printStackTrace();
-// }
+import java.util.HashSet;
+import java.util.List;
+
+import sootup.core.graph.StmtGraph;
+import sootup.core.jimple.basic.Local;
+import sootup.core.jimple.basic.Value;
+import sootup.core.jimple.common.expr.AbstractInstanceInvokeExpr;
+import sootup.core.jimple.common.expr.AbstractInvokeExpr;
+import sootup.core.jimple.common.stmt.Stmt;
+
+// imp
+
+public class CFAnalysis {
+    public final Map<Stmt, Map<Value, Set<Dependency>>> liveIn = new HashMap<>();
+    public final Map<Stmt, Map<Value, Set<Dependency>>> liveOut = new HashMap<>();
+
+    public CFAnalysis(StmtGraph<?> graph) {
+        List<Stmt> startingStmts = new ArrayList<>();
+        for (Stmt stmt : graph.getNodes()) {
+            liveIn.put(stmt, Collections.emptyMap());
+            liveOut.put(stmt, Collections.emptyMap());
+            if (graph.predecessors(stmt).isEmpty() && graph.exceptionalPredecessors(stmt).isEmpty()) {
+                startingStmts.add(stmt);
+            }
+        }
+
+        boolean fixed = false;
+        while (!fixed) {
+            fixed = true;
+            Deque<Stmt> queue = new ArrayDeque<>(startingStmts);
+            HashSet<Stmt> visitedStmts = new HashSet<>();
+            while (!queue.isEmpty()) {
+                Stmt stmt = queue.removeFirst();
+                visitedStmts.add(stmt);
+
+                Map<Value, Set<Dependency>> in = new HashMap<>(liveIn.get(stmt));
+                for (Stmt pred : graph.predecessors(stmt)) {
+                    in = merge(in, liveOut.get(pred));
+                }
+                for (Stmt epred : graph.exceptionalPredecessors(stmt)) {
+                    in = merge(in, liveOut.get(epred));
+                    // System.out.println(stmt + " ---> " + epred);
+                }
+
+                if (isNotEqual(in, liveIn.get(stmt))) {
+                    fixed = false;
+                    liveIn.put(stmt, new HashMap<>(in));
+                }
+
+                Map<Value, Set<Dependency>> out = copy(in);
+
+                if (graph.getAllSuccessors(stmt).size() > 1) {
+                    for (Value v : stmt.getUses()) {
+                        out = generate(out, v, new Dependency(stmt, DepType.CF));
+                    }
+                }
+
+                if (isNotEqual(out, liveOut.get(stmt))) {
+                    fixed = false;
+                    liveOut.put(stmt, out);
+                }
+
+                for (Stmt succ : graph.successors(stmt)) {
+                    if (!visitedStmts.contains(succ)) {
+                        queue.addLast(succ);
+                    }
+                }
+                for (Stmt esucc : graph.exceptionalSuccessors(stmt).values()) {
+                    if (!visitedStmts.contains(esucc)) {
+                        queue.addLast(esucc);
+                    }
+                }
+
+            }
+        }
+    }
+
+    public Map<Value, Set<Dependency>> copy(Map<Value, Set<Dependency>> original) {
+        Map<Value, Set<Dependency>> newm = new HashMap<>();
+        for (Value v : original.keySet()) {
+            newm.put(v, new HashSet<>(original.get(v)));
+        }
+        return newm;
+    }
+
+    public Map<Value, Set<Dependency>> getBeforeStmt(@Nonnull Stmt stmt) {
+        if (!liveIn.containsKey(stmt)) {
+            throw new RuntimeException("Stmt: " + stmt + " is not in StmtGraph!");
+        }
+        return liveIn.get(stmt);
+    }
+
+    /** Get all live locals after the given stmt. */
+
+    public Map<Value, Set<Dependency>> getAfterStmt(@Nonnull Stmt stmt) {
+        if (!liveOut.containsKey(stmt)) {
+            throw new RuntimeException("Stmt: " + stmt + " is not in StmtGraph!");
+        }
+        return liveOut.get(stmt);
+    }
+
+    /**
+     * Merge two local sets into one set.
+     *
+     * @return a merged local set
+     */
+
+    private Map<Value, Set<Dependency>> merge(@Nonnull Map<Value, Set<Dependency>> set1,
+            @Nonnull Map<Value, Set<Dependency>> set2) {
+        if (set1.isEmpty()) {
+            return set2;
+        } else {
+            Map<Value, Set<Dependency>> set3 = copy(set1);
+            for (Value v : set3.keySet()) {
+                if (set2.containsKey(v)) {
+                    Set<Dependency> loc3 = set3.get(v);
+                    for (Dependency dep : set2.get(v)) {
+                        loc3.add(dep);
+                    }
+                }
+            }
+            // set1.addAll(set2);
+            return set3;
+        }
+    }
+
+    private Map<Value, Set<Dependency>> kill(@Nonnull Map<Value, Set<Dependency>> set1, Value v) {
+        if (!set1.containsKey(v))
+            return set1;
+        Set<Dependency> dset = set1.get(v);
+        dset.removeIf(d -> d.dtype != DepType.CF);
+        return set1;
+    }
+
+    private Map<Value, Set<Dependency>> generate(@Nonnull Map<Value, Set<Dependency>> set1, Value v,
+            Dependency dep) {
+        if (!set1.containsKey(v)) {
+            Set<Dependency> sdep = new HashSet<>();
+            sdep.add(dep);
+            set1.put(v, sdep);
+        } else {
+            set1.get(v).add(dep);
+        }
+        return set1;
+    }
+
+    /**
+     * Check whether two sets contains same locals.
+     *
+     * @return if same return true, else return false;
+     */
+    private boolean isNotEqual(@Nonnull Map<Value, Set<Dependency>> set1, @Nonnull Map<Value, Set<Dependency>> set2) {
+        if (!set1.keySet().equals(set2.keySet())) {
+            return true;
+        } else {
+            for (Value v : set1.keySet()) {
+                if (!set1.get(v).equals(set2.get(v))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+}
