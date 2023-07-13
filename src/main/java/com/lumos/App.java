@@ -102,25 +102,28 @@ public class App {
         for (JavaSootMethod sm : ((JavaSootClass) sootClass).getMethods()) {
             WalaSootMethod wsm = (WalaSootMethod) sm;
             if (wsm.toString().contains("some")) {
-                Map<TracePoint, List<TracePoint>> depGMap = analyzeDef(wsm);
+                MethodInfo minfo = new MethodInfo(wsm);
+                Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
                 for (TracePoint tp : depGMap.keySet()) {
                     if (tp.name == null)
                         continue;
-                    p(tp + "  ?  " + tp.stmt + " ====> ");
-                    for (TracePoint tp2 : depGMap.get(tp)) {
-                        p(" " + tp2 + "  ?  " + tp2.stmt);
-                    }
+                    // p(tp + " ? " + tp.stmt + " ====> ");
+                    // for (TracePoint tp2 : depGMap.get(tp)) {
+                    // p(" " + tp2 + " ? " + tp2.stmt);
+                    // }
                 }
                 Stmt stmtx = wsm.getBody().getStmts().get(3);
                 Stmt stmtn = new JAssignStmt<>(((JAssignStmt) stmtx).getLeftOp(),
                         IntConstant.getInstance(10),
                         null);
-                p(insertBefore(wsm, stmtx, stmtn));
+                // insertBefore(wsm, stmtx, stmtn);
                 p("----------");
                 p("-----");
                 p(parameters(wsm));
                 p(getReturns(wsm));
                 analyzeExchange(wsm);
+                LocalAliasAnalysis laa = new LocalAliasAnalysis(minfo);
+
             }
 
         }
@@ -165,88 +168,6 @@ public class App {
             }
         }
         return tps;
-    }
-
-    public static Map<TracePoint, List<TracePoint>> analyzeDef(WalaSootMethod wsm) {
-        // if (wsm.toString().contains("some")) {
-        String[][] names = wsm.getDebugInfo().getSourceNamesForValues();
-        Map<Integer, Local> lmap = wsm.localMap;
-        Map<Value, String> nmap = new HashMap<>();
-        for (Integer i : lmap.keySet()) {
-            if (names[i].length > 0) {
-                p(i + " : " + lmap.get(i) + " -- " + names[i][0]);
-                nmap.put(lmap.get(i), names[i][0]);
-            } else {
-                p(i + " : " + lmap.get(i));
-            }
-        }
-
-        // Body body = wsm.getBody();
-
-        // BodyBuilder builder = Body.builder(body, wsm.getModifiers());
-
-        // builder.insertBefore(null, null)
-
-        StmtGraph<?> cfg = wsm.getBody().getStmtGraph();
-        // p(cfg instanceof MutableBlockStmtGraph);
-        // Set<Value> sv = new HashSet<>();
-        // for (Iterator<Stmt> unitIt = cfg.iterator(); unitIt.hasNext();) {
-        // Stmt currStmt = unitIt.next();
-        // }
-
-        ReachingDefAnalysis analysis = new ReachingDefAnalysis(cfg);
-
-        Map<TracePoint, List<TracePoint>> depGraph = new HashMap<>();
-        p(nmap + "\n -----");
-        for (Stmt stmt : cfg.getStmts()) {
-
-            Map<Value, Set<Dependency>> dmap = analysis.getBeforeStmt(stmt);
-
-            // Create Tracepoints and add description texts from frontend
-            for (Value v : stmt.getUsesAndDefs()) {
-                String name = null;
-                name = nmap.get(v);
-                if (v instanceof JInstanceFieldRef) {
-                    JInstanceFieldRef refv = (JInstanceFieldRef) v;
-                    String basename = nmap.get(refv.getBase());
-                    if (basename == null)
-                        basename = refv.getBase().getName();
-                    String refname = refv.getFieldSignature().getName();
-                    name = basename + "." + refname;
-                }
-
-                TracePoint tmp = new TracePoint(stmt, v, name);
-                if (!depGraph.containsKey(tmp)) {
-                    depGraph.put(tmp, new ArrayList<>());
-                }
-            }
-
-            // Defs depend on Uses in one line
-            for (Value v : stmt.getDefs()) {
-                TracePoint tmp = new TracePoint(stmt, v);
-                for (Value v2 : stmt.getUses()) {
-                    TracePoint tmp2 = new TracePoint(stmt, v2);
-                    depGraph.get(tmp).add(tmp2);
-                }
-            }
-
-            // Uses depend on previous reaching defs
-            for (Value v : stmt.getUses()) {
-                TracePoint tmp = new TracePoint(stmt, v);
-                if (dmap.containsKey(v)) {
-                    // p(v + " :: " + dmap.get(v));
-                    for (Dependency dep : dmap.get(v)) {
-                        for (Value v2 : dep.stmt.getUsesAndDefs()) {
-                            TracePoint tmp2 = new TracePoint(dep.stmt, v2);
-                            depGraph.get(tmp).add(tmp2);
-                        }
-                    }
-                }
-            }
-        }
-
-        return depGraph;
-
     }
 
     public static Body insertBefore(WalaSootMethod wsm, Stmt stmt, Stmt toinsert) {
