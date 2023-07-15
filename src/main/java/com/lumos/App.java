@@ -20,6 +20,7 @@ import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
+import com.lumos.common.TracePoint;
 
 import fj.Unit;
 import fj.test.reflect.Check;
@@ -112,17 +113,31 @@ public class App {
                     // p(" " + tp2 + " ? " + tp2.stmt);
                     // }
                 }
-                Stmt stmtx = wsm.getBody().getStmts().get(3);
-                Stmt stmtn = new JAssignStmt<>(((JAssignStmt) stmtx).getLeftOp(),
-                        IntConstant.getInstance(10),
-                        null);
+                // Stmt stmtx = wsm.getBody().getStmts().get(3);
+                // Stmt stmtn = new JAssignStmt<>(((JAssignStmt) stmtx).getLeftOp(),
+                // IntConstant.getInstance(10),
+                // null);
                 // insertBefore(wsm, stmtx, stmtn);
                 p("----------");
-                p("-----");
-                p(parameters(wsm));
-                p(getReturns(wsm));
-                analyzeExchange(wsm);
-                LocalAliasAnalysis laa = new LocalAliasAnalysis(minfo);
+                // p(parameters(wsm));
+
+                TracePoint target = minfo.getReturnTps().get(0);
+                p(target);
+
+                for (TracePoint tp : minfo.getPrev(target)) {
+                    for (TracePoint tp2 : minfo.getPrev(tp)) {
+
+                        if (tp2.toString().contains("<$r2, 55")) {
+                            p(tp2);
+                            // p(tp2.stmt);
+                            // p(minfo.reachingAnalysis.getBeforeStmt(tp2.stmt).get(tp2));
+                            p(minfo.getPrev(tp2));
+                        }
+                    }
+                    // p(tp.value.getClass());
+                }
+                // analyzeExchange(wsm);
+                // LocalAliasAnalysis laa = new LocalAliasAnalysis(minfo);
 
             }
 
@@ -158,16 +173,6 @@ public class App {
         }
         return methodParams;
 
-    }
-
-    public static List<TracePoint> getReturns(WalaSootMethod wsm) {
-        List<TracePoint> tps = new ArrayList<>();
-        for (Stmt stmt : wsm.getBody().getStmtGraph()) {
-            if (stmt instanceof JReturnStmt) {
-                tps.add(new TracePoint(stmt, ((JReturnStmt) stmt).getUses().get(0)));
-            }
-        }
-        return tps;
     }
 
     public static Body insertBefore(WalaSootMethod wsm, Stmt stmt, Stmt toinsert) {

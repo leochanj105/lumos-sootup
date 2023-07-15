@@ -1,4 +1,4 @@
-package com.lumos;
+package com.lumos.common;
 
 import sootup.core.jimple.basic.Trap;
 import sootup.core.jimple.basic.Value;
@@ -9,6 +9,8 @@ public class TracePoint {
     public Value value;
     public int lineNumber;
     public String name;
+
+    public boolean isTraceable = false;
 
     public TracePoint(Stmt stmt, Value value) {
         this.stmt = stmt;
@@ -22,7 +24,7 @@ public class TracePoint {
     }
 
     public String toString() {
-        return "<" + (name != null ? name : value.toString()) + ", " + this.lineNumber + ">";
+        return "<" + (name != null ? name : value.toString()) + ", " + this.lineNumber + ", " + stmt + ">";
     }
 
     public boolean equals(Object obj) {
