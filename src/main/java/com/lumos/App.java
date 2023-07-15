@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.checkerframework.checker.units.qual.min;
 import org.objectweb.asm.commons.JSRInlinerAdapter;
 
 import com.ibm.wala.cast.java.loader.JavaSourceLoaderImpl;
@@ -100,48 +101,46 @@ public class App {
         // view.getClass(classType).get();
         SootClass sootClass = view.getClass(classType).get();
         p(sootClass.getClassSource().getClass());
+
+        Map<SootMethod, MethodInfo> methodMap = new HashMap<>();
+        WalaSootMethod startMethod = null;
         for (JavaSootMethod sm : ((JavaSootClass) sootClass).getMethods()) {
             WalaSootMethod wsm = (WalaSootMethod) sm;
-            if (wsm.toString().contains("some")) {
-                MethodInfo minfo = new MethodInfo(wsm);
-                Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
-                for (TracePoint tp : depGMap.keySet()) {
-                    if (tp.name == null)
-                        continue;
-                    // p(tp + " ? " + tp.stmt + " ====> ");
-                    // for (TracePoint tp2 : depGMap.get(tp)) {
-                    // p(" " + tp2 + " ? " + tp2.stmt);
-                    // }
-                }
-                // Stmt stmtx = wsm.getBody().getStmts().get(3);
-                // Stmt stmtn = new JAssignStmt<>(((JAssignStmt) stmtx).getLeftOp(),
-                // IntConstant.getInstance(10),
-                // null);
-                // insertBefore(wsm, stmtx, stmtn);
-                p("----------");
-                // p(parameters(wsm));
-
-                TracePoint target = minfo.getReturnTps().get(0);
-                p(target);
-
-                for (TracePoint tp : minfo.getPrev(target)) {
-                    for (TracePoint tp2 : minfo.getPrev(tp)) {
-
-                        if (tp2.toString().contains("<$r2, 55")) {
-                            p(tp2);
-                            // p(tp2.stmt);
-                            // p(minfo.reachingAnalysis.getBeforeStmt(tp2.stmt).get(tp2));
-                            p(minfo.getPrev(tp2));
-                        }
-                    }
-                    // p(tp.value.getClass());
-                }
-                // analyzeExchange(wsm);
-                // LocalAliasAnalysis laa = new LocalAliasAnalysis(minfo);
-
+            // if (wsm.toString().contains("some")) {
+            MethodInfo minfo = new MethodInfo(wsm);
+            Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
+            for (TracePoint tp : depGMap.keySet()) {
+                if (tp.name == null)
+                    continue;
             }
-
+            if (wsm.toString().contains("some")) {
+                startMethod = wsm;
+            }
+            methodMap.put(wsm, minfo);
         }
+
+        p("----------");
+
+        MethodInfo minfo = methodMap.get(startMethod);
+        TracePoint target = minfo.getReturnTps().get(0);
+        p(target);
+        for (TracePoint tp : minfo.getPrev(target)) {
+            for (TracePoint tp2 : minfo.getPrev(tp)) {
+
+                if (tp2.toString().contains("<$r2, 55")) {
+                    p(tp2);
+                    // p(tp2.stmt);
+                    // p(minfo.reachingAnalysis.getBeforeStmt(tp2.stmt).get(tp2));
+                    p(minfo.getPrev(tp2));
+                }
+            }
+            // p(tp.value.getClass());
+        }
+
+    }
+
+    public static void walkMethod(Value val, MethodInfo minfo) {
+
     }
 
     public static void analyzeExchange(WalaSootMethod wsm) {
