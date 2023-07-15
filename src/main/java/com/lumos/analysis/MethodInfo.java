@@ -127,6 +127,10 @@ public class MethodInfo {
         return depGraph.get(tp);
     }
 
+    public List<TracePoint> getPrev(Stmt stmt, Value value) {
+        return getPrev(this.tpMap.get(stmt).get(value));
+    }
+
     public List<TracePoint> getReturnTps() {
         List<TracePoint> tps = new ArrayList<>();
 
@@ -136,6 +140,17 @@ public class MethodInfo {
             }
         }
         return tps;
+    }
+
+    public List<Value> getParamValues() {
+        List<Value> params = new ArrayList<>();
+        if (!this.wsm.isStatic()) {
+            params.add(this.wsm.getBody().getThisLocal());
+        }
+        for (Value v : this.wsm.getBody().getParameterLocals()) {
+            params.add(v);
+        }
+        return params;
     }
 
 }

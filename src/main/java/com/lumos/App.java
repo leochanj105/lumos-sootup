@@ -41,6 +41,8 @@ import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.constant.Constant;
 import sootup.core.jimple.common.constant.IntConstant;
+import sootup.core.jimple.common.expr.AbstractInstanceInvokeExpr;
+import sootup.core.jimple.common.expr.AbstractInvokeExpr;
 import sootup.core.jimple.common.expr.JInterfaceInvokeExpr;
 import sootup.core.jimple.common.expr.JVirtualInvokeExpr;
 import sootup.core.jimple.common.ref.JFieldRef;
@@ -137,7 +139,8 @@ public class App {
                     Value rop = ((JAssignStmt) curr).getRightOp();
                     MethodSignature sig = ((JVirtualInvokeExpr) rop).getMethodSignature();
                     p(rop);
-                    walkMethod(rop, null, methodMap.get(sig));
+                    walkMethod(rop, null, methodMap.get(sig), getParameters((JVirtualInvokeExpr) rop));
+
                     // p(methodMap.get(sig));
                 }
             }
@@ -146,7 +149,19 @@ public class App {
 
     }
 
-    public static void walkMethod(Value base, RefSeq suffix, MethodInfo minfo) {
+    public static List<Value> getParameters(AbstractInvokeExpr expr) {
+        List<Value> params = new ArrayList<>();
+        if (expr instanceof AbstractInstanceInvokeExpr) {
+            params.add(((AbstractInstanceInvokeExpr) expr).getBase());
+        }
+
+        for (int i = 0; i < expr.getArgCount(); i++) {
+            params.add(expr.getArg(i));
+        }
+        return params;
+    }
+
+    public static void walkMethod(Value base, RefSeq suffix, MethodInfo minfo, List<Value> parameters) {
         if (suffix == null) {
 
         }
@@ -162,6 +177,11 @@ public class App {
             p(tp2);
             List<TracePoint> ltps = minfo.getPrev(tp2);
             if (ltps.size() == 0) {
+                Value toresolve = tp2.value;
+                p(toresolve);
+                JInstanceFieldRef rexp = (JInstanceFieldRef) toresolve;
+                Value rbase = rexp.getBase();
+                p(minfo.getPrev(tp2.stmt, rbase));
 
             }
             // p(tp3);
