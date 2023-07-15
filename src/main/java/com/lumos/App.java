@@ -21,6 +21,10 @@ import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
+import com.lumos.analysis.MethodInfo;
+import com.lumos.analysis.ReachingDefAnalysis;
+import com.lumos.common.Dependency;
+import com.lumos.common.RefSeq;
 import com.lumos.common.TracePoint;
 
 import fj.Unit;
@@ -37,9 +41,12 @@ import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.constant.Constant;
 import sootup.core.jimple.common.constant.IntConstant;
+import sootup.core.jimple.common.expr.JInterfaceInvokeExpr;
+import sootup.core.jimple.common.expr.JVirtualInvokeExpr;
 import sootup.core.jimple.common.ref.JFieldRef;
 import sootup.core.jimple.common.ref.JInstanceFieldRef;
 import sootup.core.jimple.common.stmt.JAssignStmt;
+import sootup.core.jimple.common.stmt.JInvokeStmt;
 import sootup.core.jimple.common.stmt.JReturnStmt;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.Body;
@@ -96,42 +103,42 @@ public class App {
         // .build();
         JavaProject project = JavaProject.builder(language).addInputLocation(inputLocation).build();
         JavaView view = project.createView();
-        ClassType classType = project.getIdentifierFactory().getClassType("Test");
-        // SootClass<JavaSootClassSource> sootClass = (SootClass<JavaSootClassSource>)
-        // view.getClass(classType).get();
-        SootClass sootClass = view.getClass(classType).get();
-        p(sootClass.getClassSource().getClass());
 
-        Map<SootMethod, MethodInfo> methodMap = new HashMap<>();
-        WalaSootMethod startMethod = null;
-        for (JavaSootMethod sm : ((JavaSootClass) sootClass).getMethods()) {
-            WalaSootMethod wsm = (WalaSootMethod) sm;
-            // if (wsm.toString().contains("some")) {
-            MethodInfo minfo = new MethodInfo(wsm);
-            Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
-            for (TracePoint tp : depGMap.keySet()) {
-                if (tp.name == null)
-                    continue;
+        String[] classes = new String[] { "Test", "Test$T", "Test$Order", "Test$Result", "Test$Status" };
+        Map<MethodSignature, MethodInfo> methodMap = new HashMap<>();
+        MethodSignature startMethod = null;
+        for (String clstr : classes) {
+            ClassType classType = project.getIdentifierFactory().getClassType(clstr);
+            SootClass sootClass = view.getClass(classType).get();
+
+            for (JavaSootMethod sm : ((JavaSootClass) sootClass).getMethods()) {
+                WalaSootMethod wsm = (WalaSootMethod) sm;
+                // if (wsm.toString().contains("some")) {
+                MethodInfo minfo = new MethodInfo(wsm);
+                Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
+                if (wsm.toString().contains("some")) {
+                    startMethod = wsm.getSignature();
+                }
+                methodMap.put(wsm.getSignature(), minfo);
             }
-            if (wsm.toString().contains("some")) {
-                startMethod = wsm;
-            }
-            methodMap.put(wsm, minfo);
         }
 
         p("----------");
 
         MethodInfo minfo = methodMap.get(startMethod);
         TracePoint target = minfo.getReturnTps().get(0);
-        p(target);
+        // p(methodMap);
         for (TracePoint tp : minfo.getPrev(target)) {
             for (TracePoint tp2 : minfo.getPrev(tp)) {
 
                 if (tp2.toString().contains("<$r2, 55")) {
                     p(tp2);
-                    // p(tp2.stmt);
-                    // p(minfo.reachingAnalysis.getBeforeStmt(tp2.stmt).get(tp2));
-                    p(minfo.getPrev(tp2));
+                    Stmt curr = minfo.getPrev(tp2).get(0).stmt;
+                    Value rop = ((JAssignStmt) curr).getRightOp();
+                    MethodSignature sig = ((JVirtualInvokeExpr) rop).getMethodSignature();
+                    p(rop);
+                    walkMethod(rop, null, methodMap.get(sig));
+                    // p(methodMap.get(sig));
                 }
             }
             // p(tp.value.getClass());
@@ -139,7 +146,26 @@ public class App {
 
     }
 
-    public static void walkMethod(Value val, MethodInfo minfo) {
+    public static void walkMethod(Value base, RefSeq suffix, MethodInfo minfo) {
+        if (suffix == null) {
+
+        }
+
+        TracePoint curr = minfo.getReturnTps().get(0);
+        p(curr.value);
+
+        TracePoint tp1 = minfo.getPrev(curr).get(0);
+        p(tp1);
+        if (tp1.stmt instanceof JAssignStmt) {
+            Value rop = ((JAssignStmt) tp1.stmt).getRightOp();
+            TracePoint tp2 = minfo.tpMap.get(tp1.stmt).get(rop);
+            p(tp2);
+            List<TracePoint> ltps = minfo.getPrev(tp2);
+            if (ltps.size() == 0) {
+
+            }
+            // p(tp3);
+        }
 
     }
 

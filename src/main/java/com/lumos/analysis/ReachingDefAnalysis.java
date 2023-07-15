@@ -1,4 +1,4 @@
-package com.lumos;
+package com.lumos.analysis;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -11,6 +11,9 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.SerializationUtils;
+
+// import com.lumos.common.DepType;
+import com.lumos.common.Dependency;
 
 import java.util.HashSet;
 import java.util.List;
@@ -64,7 +67,7 @@ public class ReachingDefAnalysis {
                 Map<Value, Set<Dependency>> out = copy(in);
                 for (Value v : stmt.getDefs()) {
                     out = kill(out, v);
-                    out = generate(out, v, new Dependency(stmt, DepType.RW));
+                    out = generate(out, v, new Dependency(stmt, Dependency.DepType.RW));
                 }
 
                 // This conservatively assume a function call changes all parameters
@@ -74,11 +77,11 @@ public class ReachingDefAnalysis {
                     AbstractInvokeExpr iexpr = stmt.getInvokeExpr();
                     if (iexpr instanceof AbstractInstanceInvokeExpr) {
                         Value caller = ((AbstractInstanceInvokeExpr) iexpr).getBase();
-                        out = generate(out, caller, new Dependency(stmt, DepType.CALL));
+                        out = generate(out, caller, new Dependency(stmt, Dependency.DepType.CALL));
                     }
                     for (int i = 0; i < iexpr.getArgCount(); i++) {
                         Value arg = iexpr.getArg(i);
-                        out = generate(out, arg, new Dependency(stmt, DepType.CALL));
+                        out = generate(out, arg, new Dependency(stmt, Dependency.DepType.CALL));
                     }
                 }
 
@@ -147,7 +150,7 @@ public class ReachingDefAnalysis {
         if (!set1.containsKey(v))
             return set1;
         Set<Dependency> dset = set1.get(v);
-        dset.removeIf(d -> d.dtype != DepType.CF);
+        dset.removeIf(d -> d.dtype != Dependency.DepType.CF);
         return set1;
     }
 

@@ -1,12 +1,12 @@
-package com.lumos;
+package com.lumos.common;
 
 import sootup.core.jimple.common.stmt.Stmt;
 
-enum DepType {
-    RW, CF, CALL
-};
+public class Dependency {
+    public enum DepType {
+        RW, CF, CALL
+    };
 
-class Dependency {
     public Stmt stmt;
     // public Value v;
     public DepType dtype;

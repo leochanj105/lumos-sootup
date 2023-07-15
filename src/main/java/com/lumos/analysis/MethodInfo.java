@@ -1,4 +1,4 @@
-package com.lumos;
+package com.lumos.analysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.lumos.common.Dependency;
 import com.lumos.common.TracePoint;
 
 import sootup.core.graph.StmtGraph;
@@ -17,14 +18,14 @@ import sootup.core.jimple.common.stmt.Stmt;
 import sootup.java.sourcecode.frontend.WalaSootMethod;
 
 public class MethodInfo {
-    WalaSootMethod wsm;
-    Map<TracePoint, List<TracePoint>> depGraph;
-    Map<Value, String> nameMap;
+    public WalaSootMethod wsm;
+    public Map<TracePoint, List<TracePoint>> depGraph;
+    public Map<Value, String> nameMap;
 
-    Map<Stmt, Map<Value, TracePoint>> tpMap = new HashMap<>();
-    Map<Integer, List<Stmt>> stmtMap = new HashMap<>();
+    public Map<Stmt, Map<Value, TracePoint>> tpMap = new HashMap<>();
+    public Map<Integer, List<Stmt>> stmtMap = new HashMap<>();
 
-    ReachingDefAnalysis reachingAnalysis;
+    public ReachingDefAnalysis reachingAnalysis;
 
     public MethodInfo(WalaSootMethod wsm) {
         this.wsm = wsm;

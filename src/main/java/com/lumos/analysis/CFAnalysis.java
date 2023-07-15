@@ -1,4 +1,4 @@
-package com.lumos;
+package com.lumos.analysis;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -11,6 +11,9 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.SerializationUtils;
+
+// import com.lumos.common.Dependency.DepType;
+import com.lumos.common.Dependency;
 
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +103,7 @@ public class CFAnalysis {
 
                 if (graph.getAllSuccessors(stmt).size() > 1) {
                     for (Value v : stmt.getUses()) {
-                        out = generate(out, v, new Dependency(stmt, DepType.CF));
+                        out = generate(out, v, new Dependency(stmt, Dependency.DepType.CF));
                     }
                 }
 
@@ -171,7 +174,7 @@ public class CFAnalysis {
         if (!set1.containsKey(v))
             return set1;
         Set<Dependency> dset = set1.get(v);
-        dset.removeIf(d -> d.dtype != DepType.CF);
+        dset.removeIf(d -> d.dtype != Dependency.DepType.CF);
         return set1;
     }
 

@@ -1,4 +1,4 @@
-package com.lumos;
+package com.lumos.wire;
 
 import sootup.core.model.SootMethod;
 

@@ -1,4 +1,4 @@
-package com.lumos;
+package com.lumos.wire;
 
 public class HTTPResponseWirePoint {
     public String reqType;
