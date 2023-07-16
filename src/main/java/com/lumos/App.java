@@ -139,7 +139,7 @@ public class App {
 
         MethodInfo minfo = searchMethod("some");
         TracePoint target = minfo.getReturnTps().get(0);
-        backtrack(new RefSeq(target.value, null), minfo, target.stmt);
+        backtrack(new Query(new RefSeq(target.value, null), target.stmt), minfo);
         // p(methodMap);
         // for (TracePoint tp : minfo.getPrev(target)) {
         // for (TracePoint tp2 : minfo.getPrev(tp)) {
@@ -177,39 +177,28 @@ public class App {
         return null;
     }
 
-    public static List<Value> getParameters(AbstractInvokeExpr expr) {
-        List<Value> params = new ArrayList<>();
-        if (expr instanceof AbstractInstanceInvokeExpr) {
-            params.add(((AbstractInstanceInvokeExpr) expr).getBase());
-        }
-
-        for (int i = 0; i < expr.getArgCount(); i++) {
-            params.add(expr.getArg(i));
-        }
-        return params;
-    }
-
-    public static void backtrack(RefSeq seq, MethodInfo minfo, Stmt stmt) {
+    public static void backtrack(Query query, MethodInfo minfo) {
 
         Deque<Query> currQueries = new ArrayDeque<>();
-        currQueries.add(new Query(seq, stmt));
+        currQueries.add(query);
+
         while (!currQueries.isEmpty()) {
-            Query curr = currQueries.pop();
+            Query currQuery = currQueries.pop();
 
             Set<Provenance> pureDependencies = new HashSet<>();
-            if (curr.refSeq.fields.size() > 0) {
-                Value refHead = new JInstanceFieldRef((Local) seq.value, seq.fields.get(0));
+            if (currQuery.refSeq.fields.size() > 0) {
+                Value refHead = new JInstanceFieldRef((Local) currQuery.refSeq.value, currQuery.refSeq.fields.get(0));
                 // Should check all aliases of prefixes of reference sequence
-                for (Dependency dep : minfo.getPrev(stmt, refHead)) {
+                for (Dependency dep : minfo.getPrev(currQuery.stmt, refHead)) {
                     if (!(dep.dtype == Dependency.DepType.CF)) {
-                        pureDependencies.add(new Provenance(dep, minfo, curr.refSeq, 1));
+                        pureDependencies.add(new Provenance(dep, minfo, currQuery.refSeq, 1));
                     }
                 }
             }
 
-            for (Dependency dep : minfo.getPrev(stmt, curr.refSeq.value)) {
+            for (Dependency dep : minfo.getPrev(currQuery.stmt, currQuery.refSeq.value)) {
                 if (!(dep.dtype == Dependency.DepType.CF)) {
-                    pureDependencies.add(new Provenance(dep, minfo, curr.refSeq, 0));
+                    pureDependencies.add(new Provenance(dep, minfo, currQuery.refSeq, 0));
                 }
             }
             // Find closet dependencies
@@ -231,7 +220,8 @@ public class App {
             for (Provenance prov : pureDependencies) {
                 Stmt currStmt = prov.dep.stmt;
 
-                p(prov.dep);
+                p(prov.dep + ", " + currQuery);
+
                 if (currStmt instanceof JAssignStmt) {
                     Value rop = ((JAssignStmt) currStmt).getRightOp();
                     // for (Value use : rop.getUses()) {
@@ -239,74 +229,107 @@ public class App {
                     // }
                     // p(rop.getClass());
                     if (rop instanceof AbstractInvokeExpr) {
-                        panicni();
+                        AbstractInvokeExpr iexpr = (AbstractInvokeExpr) rop;
+                        List<Value> parameters = new ArrayList<>();
+                        // for()
+                        walkMethod(currQuery.refSeq, searchMethod(iexpr.getMethodSignature().toString()),
+                                getParameters(iexpr), -1);
                     } else {
                         for (Value use : rop.getUses()) {
                             if (use instanceof JCastExpr) {
                                 continue;
-                            }
-                            if (use instanceof Local) {
+                            } else if (use instanceof Local) {
                                 currQueries.add(new Query(new RefSeq(use, null), currStmt));
-                            }
-                            if (use instanceof JInstanceFieldRef) {
+                            } else if (use instanceof JInstanceFieldRef) {
                                 JInstanceFieldRef tmpRef = (JInstanceFieldRef) use;
                                 RefSeq refSeq = new RefSeq(tmpRef.getBase());
 
                                 refSeq.appendRef(tmpRef.getFieldSignature());
                                 currQueries.add(new Query(refSeq, currStmt));
+                            } else {
+                                p(use.getClass());
+                                panicni();
                             }
                         }
                     }
+                } else {
+                    p(currStmt.getClass());
+                    panicni();
                 }
             }
         }
 
+    }
+
+    public static List<Value> getParameters(AbstractInvokeExpr iexpr) {
+        List<Value> params = new ArrayList<>();
+        if (iexpr instanceof AbstractInstanceInvokeExpr) {
+            AbstractInstanceInvokeExpr aiexpr = (AbstractInstanceInvokeExpr) iexpr;
+            params.add(aiexpr.getBase());
+        }
+
+        for (Value v : iexpr.getArgs()) {
+            params.add(v);
+        }
+        return params;
     }
 
     public static void panicni() {
         throw new RuntimeException("Not implemented");
     }
 
-    public static RefSeq walkMethod(RefSeq seq, MethodInfo minfo, List<Value> parameters) {
-        if (seq.fields == null) {
+    public static void walkMethod(RefSeq seq, MethodInfo minfo, List<Value> parameters, int baseIndex) {
 
-        }
-        RefSeq currSeq = seq;
-        Value base = seq.value;
-
-        Value ref = null;
-        if (seq.fields.size() > 0)
-            ref = new JInstanceFieldRef((Local) base, seq.fields.get(0));
-
-        List<Value> paramValues = minfo.getParamValues();
-        TracePoint baseRet = minfo.getReturnTps().get(0);
-        minfo.reachingAnalysis.getBeforeStmt(baseRet.stmt);
-        // p(curr.value);
-
-        TracePoint baseProv = null;
-        List<TracePoint> provenance = minfo.getPrev(baseRet);
-
-        // for(TracePoint tp : provenance){
-        // if()
-        // }
-        if (ref != null) {
-            for (Dependency dp : minfo.getPrev(baseRet.stmt, ref)) {
-                Stmt provStmt = dp.stmt;
-                if (provStmt instanceof JAssignStmt) {
-                    Value lop = ((JAssignStmt) provStmt).getLeftOp();
-                    Value rop = ((JAssignStmt) provStmt).getRightOp();
-
-                    if (rop instanceof AbstractInvokeExpr) {
-                        RefSeq newSeq = walkMethod(new RefSeq(lop, null), minfo, parameters);
-                    } else {
-                        currSeq = new RefSeq(rop, currSeq.fields.subList(1, currSeq.fields.size()));
-                    }
-                } else if (provStmt.containsInvokeExpr()) {
-                    AbstractInvokeExpr iexpr = provStmt.getInvokeExpr();
-
-                }
+        for (TracePoint retPoint : minfo.getReturnTps()) {
+            Value baseVal = null;
+            if (baseIndex == -1) {
+                baseVal = retPoint.value;
+            } else {
+                baseVal = minfo.getParamValues().get(baseIndex);
             }
+            RefSeq actualSeq = new RefSeq(baseVal, seq.fields);
+            Query actualQuery = new Query(actualSeq, retPoint.stmt);
+            backtrack(actualQuery, minfo);
         }
+        // if (seq.fields == null) {
+
+        // }
+        // RefSeq currSeq = seq;
+        // Value base = seq.value;
+
+        // Value ref = null;
+        // if (seq.fields.size() > 0)
+        // ref = new JInstanceFieldRef((Local) base, seq.fields.get(0));
+
+        // List<Value> paramValues = minfo.getParamValues();
+        // TracePoint baseRet = minfo.getReturnTps().get(0);
+        // minfo.reachingAnalysis.getBeforeStmt(baseRet.stmt);
+        // // p(curr.value);
+
+        // TracePoint baseProv = null;
+        // List<TracePoint> provenance = minfo.getPrev(baseRet);
+
+        // // for(TracePoint tp : provenance){
+        // // if()
+        // // }
+        // if (ref != null) {
+        // for (Dependency dp : minfo.getPrev(baseRet.stmt, ref)) {
+        // Stmt provStmt = dp.stmt;
+        // if (provStmt instanceof JAssignStmt) {
+        // Value lop = ((JAssignStmt) provStmt).getLeftOp();
+        // Value rop = ((JAssignStmt) provStmt).getRightOp();
+
+        // if (rop instanceof AbstractInvokeExpr) {
+        // RefSeq newSeq = walkMethod(new RefSeq(lop, null), minfo, parameters);
+        // } else {
+        // currSeq = new RefSeq(rop, currSeq.fields.subList(1, currSeq.fields.size()));
+        // }
+        // } else if (provStmt.containsInvokeExpr()) {
+        // AbstractInvokeExpr iexpr = provStmt.getInvokeExpr();
+
+        // }
+        // }
+        // }
 
         // p(tp1);
         // if (tp1.stmt instanceof JAssignStmt) {
@@ -340,7 +363,7 @@ public class App {
         // // p(tp3);
         // }
 
-        return seq;
+        // return seq;
 
     }
 
