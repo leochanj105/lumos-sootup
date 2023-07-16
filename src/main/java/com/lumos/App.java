@@ -4,8 +4,11 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -24,6 +27,8 @@ import com.ibm.wala.ssa.SymbolTable;
 import com.lumos.analysis.MethodInfo;
 import com.lumos.analysis.ReachingDefAnalysis;
 import com.lumos.common.Dependency;
+import com.lumos.common.Provenance;
+import com.lumos.common.Query;
 import com.lumos.common.RefSeq;
 import com.lumos.common.TracePoint;
 
@@ -90,6 +95,8 @@ public class App {
     public static String outputFormat = "jimple";
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
+    public static Map<MethodSignature, MethodInfo> methodMap;
+
     public static void main(String[] args) {
         readParams();
         analyzePath("src/code");
@@ -106,8 +113,8 @@ public class App {
         JavaProject project = JavaProject.builder(language).addInputLocation(inputLocation).build();
         JavaView view = project.createView();
 
-        String[] classes = new String[] { "Test", "Test$T", "Test$Order", "Test$Result", "Test$Status" };
-        Map<MethodSignature, MethodInfo> methodMap = new HashMap<>();
+        String[] classes = new String[] { "Test", "Test$T", "Test$Order", "Test$Result" };
+        methodMap = new HashMap<>();
         MethodSignature startMethod = null;
         for (String clstr : classes) {
             ClassType classType = project.getIdentifierFactory().getClassType(clstr);
@@ -127,27 +134,44 @@ public class App {
 
         p("----------");
 
-        MethodInfo minfo = methodMap.get(startMethod);
+        MethodInfo minfo = searchMethod("some");
         TracePoint target = minfo.getReturnTps().get(0);
+        backtrack(new RefSeq(target.value, null), minfo, target.stmt);
         // p(methodMap);
-        for (TracePoint tp : minfo.getPrev(target)) {
-            for (TracePoint tp2 : minfo.getPrev(tp)) {
+        // for (TracePoint tp : minfo.getPrev(target)) {
+        // for (TracePoint tp2 : minfo.getPrev(tp)) {
 
-                if (tp2.toString().contains("<$r2, 55")) {
-                    p(tp2);
-                    Stmt curr = minfo.getPrev(tp2).get(0).stmt;
-                    Value rop = ((JAssignStmt) curr).getRightOp();
-                    MethodSignature sig = ((JVirtualInvokeExpr) rop).getMethodSignature();
-                    p(rop);
-                    RefSeq solvedSeq = walkMethod(new RefSeq(rop, null), methodMap.get(sig),
-                            getParameters((JVirtualInvokeExpr) rop));
+        // if (tp2.toString().contains("<$r2, 55")) {
+        // p(tp2);
+        // Stmt curr = minfo.getPrev(tp2).get(0).stmt;
+        // Value rop = ((JAssignStmt) curr).getRightOp();
+        // MethodSignature sig = ((JVirtualInvokeExpr) rop).getMethodSignature();
+        // p(rop);
+        // RefSeq solvedSeq = walkMethod(new RefSeq(rop, null), methodMap.get(sig),
+        // getParameters((JVirtualInvokeExpr) rop));
 
-                    p(solvedSeq);
+        // p(solvedSeq);
+        // }
+        // }
+        // // p(tp.value.getClass());
+        // }
+
+    }
+
+    public static MethodInfo searchMethod(String... str) {
+        for (MethodSignature sig : methodMap.keySet()) {
+            boolean match = true;
+            for (String s : str) {
+                if (!sig.toString().contains(s)) {
+                    match = false;
+                    break;
                 }
             }
-            // p(tp.value.getClass());
+            if (match) {
+                return methodMap.get(sig);
+            }
         }
-
+        return null;
     }
 
     public static List<Value> getParameters(AbstractInvokeExpr expr) {
@@ -162,11 +186,57 @@ public class App {
         return params;
     }
 
+    public static void backtrack(RefSeq seq, MethodInfo minfo, Stmt stmt) {
+
+        Deque<Query> currQueries = new ArrayDeque<>();
+        currQueries.add(new Query(seq, stmt));
+        while (!currQueries.isEmpty()) {
+            Query curr = currQueries.pop();
+
+            Set<Provenance> pureDependencies = new HashSet<>();
+            if (curr.refSeq.fields.size() > 0) {
+                Value refHead = new JInstanceFieldRef((Local) seq.value, seq.fields.get(0));
+                // Should check all aliases of prefixes of reference sequence
+                for (Dependency dep : minfo.getPrev(stmt, refHead)) {
+                    if (!(dep.dtype == Dependency.DepType.CF)) {
+                        pureDependencies.add(new Provenance(dep, minfo, curr.refSeq, 1));
+                    }
+                }
+            }
+
+            for (Dependency dep : minfo.getPrev(stmt, curr.refSeq.value)) {
+                if (!(dep.dtype == Dependency.DepType.CF)) {
+                    pureDependencies.add(new Provenance(dep, minfo, curr.refSeq, 0));
+                }
+            }
+            // Find closet dependencies
+
+            List<Provenance> toRemove = new ArrayList<>();
+            for (Provenance prov : pureDependencies) {
+                for (Provenance prov2 : pureDependencies) {
+                    if (prov.isBefore(prov2)) {
+                        toRemove.add(prov);
+                        break;
+                    }
+                }
+            }
+
+            for (Provenance prov : toRemove) {
+                pureDependencies.remove(prov);
+            }
+
+            for (Provenance prov : pureDependencies) {
+                p(prov.dep);
+            }
+        }
+
+    }
+
     public static RefSeq walkMethod(RefSeq seq, MethodInfo minfo, List<Value> parameters) {
         if (seq.fields == null) {
 
         }
-
+        RefSeq currSeq = seq;
         Value base = seq.value;
 
         Value ref = null;
@@ -177,7 +247,32 @@ public class App {
         TracePoint baseRet = minfo.getReturnTps().get(0);
         minfo.reachingAnalysis.getBeforeStmt(baseRet.stmt);
         // p(curr.value);
+
+        TracePoint baseProv = null;
         List<TracePoint> provenance = minfo.getPrev(baseRet);
+
+        // for(TracePoint tp : provenance){
+        // if()
+        // }
+        if (ref != null) {
+            for (Dependency dp : minfo.getPrev(baseRet.stmt, ref)) {
+                Stmt provStmt = dp.stmt;
+                if (provStmt instanceof JAssignStmt) {
+                    Value lop = ((JAssignStmt) provStmt).getLeftOp();
+                    Value rop = ((JAssignStmt) provStmt).getRightOp();
+
+                    if (rop instanceof AbstractInvokeExpr) {
+                        RefSeq newSeq = walkMethod(new RefSeq(lop, ), minfo, parameters)
+                    } else {
+                        currSeq = new RefSeq(rop, currSeq.fields.subList(1, currSeq.fields.size()));
+                    }
+                }
+                else if(provStmt.containsInvokeExpr()){
+                    AbstractInvokeExpr iexpr = provStmt.getInvokeExpr();
+
+                }
+            }
+        }
 
         p(tp1);
         if (tp1.stmt instanceof JAssignStmt) {

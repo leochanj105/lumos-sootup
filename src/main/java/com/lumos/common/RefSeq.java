@@ -21,6 +21,10 @@ public class RefSeq {
         }
     }
 
+    public RefSeq(Value value) {
+        this(value, null);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || !(o instanceof RefSeq))
