@@ -66,8 +66,10 @@ public class Test {
 
     public boolean pay() {
         Result result = getById();
-        // if()
-        return true;
+        if (result.order.status.status.equals("CANCEL"))
+            return true;
+        else
+            return false;
     }
 
     public T exchange(String url) {

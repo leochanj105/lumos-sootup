@@ -139,9 +139,10 @@ public class App {
                     Value rop = ((JAssignStmt) curr).getRightOp();
                     MethodSignature sig = ((JVirtualInvokeExpr) rop).getMethodSignature();
                     p(rop);
-                    walkMethod(rop, null, methodMap.get(sig), getParameters((JVirtualInvokeExpr) rop));
+                    RefSeq solvedSeq = walkMethod(new RefSeq(rop, null), methodMap.get(sig),
+                            getParameters((JVirtualInvokeExpr) rop));
 
-                    // p(methodMap.get(sig));
+                    p(solvedSeq);
                 }
             }
             // p(tp.value.getClass());
@@ -161,15 +162,23 @@ public class App {
         return params;
     }
 
-    public static void walkMethod(Value base, RefSeq suffix, MethodInfo minfo, List<Value> parameters) {
-        if (suffix == null) {
+    public static RefSeq walkMethod(RefSeq seq, MethodInfo minfo, List<Value> parameters) {
+        if (seq.fields == null) {
 
         }
 
-        TracePoint curr = minfo.getReturnTps().get(0);
-        p(curr.value);
+        Value base = seq.value;
 
-        TracePoint tp1 = minfo.getPrev(curr).get(0);
+        Value ref = null;
+        if (seq.fields.size() > 0)
+            ref = new JInstanceFieldRef((Local) base, seq.fields.get(0));
+
+        List<Value> paramValues = minfo.getParamValues();
+        TracePoint baseRet = minfo.getReturnTps().get(0);
+        minfo.reachingAnalysis.getBeforeStmt(baseRet.stmt);
+        // p(curr.value);
+        List<TracePoint> provenance = minfo.getPrev(baseRet);
+
         p(tp1);
         if (tp1.stmt instanceof JAssignStmt) {
             Value rop = ((JAssignStmt) tp1.stmt).getRightOp();
@@ -178,14 +187,30 @@ public class App {
             List<TracePoint> ltps = minfo.getPrev(tp2);
             if (ltps.size() == 0) {
                 Value toresolve = tp2.value;
-                p(toresolve);
                 JInstanceFieldRef rexp = (JInstanceFieldRef) toresolve;
                 Value rbase = rexp.getBase();
-                p(minfo.getPrev(tp2.stmt, rbase));
 
+                Value resolved = null;
+                int index = paramValues.indexOf(rbase);
+                if (index >= 0) {
+                    p(paramValues.get(index));
+                    resolved = parameters.get(index);
+                    p(resolved);
+
+                }
+                // p(toresolve);
+                JInstanceFieldRef solvedExpr = new JInstanceFieldRef((Local) resolved, rexp.getFieldSignature());
+                p(solvedExpr);
+                RefSeq newSeq = new RefSeq(solvedExpr.getBase(), seq.fields);
+                newSeq.fields.add(0, solvedExpr.getFieldSignature());
+                return newSeq;
+                // p(minfo.getPrev(tp2.stmt, rbase));
+                // p();
             }
             // p(tp3);
         }
+
+        return seq;
 
     }
 

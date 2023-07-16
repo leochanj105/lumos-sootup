@@ -127,8 +127,9 @@ public class MethodInfo {
         return depGraph.get(tp);
     }
 
-    public List<TracePoint> getPrev(Stmt stmt, Value value) {
-        return getPrev(this.tpMap.get(stmt).get(value));
+    public Set<Dependency> getPrev(Stmt stmt, Value value) {
+        // return getPrev(this.tpMap.get(stmt).get(value));
+        return this.reachingAnalysis.getBeforeStmt(stmt).get(value);
     }
 
     public List<TracePoint> getReturnTps() {
