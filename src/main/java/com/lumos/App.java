@@ -1,6 +1,7 @@
 package com.lumos;
 
 import java.nio.file.Paths;
+import java.sql.Ref;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.checkerframework.checker.units.qual.min;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.objectweb.asm.commons.JSRInlinerAdapter;
 
 import com.ibm.wala.cast.java.loader.JavaSourceLoaderImpl;
@@ -48,6 +50,7 @@ import sootup.core.jimple.common.constant.Constant;
 import sootup.core.jimple.common.constant.IntConstant;
 import sootup.core.jimple.common.expr.AbstractInstanceInvokeExpr;
 import sootup.core.jimple.common.expr.AbstractInvokeExpr;
+import sootup.core.jimple.common.expr.JCastExpr;
 import sootup.core.jimple.common.expr.JInterfaceInvokeExpr;
 import sootup.core.jimple.common.expr.JVirtualInvokeExpr;
 import sootup.core.jimple.common.ref.JFieldRef;
@@ -226,10 +229,42 @@ public class App {
             }
 
             for (Provenance prov : pureDependencies) {
+                Stmt currStmt = prov.dep.stmt;
+
                 p(prov.dep);
+                if (currStmt instanceof JAssignStmt) {
+                    Value rop = ((JAssignStmt) currStmt).getRightOp();
+                    // for (Value use : rop.getUses()) {
+                    // p(use.getClass());
+                    // }
+                    // p(rop.getClass());
+                    if (rop instanceof AbstractInvokeExpr) {
+                        panicni();
+                    } else {
+                        for (Value use : rop.getUses()) {
+                            if (use instanceof JCastExpr) {
+                                continue;
+                            }
+                            if (use instanceof Local) {
+                                currQueries.add(new Query(new RefSeq(use, null), currStmt));
+                            }
+                            if (use instanceof JInstanceFieldRef) {
+                                JInstanceFieldRef tmpRef = (JInstanceFieldRef) use;
+                                RefSeq refSeq = new RefSeq(tmpRef.getBase());
+
+                                refSeq.appendRef(tmpRef.getFieldSignature());
+                                currQueries.add(new Query(refSeq, currStmt));
+                            }
+                        }
+                    }
+                }
             }
         }
 
+    }
+
+    public static void panicni() {
+        throw new RuntimeException("Not implemented");
     }
 
     public static RefSeq walkMethod(RefSeq seq, MethodInfo minfo, List<Value> parameters) {
@@ -262,48 +297,48 @@ public class App {
                     Value rop = ((JAssignStmt) provStmt).getRightOp();
 
                     if (rop instanceof AbstractInvokeExpr) {
-                        RefSeq newSeq = walkMethod(new RefSeq(lop, ), minfo, parameters)
+                        RefSeq newSeq = walkMethod(new RefSeq(lop, null), minfo, parameters);
                     } else {
                         currSeq = new RefSeq(rop, currSeq.fields.subList(1, currSeq.fields.size()));
                     }
-                }
-                else if(provStmt.containsInvokeExpr()){
+                } else if (provStmt.containsInvokeExpr()) {
                     AbstractInvokeExpr iexpr = provStmt.getInvokeExpr();
 
                 }
             }
         }
 
-        p(tp1);
-        if (tp1.stmt instanceof JAssignStmt) {
-            Value rop = ((JAssignStmt) tp1.stmt).getRightOp();
-            TracePoint tp2 = minfo.tpMap.get(tp1.stmt).get(rop);
-            p(tp2);
-            List<TracePoint> ltps = minfo.getPrev(tp2);
-            if (ltps.size() == 0) {
-                Value toresolve = tp2.value;
-                JInstanceFieldRef rexp = (JInstanceFieldRef) toresolve;
-                Value rbase = rexp.getBase();
+        // p(tp1);
+        // if (tp1.stmt instanceof JAssignStmt) {
+        // Value rop = ((JAssignStmt) tp1.stmt).getRightOp();
+        // TracePoint tp2 = minfo.tpMap.get(tp1.stmt).get(rop);
+        // p(tp2);
+        // List<TracePoint> ltps = minfo.getPrev(tp2);
+        // if (ltps.size() == 0) {
+        // Value toresolve = tp2.value;
+        // JInstanceFieldRef rexp = (JInstanceFieldRef) toresolve;
+        // Value rbase = rexp.getBase();
 
-                Value resolved = null;
-                int index = paramValues.indexOf(rbase);
-                if (index >= 0) {
-                    p(paramValues.get(index));
-                    resolved = parameters.get(index);
-                    p(resolved);
+        // Value resolved = null;
+        // int index = paramValues.indexOf(rbase);
+        // if (index >= 0) {
+        // p(paramValues.get(index));
+        // resolved = parameters.get(index);
+        // p(resolved);
 
-                }
-                // p(toresolve);
-                JInstanceFieldRef solvedExpr = new JInstanceFieldRef((Local) resolved, rexp.getFieldSignature());
-                p(solvedExpr);
-                RefSeq newSeq = new RefSeq(solvedExpr.getBase(), seq.fields);
-                newSeq.fields.add(0, solvedExpr.getFieldSignature());
-                return newSeq;
-                // p(minfo.getPrev(tp2.stmt, rbase));
-                // p();
-            }
-            // p(tp3);
-        }
+        // }
+        // // p(toresolve);
+        // JInstanceFieldRef solvedExpr = new JInstanceFieldRef((Local) resolved,
+        // rexp.getFieldSignature());
+        // p(solvedExpr);
+        // RefSeq newSeq = new RefSeq(solvedExpr.getBase(), seq.fields);
+        // newSeq.fields.add(0, solvedExpr.getFieldSignature());
+        // return newSeq;
+        // // p(minfo.getPrev(tp2.stmt, rbase));
+        // // p();
+        // }
+        // // p(tp3);
+        // }
 
         return seq;
 

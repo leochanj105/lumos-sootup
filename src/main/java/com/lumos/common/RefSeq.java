@@ -21,8 +21,18 @@ public class RefSeq {
         }
     }
 
+    // public RefSeq(Value value, FieldSignature field) {
+    // this.value = value;
+    // this.fields = new ArrayList<>();
+    // this.fields.add(field);
+    // }
+
     public RefSeq(Value value) {
         this(value, null);
+    }
+
+    public void appendRef(FieldSignature sig) {
+        this.fields.add(sig);
     }
 
     @Override
