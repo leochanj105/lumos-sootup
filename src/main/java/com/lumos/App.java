@@ -347,9 +347,6 @@ public class App {
                     for (Query resolvedQuery : resolvedQueries) {
                         currQueries.add(resolvedQuery);
                     }
-                    // for (int i = 0; i < params.size(); i++) {
-                    // if
-                    // }
                 } else {
                     p(currStmt + ", " + currStmt.getClass());
                     panicni();
@@ -377,12 +374,26 @@ public class App {
         throw new RuntimeException("Not implemented");
     }
 
+    public static Set<Query> resolveMethod(AbstractInvokeExpr iexpr, Stmt stmt) {
+        String methodName = iexpr.getMethodSignature().toString();
+        Set<Query> resolvedQueries = new HashSet<>();
+        if (methodName.contains("java.lang.String: boolean equals(java.lang.Object)")) {
+            p("Manually wired " + methodName);
+            for (Value v : getParameters(iexpr)) {
+                resolvedQueries.add(new Query(new RefSeq(v), stmt));
+            }
+        } else {
+            p("Method " + iexpr.getMethodSignature() + " not found.");
+        }
+        return resolvedQueries;
+    }
+
     public static Set<Query> walkMethod(RefSeq seq, Stmt stmt, int baseIndex) {
         AbstractInvokeExpr iexpr = stmt.getInvokeExpr();
         Set<Query> resolvedQueries = new HashSet<>();
         MethodInfo minfo = searchMethod(iexpr.getMethodSignature().toString());
         if (minfo == null) {
-            p("Method " + iexpr.getMethodSignature() + " not found.");
+            resolvedQueries.addAll(resolveMethod(iexpr, stmt));
             return resolvedQueries;
         }
         List<Value> parameters = getParameters(iexpr);
@@ -415,81 +426,6 @@ public class App {
         }
         p("Finished WALK in " + minfo.wsm.getName() + ": " + seq + ", " + stmt);
         return resolvedQueries;
-
-        // if (seq.fields == null) {
-
-        // }
-        // RefSeq currSeq = seq;
-        // Value base = seq.value;
-
-        // Value ref = null;
-        // if (seq.fields.size() > 0)
-        // ref = new JInstanceFieldRef((Local) base, seq.fields.get(0));
-
-        // List<Value> paramValues = minfo.getParamValues();
-        // TracePoint baseRet = minfo.getReturnTps().get(0);
-        // minfo.reachingAnalysis.getBeforeStmt(baseRet.stmt);
-        // // p(curr.value);
-
-        // TracePoint baseProv = null;
-        // List<TracePoint> provenance = minfo.getPrev(baseRet);
-
-        // // for(TracePoint tp : provenance){
-        // // if()
-        // // }
-        // if (ref != null) {
-        // for (Dependency dp : minfo.getPrev(baseRet.stmt, ref)) {
-        // Stmt provStmt = dp.stmt;
-        // if (provStmt instanceof JAssignStmt) {
-        // Value lop = ((JAssignStmt) provStmt).getLeftOp();
-        // Value rop = ((JAssignStmt) provStmt).getRightOp();
-
-        // if (rop instanceof AbstractInvokeExpr) {
-        // RefSeq newSeq = walkMethod(new RefSeq(lop, null), minfo, parameters);
-        // } else {
-        // currSeq = new RefSeq(rop, currSeq.fields.subList(1, currSeq.fields.size()));
-        // }
-        // } else if (provStmt.containsInvokeExpr()) {
-        // AbstractInvokeExpr iexpr = provStmt.getInvokeExpr();
-
-        // }
-        // }
-        // }
-
-        // p(tp1);
-        // if (tp1.stmt instanceof JAssignStmt) {
-        // Value rop = ((JAssignStmt) tp1.stmt).getRightOp();
-        // TracePoint tp2 = minfo.tpMap.get(tp1.stmt).get(rop);
-        // p(tp2);
-        // List<TracePoint> ltps = minfo.getPrev(tp2);
-        // if (ltps.size() == 0) {
-        // Value toresolve = tp2.value;
-        // JInstanceFieldRef rexp = (JInstanceFieldRef) toresolve;
-        // Value rbase = rexp.getBase();
-
-        // Value resolved = null;
-        // int index = paramValues.indexOf(rbase);
-        // if (index >= 0) {
-        // p(paramValues.get(index));
-        // resolved = parameters.get(index);
-        // p(resolved);
-
-        // }
-        // // p(toresolve);
-        // JInstanceFieldRef solvedExpr = new JInstanceFieldRef((Local) resolved,
-        // rexp.getFieldSignature());
-        // p(solvedExpr);
-        // RefSeq newSeq = new RefSeq(solvedExpr.getBase(), seq.fields);
-        // newSeq.fields.add(0, solvedExpr.getFieldSignature());
-        // return newSeq;
-        // // p(minfo.getPrev(tp2.stmt, rbase));
-        // // p();
-        // }
-        // // p(tp3);
-        // }
-
-        // return seq;
-
     }
 
     public static void analyzeExchange(WalaSootMethod wsm) {
