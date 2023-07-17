@@ -143,6 +143,10 @@ public class MethodInfo {
         return this.reachingAnalysis.getBeforeStmt(stmt).get(value);
     }
 
+    public Set<Dependency> getCF(Stmt stmt) {
+        return this.cfAnalysis.getBeforeStmt(stmt);
+    }
+
     public List<TracePoint> getReturnTps() {
         List<TracePoint> tps = new ArrayList<>();
 

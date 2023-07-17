@@ -229,6 +229,12 @@ public class App {
                     // }
                 }
             }
+            Set<Dependency> cfdeps = minfo.getCF(currQuery.stmt);
+
+            // RefSeq == null represents control-flow dependency
+            for (Dependency dep : cfdeps) {
+                pureDependencies.add(new Provenance(dep, minfo, null, -2));
+            }
             // Find closest dependencies
 
             List<Provenance> toRemove = new ArrayList<>();
@@ -261,6 +267,23 @@ public class App {
             }
 
             for (Provenance prov : pureDependencies) {
+                if (prov.refSeq == null) {
+                    Stmt currStmt = prov.dep.stmt;
+
+                    for (Value use : currStmt.getUses()) {
+                        p("[CF] " + use);
+                        if (use instanceof Local) {
+                            currQueries.add(new Query(new RefSeq(use), currStmt));
+                        } else if (use instanceof Constant) {
+                            // Do nothing for constants
+                        } else {
+                            // p(use.getClass());
+                            // panicni();
+                        }
+                    }
+                    continue;
+                }
+
                 Stmt currStmt = prov.dep.stmt;
 
                 p(prov.dep + " answering " + currQuery);
