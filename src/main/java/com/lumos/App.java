@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +29,9 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.lumos.analysis.MethodInfo;
 import com.lumos.analysis.ReachingDefAnalysis;
+import com.lumos.common.BacktrackInfo;
 import com.lumos.common.Dependency;
+import com.lumos.common.InstrumentPoint;
 import com.lumos.common.Provenance;
 import com.lumos.common.Query;
 import com.lumos.common.RefSeq;
@@ -143,7 +146,10 @@ public class App {
         MethodInfo minfo = searchMethod("some");
         TracePoint target = minfo.getReturnTps().get(0);
 
-        backtrack(new Query(new RefSeq(target.value, null), target.stmt), minfo);
+        BacktrackInfo binfo = backtrack(new Query(new RefSeq(target.value, null), target.stmt), minfo);
+        for (InstrumentPoint ipoint : binfo.insPoints) {
+            p(ipoint);
+        }
     }
 
     public static MethodInfo searchMethod(String... str) {
@@ -162,12 +168,13 @@ public class App {
         return null;
     }
 
-    public static Set<Query> backtrack(Query query, MethodInfo minfo) {
+    public static BacktrackInfo backtrack(Query query, MethodInfo minfo) {
         p("BackTracking " + query + " in " + minfo.wsm.getName());
         Deque<Query> currQueries = new ArrayDeque<>();
         Set<Query> visitedQueries = new HashSet<>();
         currQueries.add(query);
         Set<Query> unresolvedQueries = new HashSet<>();
+        Set<InstrumentPoint> iPoints = new HashSet<>();
         while (!currQueries.isEmpty()) {
             Query currQuery = currQueries.pop();
             if (visitedQueries.contains(currQuery)) {
@@ -260,7 +267,10 @@ public class App {
                     for (Value use : currStmt.getUses()) {
                         p("[CF] " + use);
                         if (use instanceof Local) {
+                            // CF usage tp put before the branching statement
+                            iPoints.add(new InstrumentPoint(currStmt, use, minfo, true));
                             currQueries.add(new Query(new RefSeq(use), currStmt));
+
                         } else if (use instanceof Constant) {
                             // Do nothing for constants
                         } else {
@@ -277,16 +287,18 @@ public class App {
 
                 if ((currStmt instanceof JAssignStmt)) {
                     Value rop = null;
-                    if (currStmt instanceof JAssignStmt) {
-                        rop = ((JAssignStmt) currStmt).getRightOp();
-                    } else {
-                        rop = ((JIdentityStmt) currStmt).getRightOp();
-                    }
+                    // if (currStmt instanceof JAssignStmt) {
+                    rop = ((JAssignStmt) currStmt).getRightOp();
+                    // } else {
+                    // rop = ((JIdentityStmt) currStmt).getRightOp();
+                    // }
+                    Value lop = ((JAssignStmt) currStmt).getLeftOp();
                     if (rop instanceof AbstractInvokeExpr) {
                         AbstractInvokeExpr iexpr = (AbstractInvokeExpr) rop;
                         List<Value> parameters = new ArrayList<>();
-
-                        Set<Query> resolvedQueries = walkMethod(currQuery.refSeq, currStmt, -1);
+                        BacktrackInfo binfo = walkMethod(currQuery.refSeq, currStmt, -1);
+                        Set<Query> resolvedQueries = binfo.unresolvedRequeries;
+                        iPoints.addAll(binfo.insPoints);
 
                         for (Query resolvedQuery : resolvedQueries) {
                             currQueries.add(resolvedQuery);
@@ -318,6 +330,10 @@ public class App {
                                 }
                             }
                         }
+
+                    }
+                    if (currQuery.refSeq.fields.size() == 0 && !(lop instanceof JInstanceFieldRef)) {
+                        iPoints.add(new InstrumentPoint(minfo.tpMap.get(currStmt).get(lop), minfo));
                     }
                 } else if (currStmt instanceof JIdentityStmt) {
                     // Do nothing; local identities already resolved
@@ -330,7 +346,10 @@ public class App {
                         p("Base not found");
                         panicni();
                     }
-                    Set<Query> resolvedQueries = walkMethod(currQuery.refSeq, currStmt, indexOfBase);
+                    BacktrackInfo binfo = walkMethod(currQuery.refSeq, currStmt, indexOfBase);
+                    Set<Query> resolvedQueries = binfo.unresolvedRequeries;
+                    iPoints.addAll(binfo.insPoints);
+                    // Set<Query> resolvedQueries =
                     for (Query resolvedQuery : resolvedQueries) {
                         currQueries.add(resolvedQuery);
                     }
@@ -340,8 +359,8 @@ public class App {
                 }
             }
         }
-
-        return unresolvedQueries;
+        BacktrackInfo currInfo = new BacktrackInfo(unresolvedQueries, iPoints);
+        return currInfo;
     }
 
     public static List<Value> getParameters(AbstractInvokeExpr iexpr) {
@@ -375,13 +394,14 @@ public class App {
         return resolvedQueries;
     }
 
-    public static Set<Query> walkMethod(RefSeq seq, Stmt stmt, int baseIndex) {
+    public static BacktrackInfo walkMethod(RefSeq seq, Stmt stmt, int baseIndex) {
         AbstractInvokeExpr iexpr = stmt.getInvokeExpr();
         Set<Query> resolvedQueries = new HashSet<>();
+        Set<InstrumentPoint> resolvedInsts = new HashSet<>();
         MethodInfo minfo = searchMethod(iexpr.getMethodSignature().toString());
         if (minfo == null) {
             resolvedQueries.addAll(resolveMethod(iexpr, stmt));
-            return resolvedQueries;
+            return new BacktrackInfo(resolvedQueries, resolvedInsts);
         }
         List<Value> parameters = getParameters(iexpr);
         List<Value> actualParams = minfo.getParamValues();
@@ -397,7 +417,9 @@ public class App {
             }
             RefSeq actualSeq = new RefSeq(baseVal, seq.fields);
             Query actualQuery = new Query(actualSeq, retPoint);
-            Set<Query> unresolved = backtrack(actualQuery, minfo);
+            BacktrackInfo currInfo = backtrack(actualQuery, minfo);
+            Set<Query> unresolved = currInfo.unresolvedRequeries;
+            resolvedInsts.addAll(currInfo.insPoints);
 
             for (Query query : unresolved) {
                 Value base = query.refSeq.value;
@@ -412,7 +434,7 @@ public class App {
             }
         }
         p("Finished WALK in " + minfo.wsm.getName() + ": " + seq + ", " + stmt);
-        return resolvedQueries;
+        return new BacktrackInfo(resolvedQueries, resolvedInsts);
     }
 
     public static void analyzeExchange(WalaSootMethod wsm) {

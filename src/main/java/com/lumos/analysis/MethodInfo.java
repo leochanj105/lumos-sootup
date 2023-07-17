@@ -13,6 +13,7 @@ import sootup.core.graph.StmtGraph;
 import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.ref.JInstanceFieldRef;
+import sootup.core.jimple.common.stmt.JAssignStmt;
 import sootup.core.jimple.common.stmt.JReturnStmt;
 import sootup.core.jimple.common.stmt.JReturnVoidStmt;
 import sootup.core.jimple.common.stmt.Stmt;
@@ -73,6 +74,8 @@ public class MethodInfo {
             Map<Value, Set<Dependency>> dmap = reachingAnalysis.getBeforeStmt(stmt);
 
             Map<Value, TracePoint> currStmtMap = tpMap.get(stmt);
+
+            String refName = null;
             // Create Tracepoints and add description texts from frontend
             for (Value v : stmt.getUsesAndDefs()) {
 
@@ -81,16 +84,33 @@ public class MethodInfo {
                 if (v instanceof JInstanceFieldRef) {
                     JInstanceFieldRef refv = (JInstanceFieldRef) v;
                     String basename = nameMap.get(refv.getBase());
-                    if (basename == null)
+                    String refname = refv.getFieldSignature().getSubSignature().getName();
+                    if (basename == null) {
                         basename = refv.getBase().getName();
-                    String refname = refv.getFieldSignature().getName();
+                    }
+
                     name = basename + "." + refname;
+                    refName = name;
+                    // nameMap.put(v, name);
+
                 }
 
                 TracePoint tmp = new TracePoint(stmt, v, name);
                 currStmtMap.put(v, tmp);
                 if (!depGraph.containsKey(tmp)) {
                     depGraph.put(tmp, new ArrayList<>());
+                }
+            }
+
+            // Propagate name of references
+            if (stmt instanceof JAssignStmt) {
+                JAssignStmt astmt = (JAssignStmt) stmt;
+                Value rop = astmt.getRightOp();
+
+                if (rop instanceof JInstanceFieldRef) {
+                    Value lop = astmt.getLeftOp();
+                    System.out.println(lop + ", " + refName);
+                    nameMap.put(lop, refName);
                 }
             }
 

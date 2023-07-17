@@ -5,9 +5,9 @@ import java.util.Set;
 
 public class BacktrackInfo {
     public Set<Query> unresolvedRequeries;
-    public List<InstrumentPoint> insPoints;
+    public Set<InstrumentPoint> insPoints;
 
-    public BacktrackInfo(Set<Query> queries, List<InstrumentPoint> points) {
+    public BacktrackInfo(Set<Query> queries, Set<InstrumentPoint> points) {
         this.unresolvedRequeries = queries;
         this.insPoints = points;
     }
