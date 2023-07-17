@@ -75,20 +75,23 @@ public class CFAnalysis {
                 List<Value> valtoremove = new ArrayList<>();
                 for (Value v : out.keySet()) {
                     for (Dependency dep : out.get(v)) {
-                        boolean outofscode = true;
+                        boolean outofscope = true;
                         for (Value vmp : stmt.getUses()) {
-                            for (Dependency dpmp : rwa.getBeforeStmt(stmt).get(vmp)) {
-                                Position rwpos = dpmp.stmt.getPositionInfo().getStmtPosition();
-                                Position cfpos = dep.stmt.getPositionInfo().getStmtPosition();
-                                if (rwpos.compareTo(cfpos) >= 0) {
-                                    outofscode = false;
-                                    break;
+                            Set<Dependency> rwadeps = rwa.getBeforeStmt(stmt).get(vmp);
+                            if (rwadeps != null) {
+                                for (Dependency dpmp : rwa.getBeforeStmt(stmt).get(vmp)) {
+                                    Position rwpos = dpmp.stmt.getPositionInfo().getStmtPosition();
+                                    Position cfpos = dep.stmt.getPositionInfo().getStmtPosition();
+                                    if (rwpos.compareTo(cfpos) >= 0) {
+                                        outofscope = false;
+                                        break;
+                                    }
                                 }
+                                if (!outofscope)
+                                    break;
                             }
-                            if (!outofscode)
-                                break;
                         }
-                        if (outofscode) {
+                        if (outofscope) {
                             valtoremove.add(v);
                             deptoremove.add(dep);
                         }

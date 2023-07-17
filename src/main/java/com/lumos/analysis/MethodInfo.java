@@ -14,6 +14,7 @@ import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.ref.JInstanceFieldRef;
 import sootup.core.jimple.common.stmt.JReturnStmt;
+import sootup.core.jimple.common.stmt.JReturnVoidStmt;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.java.sourcecode.frontend.WalaSootMethod;
 
@@ -26,6 +27,7 @@ public class MethodInfo {
     public Map<Integer, List<Stmt>> stmtMap = new HashMap<>();
 
     public ReachingDefAnalysis reachingAnalysis;
+    public CFAnalysis cfAnalysis;
 
     public MethodInfo(WalaSootMethod wsm) {
         this.wsm = wsm;
@@ -123,6 +125,15 @@ public class MethodInfo {
         return depGraph;
     }
 
+    public void analyzeCF() {
+        if (this.reachingAnalysis == null) {
+            System.out.println("RA analysis not done before CF analysis!!");
+            return;
+        }
+        StmtGraph<?> cfg = wsm.getBody().getStmtGraph();
+        this.cfAnalysis = new CFAnalysis(cfg, reachingAnalysis);
+    }
+
     public List<TracePoint> getPrev(TracePoint tp) {
         return depGraph.get(tp);
     }
@@ -141,6 +152,17 @@ public class MethodInfo {
             }
         }
         return tps;
+    }
+
+    public List<Stmt> getReturnStmts() {
+        List<Stmt> rets = new ArrayList<>();
+
+        for (Stmt stmt : wsm.getBody().getStmtGraph()) {
+            if ((stmt instanceof JReturnStmt) || (stmt instanceof JReturnVoidStmt)) {
+                rets.add(stmt);
+            }
+        }
+        return rets;
     }
 
     public List<Value> getParamValues() {

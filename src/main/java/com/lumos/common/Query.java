@@ -12,7 +12,7 @@ public class Query {
     }
 
     public String toString() {
-        return "[" + this.refSeq.toString() + " ?? " + stmt + "]";
+        return "[" + this.refSeq.toString() + " at " + stmt + "]";
     }
 
     public boolean equals(Object o) {
@@ -20,5 +20,9 @@ public class Query {
             return false;
         Query other = (Query) o;
         return other.refSeq.equals(this.refSeq) && other.stmt.equals(this.stmt);
+    }
+
+    public int hashCode() {
+        return refSeq.hashCode() + stmt.hashCode();
     }
 }

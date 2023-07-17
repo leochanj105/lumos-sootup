@@ -1,5 +1,6 @@
 package com.lumos.common;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +16,13 @@ public class RefSeq {
     public RefSeq(Value value, List<FieldSignature> fields) {
         // this.base = base;
         this.value = value;
-        this.fields = fields;
-        if (fields == null) {
-            this.fields = new ArrayList<>();
+        this.fields = new ArrayList<>();
+        if (fields != null) {
+            for (FieldSignature sig : fields) {
+                this.fields.add(sig);
+            }
         }
+
     }
 
     // public RefSeq(Value value, FieldSignature field) {
@@ -31,8 +35,12 @@ public class RefSeq {
         this(value, null);
     }
 
-    public void appendRef(FieldSignature sig) {
+    public void appendTail(FieldSignature sig) {
         this.fields.add(sig);
+    }
+
+    public void appendHead(FieldSignature sig) {
+        this.fields.add(0, sig);
     }
 
     @Override
@@ -52,8 +60,16 @@ public class RefSeq {
         return other.fields.equals(this.fields);
     }
 
+    // public RefSeq shiftLeft(int pos){
+    // return new RefSeq(this.value,)
+    // }
+
     @Override
     public String toString() {
         return "(" + value.toString() + "." + fields.toString() + ")";
+    }
+
+    public int hashCode() {
+        return value.hashCode() + fields.hashCode();
     }
 }
