@@ -142,26 +142,8 @@ public class App {
 
         MethodInfo minfo = searchMethod("some");
         TracePoint target = minfo.getReturnTps().get(0);
+
         backtrack(new Query(new RefSeq(target.value, null), target.stmt), minfo);
-        // p(methodMap);
-        // for (TracePoint tp : minfo.getPrev(target)) {
-        // for (TracePoint tp2 : minfo.getPrev(tp)) {
-
-        // if (tp2.toString().contains("<$r2, 55")) {
-        // p(tp2);
-        // Stmt curr = minfo.getPrev(tp2).get(0).stmt;
-        // Value rop = ((JAssignStmt) curr).getRightOp();
-        // MethodSignature sig = ((JVirtualInvokeExpr) rop).getMethodSignature();
-        // p(rop);
-        // RefSeq solvedSeq = walkMethod(new RefSeq(rop, null), methodMap.get(sig),
-        // getParameters((JVirtualInvokeExpr) rop));
-
-        // p(solvedSeq);
-        // }
-        // }
-        // // p(tp.value.getClass());
-        // }
-
     }
 
     public static MethodInfo searchMethod(String... str) {
@@ -183,11 +165,16 @@ public class App {
     public static Set<Query> backtrack(Query query, MethodInfo minfo) {
         p("BackTracking " + query + " in " + minfo.wsm.getName());
         Deque<Query> currQueries = new ArrayDeque<>();
+        Set<Query> visitedQueries = new HashSet<>();
         currQueries.add(query);
         Set<Query> unresolvedQueries = new HashSet<>();
         while (!currQueries.isEmpty()) {
             Query currQuery = currQueries.pop();
+            if (visitedQueries.contains(currQuery)) {
+                continue;
+            }
 
+            visitedQueries.add(currQuery);
             Set<Provenance> pureDependencies = new HashSet<>();
             if (currQuery.refSeq.fields.size() > 0) {
                 Value refHead = new JInstanceFieldRef((Local) currQuery.refSeq.value, currQuery.refSeq.fields.get(0));
