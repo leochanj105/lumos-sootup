@@ -44,6 +44,7 @@ public class LocalAliasAnalysis {
 
     public LocalAliasAnalysis(MethodInfo minfo) {
         this.minfo = minfo;
+
         this.graph = minfo.wsm.getBody().getStmtGraph();
         this.wsm = minfo.wsm;
         System.out.println(minfo.nameMap);
