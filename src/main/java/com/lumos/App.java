@@ -149,10 +149,13 @@ public class App {
         Path pa = Paths.get(path);
         p(pa.toAbsolutePath());
         AnalysisInputLocation<JavaSootClass> inputLocation = new PathBasedAnalysisInputLocation(
+                pa, SourceType.Phantom);
+        AnalysisInputLocation<JavaSootClass> inputLocation2 = new PathBasedAnalysisInputLocation(
                 pa, SourceType.Application);
         JavaLanguage language = new JavaLanguage(8);
 
-        JavaProject project = JavaProject.builder(language).addInputLocation(inputLocation).build();
+        JavaProject project = JavaProject.builder(language).addInputLocation(inputLocation)
+                .addInputLocation(inputLocation2).build();
         JavaView view = project.createView();
         // p(inputLocation.getSourceType());
         // p(view.getScope());
@@ -173,11 +176,11 @@ public class App {
             if (cls.toString().contains("conf.HttpAspect")) {
                 continue;
             }
-            CompileUtils.outputJimple(cls);
+            CompileUtils.outputJimple(cls, path);
             if (true)
-                // continue;
+                continue;
 
-                return;
+            // return;
             for (JavaSootMethod sm : cls.getMethods()) {
                 if (sm.isAbstract()) {
                     // p(sm);
