@@ -39,7 +39,7 @@ public class Provenance {
         if (other.equals(this)) {
             return false;
         }
-
+        // if(this.query)
         boolean found = false;
         Deque<Unit> q = new ArrayDeque<>();
         Set<Unit> visited = new HashSet<>();

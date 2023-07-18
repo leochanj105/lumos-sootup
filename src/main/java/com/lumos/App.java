@@ -29,7 +29,11 @@ import com.lumos.common.Provenance;
 import com.lumos.common.Query;
 import com.lumos.common.RefSeq;
 import com.lumos.common.TracePoint;
+import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
+import com.lumos.wire.HTTPReceiveWirePoint;
+import com.lumos.wire.WireForAllParams;
+import com.lumos.wire.WireHTTP;
 
 import soot.Body;
 // import soot.toolkits.scalar.ForwardFlowAnalysis;
@@ -88,23 +92,47 @@ public class App {
 
     public static void main(String[] args) {
         readParams();
-        String[] services = new String[] { "ts-launcher" };
-        analyzePath("src/code");
-        // analyzePath(
-        // "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\ts-launcher\\target\\classes");
-        // String base =
-        // "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
-        // String suffix = "\\target\\classes";
+        String[] services = new String[] { "ts-launcher", "ts-inside-payment-service" };
+        // analyzePath("src/code");
+        String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
+        String suffix = "\\target\\classes";
+        methodMap = new HashMap<>();
 
-        // for (String str : services) {
-        // String complete = base + str + suffix;
-        // analyzePath(complete);
+        for (String str : services) {
+            String complete = base + str + suffix;
+            analyzePath(complete);
+        }
+        // MethodInfo minfo = searchMethod("some", "Test");
+        // Unit start = minfo.getStmt(68, 0);
+        // // p(start);
+        // // minfo.printValue(start);
+        // Value startVal = minfo.getValue(start, 0);
+        // p(startVal);
+
+        // BacktrackInfo binfo = backtrack(new Query(new RefSeq(startVal, null),
+        // start), minfo);
+        // for (InstrumentPoint ipoint : binfo.insPoints) {
+        // p(ipoint);
         // }
+        play();
+    }
 
-        // WalaIRToJimpleConverter walaToSoot = new WalaIRToJimpleConverter();
-        // JavaSourceLoaderImpl.JavaClass walaClass = loadWalaClass(signature,
-        // walaToSoot);
-        // return Optional.ofNullable(walaClass).map(walaToSoot::convertClass);
+    public static void play() {
+        MethodInfo minfo = searchMethod("doErrorQueue", "LauncherServiceImpl");
+
+        p(minfo);
+        // minfo.printLine(126);
+        Unit start = minfo.getStmt(126, 11);
+        p(start);
+        // minfo.printValue(start);
+        Value startVal = minfo.getValue(start, 1);
+        p(startVal);
+
+        BacktrackInfo binfo = backtrack(new Query(new RefSeq(startVal, null),
+                start), minfo);
+        for (InstrumentPoint ipoint : binfo.insPoints) {
+            p(ipoint);
+        }
     }
 
     public static void setupSoot(String path) {
@@ -193,25 +221,21 @@ public class App {
         // String cname = "launcher.service.LauncherServiceImpl";
         String cname = "Test";
 
-        methodMap = new HashMap<>();
         // SootMethod sm;
         for (SootClass cls : Scene.v().getApplicationClasses()) {
-            // p(cls);
             Scene.v().forceResolve(cls.getName(), SootClass.BODIES);
-            // ClassType classType = project.getIdentifierFactory().getClassType(clstr);
-            // SootClass sootClass = view.getClass(classType).get();
-            // if (cls.toString().contains("conf.HttpAspect")) {
-            // continue;
-            // }
+            if (cls.toString().contains("conf.HttpAspect")) {
+                continue;
+            }
 
-            // // return;
             for (SootMethod sm : cls.getMethods()) {
-                // Scene.v().forceResolve(sm.getName(), SootMethod.);
-                sm.retrieveActiveBody();
-                // p(sm.getActiveBody());
                 if (sm.isAbstract()) {
                     continue;
                 }
+                // p(sm.getSignature());
+                sm.retrieveActiveBody();
+                // p(sm.getActiveBody());
+
                 // if (!sm.toString().contains("Test$T: void <init>(Test,boolean)")) {
                 // continue;
                 // minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0));
@@ -226,48 +250,13 @@ public class App {
                     p("--- " +
                             minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0)));
                 }
-                // // if (wsm.toString().contains("some")) {
-                // // startMethod = wsm.getSignature();
-                // // }
-                // // p();
                 methodMap.put(sm.getSignature(), minfo);
             }
             // CompileUtils.outputJimple(cls, path);
-            // if (true)
-            // continue;
         }
 
         p("----------");
-        // if (true)
-        // return;
-        // MethodInfo minfo = searchMethod("doErrorQueue", "LauncherServiceImpl");
-        MethodInfo minfo = searchMethod("some", "Test");
-        // p(minfo);
-        // for (Stmt stmt : minfo.sm.getBody().getStmts()) {
-        // // p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
-        // if (stmt.containsInvokeExpr()) {
-        // p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
-        // AbstractInvokeExpr aiexpr = stmt.getInvokeExpr();
-        // for (Value v : aiexpr.getArgs()) {
-        // p(v + ", " + v.getClass());
-        // }
-        // }
-        // }
-        // p(minfo);
-        // // minfo.printLine(125);
-        // minfo.printLine(81);
 
-        Unit start = minfo.getStmt(68, 0);
-        // p(start);
-        // minfo.printValue(start);
-        Value startVal = minfo.getValue(start, 0);
-        p(startVal);
-
-        BacktrackInfo binfo = backtrack(new Query(new RefSeq(startVal, null),
-                start), minfo);
-        for (InstrumentPoint ipoint : binfo.insPoints) {
-            p(ipoint);
-        }
     }
 
     public static MethodInfo searchMethod(String... str) {
@@ -299,59 +288,67 @@ public class App {
             if (visitedQueries.contains(currQuery)) {
                 continue;
             }
+            // p("!!! " + currQuery);
+            // p(currQuery.refSeq);
 
             visitedQueries.add(currQuery);
             Set<Provenance> pureDependencies = new HashSet<>();
-            if (currQuery.refSeq.fields.size() > 0) {
-                // new JInstanceFieldRef();
-                Value refHead = new JInstanceFieldRef(currQuery.refSeq.value, currQuery.refSeq.fields.get(0));
+            // If current refSeq == null, then only backtrack CF dependencies
+            if (currQuery.refSeq != null) {
 
-                Set<Dependency> deps = minfo.getPrev(currQuery.unit, refHead);
+                if (currQuery.refSeq.fields.size() > 0) {
+                    // new JInstanceFieldRef();
+                    Value refHead = new JInstanceFieldRef(currQuery.refSeq.value, currQuery.refSeq.fields.get(0));
 
-                // Urrr... JInstanceFieldRef does not have hashcode() implementation
-                // We might have to retrive equal idential ref values manually
-                if (deps == null) {
-                    Map<Value, Set<Dependency>> smap = minfo.reachingAnalysis.getBeforeUnit(currQuery.unit);
-                    for (Value v : smap.keySet()) {
-                        if (v instanceof JInstanceFieldRef) {
-                            JInstanceFieldRef iref = (JInstanceFieldRef) v;
-                            JInstanceFieldRef href = (JInstanceFieldRef) refHead;
-                            if (iref.getBase().equals(href.getBase())
-                                    && iref.getFieldRef().equals(href.getFieldRef())) {
-                                deps = smap.get(v);
+                    Set<Dependency> deps = minfo.getPrev(currQuery.unit, refHead);
+
+                    // Urrr... JInstanceFieldRef does not have hashcode() implementation
+                    // We might have to retrive equal idential ref values manually
+                    if (deps == null) {
+                        Map<Value, Set<Dependency>> smap = minfo.reachingAnalysis.getBeforeUnit(currQuery.unit);
+                        for (Value v : smap.keySet()) {
+                            if (v instanceof JInstanceFieldRef) {
+                                JInstanceFieldRef iref = (JInstanceFieldRef) v;
+                                JInstanceFieldRef href = (JInstanceFieldRef) refHead;
+                                if (iref.getBase().equals(href.getBase())
+                                        && iref.getFieldRef().equals(href.getFieldRef())) {
+                                    deps = smap.get(v);
+                                }
                             }
                         }
                     }
-                }
 
-                // Should check all aliases of prefixes of reference sequence
+                    // Should check all aliases of prefixes of reference sequence
+                    if (deps != null) {
+
+                        for (Dependency dep : deps) {
+                            // if (!(dep.dtype == Dependency.DepType.CF)) {
+                            // if (dep.dtype == Dependency.DepType.CF) {
+                            // p(dep);
+                            // }
+                            pureDependencies.add(new Provenance(dep, minfo, currQuery.refSeq, 1));
+                            // }
+                        }
+                    }
+                }
+                Set<Dependency> deps = minfo.getPrev(currQuery.unit, currQuery.refSeq.value);
+
                 if (deps != null) {
 
                     for (Dependency dep : deps) {
-                        // if (!(dep.dtype == Dependency.DepType.CF)) {
-                        if (dep.dtype == Dependency.DepType.CF) {
-                            p(dep);
-                        }
-                        pureDependencies.add(new Provenance(dep, minfo, currQuery.refSeq, 1));
-                        // }
+
+                        pureDependencies.add(new Provenance(dep, minfo, currQuery.refSeq, 0));
+
                     }
                 }
             }
-            Set<Dependency> deps = minfo.getPrev(currQuery.unit, currQuery.refSeq.value);
-            if (deps != null) {
-                for (Dependency dep : deps) {
-                    // if (!(dep.dtype == Dependency.DepType.CF)) {
-                    pureDependencies.add(new Provenance(dep, minfo, currQuery.refSeq, 0));
-                    // }
-                }
-            }
-            Set<Dependency> cfdeps = minfo.getCF(currQuery.unit);
 
-            // RefSeq == null represents control-flow dependency
-            for (Dependency dep : cfdeps) {
-                pureDependencies.add(new Provenance(dep, minfo, null, -2));
-            }
-
+            // if (currQuery.refSeq != null &&
+            // currQuery.refSeq.toString().contains("stack48")) {
+            // for (Provenance prov : pureDependencies) {
+            // p("--- " + prov.dep);
+            // }
+            // }
             // Find closest dependencies
 
             List<Provenance> toRemove = new ArrayList<>();
@@ -366,6 +363,14 @@ public class App {
 
             for (Provenance prov : toRemove) {
                 pureDependencies.remove(prov);
+            }
+
+            // Should add CF deps after removing redundant RW deps...
+            Set<Dependency> cfdeps = minfo.getCF(currQuery.unit);
+
+            // RefSeq == null represents control-flow dependency
+            for (Dependency dep : cfdeps) {
+                pureDependencies.add(new Provenance(dep, minfo, null, -2));
             }
             boolean allId = true;
             for (Provenance prov : pureDependencies) {
@@ -392,7 +397,7 @@ public class App {
 
                     for (ValueBox usebox : currStmt.getUseBoxes()) {
                         Value use = usebox.getValue();
-                        p("[CF] " + use);
+                        p("[CF] " + use + " at line " + currStmt.getJavaSourceStartLineNumber());
                         if (use instanceof Local) {
                             // CF usage tp put before the branching statement
                             iPoints.add(new InstrumentPoint(currStmt, use, minfo, true));
@@ -423,7 +428,7 @@ public class App {
                     if (rop instanceof AbstractInvokeExpr) {
                         AbstractInvokeExpr iexpr = (AbstractInvokeExpr) rop;
                         List<Value> parameters = new ArrayList<>();
-                        BacktrackInfo binfo = walkMethod(currQuery.refSeq, currStmt, -1);
+                        BacktrackInfo binfo = walkMethod(currQuery.refSeq, prov, -1);
                         Set<Query> resolvedQueries = binfo.unresolvedRequeries;
                         iPoints.addAll(binfo.insPoints);
 
@@ -445,7 +450,10 @@ public class App {
                             currQueries.add(new Query(refSeq, currStmt));
                         } else if (rop instanceof Local) {
                             currQueries.add(new Query(new RefSeq(rop, newSuffix), currStmt));
+                        } else if (rop instanceof Constant) {
+                            currQueries.add(new Query(null, currStmt));
                         } else {
+
                             for (ValueBox usebox : rop.getUseBoxes()) {
                                 Value use = usebox.getValue();
                                 // p(use + " ========= " + use.getClass());
@@ -474,13 +482,19 @@ public class App {
                         p("Base not found");
                         panicni();
                     }
-                    BacktrackInfo binfo = walkMethod(currQuery.refSeq, currStmt, indexOfBase);
+                    BacktrackInfo binfo = walkMethod(currQuery.refSeq, prov, indexOfBase);
                     Set<Query> resolvedQueries = binfo.unresolvedRequeries;
                     iPoints.addAll(binfo.insPoints);
                     // Set<Query> resolvedQueries =
+
+                    // If the this method did not
+                    // if (resolvedQueries.isEmpty()) {
+                    // currQueries.add(new Query(currQuery.refSeq, currStmt));
+                    // } else {
                     for (Query resolvedQuery : resolvedQueries) {
                         currQueries.add(resolvedQuery);
                     }
+                    // }
                 } else {
                     p(currStmt + ", " + currStmt.getClass());
                     panicni();
@@ -508,18 +522,18 @@ public class App {
         throw new RuntimeException("Not implemented");
     }
 
+    public static String wireExchange(InvokeExpr Expr, String reqMethod, int lineNum) {
+        return "";
+    }
+
     public static Set<Query> resolveMethod(InvokeExpr iexpr, Stmt stmt) {
         String methodName = iexpr.getMethod().getSignature();
         Set<Query> resolvedQueries = new HashSet<>();
-        if (methodName.contains("java.lang.String: boolean equals(java.lang.Object)")) {
-            p("Manually wired " + methodName);
+
+        if (wireByNameForParams(methodName)) {
+            p("Manually wired " + methodName + " at " + stmt);
             for (Value v : getParameters(iexpr)) {
-                resolvedQueries.add(new Query(new RefSeq(v), stmt));
-            }
-        }
-        if (methodName.contains("java.lang.Boolean: ")) {
-            p("Manually wired " + methodName);
-            for (Value v : getParameters(iexpr)) {
+                // p("!!! " + v);
                 resolvedQueries.add(new Query(new RefSeq(v), stmt));
             }
         } else {
@@ -528,14 +542,51 @@ public class App {
         return resolvedQueries;
     }
 
-    public static BacktrackInfo walkMethod(RefSeq seq, Stmt stmt, int baseIndex) {
+    public static boolean wireByNameForParams(String name) {
+        boolean found = false;
+        for (String str : WireForAllParams.getNames()) {
+            if (name.contains(str)) {
+                found = true;
+                break;
+            }
+        }
+
+        return found;
+    }
+
+    public static BacktrackInfo walkMethod(RefSeq seq, Provenance prov, int baseIndex) {
+        Stmt stmt = (Stmt) prov.dep.unit;
         InvokeExpr iexpr = stmt.getInvokeExpr();
         Set<Query> resolvedQueries = new HashSet<>();
         Set<InstrumentPoint> resolvedInsts = new HashSet<>();
         MethodInfo minfo = searchMethod(iexpr.getMethod().getSignature().toString());
+        HTTPReceiveWirePoint remotep = null;
         if (minfo == null) {
-            resolvedQueries.addAll(resolveMethod(iexpr, stmt));
-            return new BacktrackInfo(resolvedQueries, resolvedInsts);
+            Set<Query> wireSolved = resolveMethod(iexpr, stmt);
+            if (!wireSolved.isEmpty()) {
+                resolvedQueries.addAll(wireSolved);
+                return new BacktrackInfo(resolvedQueries, resolvedInsts);
+            } else {
+                if (iexpr.getMethod().getSignature().contains("exchange")) {
+                    p("======");
+                }
+                remotep = WireHTTP.get(prov.minfo.sm.getSignature(),
+                        stmt.getJavaSourceStartLineNumber());
+                if (remotep != null) {
+                    minfo = searchMethod(remotep.targetMethod);
+                    p("!!!!! " + minfo);
+                } else {
+                    // If current depedency is a MAY-CALL, and no dependency is resolved,
+                    // we keep searching backwards
+                    if (resolvedQueries.isEmpty()) {
+                        if (prov.dep.dtype == DepType.CALL) {
+                            resolvedQueries.add(new Query(seq, stmt));
+                        }
+                    }
+                    return new BacktrackInfo(resolvedQueries, resolvedInsts);
+                }
+            }
+
         }
         List<Value> parameters = getParameters(iexpr);
         List<Value> actualParams = minfo.getParamValues();
@@ -560,9 +611,20 @@ public class App {
                 for (int i = 0; i < actualParams.size(); i++) {
                     Value v = actualParams.get(i);
                     if (base.equals(v)) {
-                        Query resolvedQuery = new Query(new RefSeq(parameters.get(i), query.refSeq.fields), stmt);
-                        resolvedQueries.add(resolvedQuery);
-                        p("Resovled: " + resolvedQuery);
+                        if (remotep != null) {
+                            int idx = remotep.recvParamIndices.indexOf(i);
+                            if (idx >= 0) {
+                                int oridx = remotep.sendParamIndices.get(idx);
+                                Query resolvedQuery = new Query(new RefSeq(parameters.get(oridx), query.refSeq.fields),
+                                        stmt);
+                                resolvedQueries.add(resolvedQuery);
+                                p("Resovled: " + resolvedQuery);
+                            }
+                        } else {
+                            Query resolvedQuery = new Query(new RefSeq(parameters.get(i), query.refSeq.fields), stmt);
+                            resolvedQueries.add(resolvedQuery);
+                            p("Resovled: " + resolvedQuery);
+                        }
                     }
                 }
             }

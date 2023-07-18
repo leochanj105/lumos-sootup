@@ -12,17 +12,20 @@ public class Query {
     }
 
     public String toString() {
-        return "[" + this.refSeq.toString() + " at " + unit + "]";
+        // System.out.println(unit);
+        return "[" + (this.refSeq != null ? (this.refSeq.toString()) : " CF ") + " at " + unit + "]";
     }
 
     public boolean equals(Object o) {
         if (!(o instanceof Query) || o == null)
             return false;
         Query other = (Query) o;
-        return other.refSeq.equals(this.refSeq) && other.unit.equals(this.unit);
+
+        return (other.refSeq == null ? (this.refSeq == null) : other.refSeq.equals(this.refSeq))
+                && other.unit.equals(this.unit);
     }
 
     public int hashCode() {
-        return refSeq.hashCode() + unit.hashCode();
+        return refSeq != null ? refSeq.hashCode() : 0 + unit.hashCode();
     }
 }

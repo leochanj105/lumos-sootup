@@ -1,34 +1,37 @@
 package com.lumos.wire;
 
-public class HTTPRequestWirePoint {
-    public String reqType;
-    public int index;
-    public String reqURL;
+import java.util.List;
 
-    public HTTPRequestWirePoint(String reqType, int index, String reqURL) {
-        this.reqType = reqType;
-        this.index = index;
-        this.reqURL = reqURL;
+import soot.jimple.InvokeExpr;
+
+public class HTTPRequestWirePoint {
+    // public InvokeExpr iexpr;
+    public String reqMethod;
+    public int lineNum;
+    // public String targetMethod;
+
+    // public List<Integer> sendParamIndices;
+    // public List<Integer> recvParamIndices;
+
+    public HTTPRequestWirePoint(String reqMethod, int lineNum) {
+        this.reqMethod = reqMethod;
+        this.lineNum = lineNum;
+        // this.targetMethod = targetMethod;
+        // this.sendParamIndices = sendParamIndices;
+        // this.recvParamIndices = recvParamIndices;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof HTTPRequestWirePoint)) {
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof HTTPRequestWirePoint)) {
             return false;
         }
-        HTTPRequestWirePoint wp = (HTTPRequestWirePoint) obj;
-        return (this.reqType.equals(wp.reqType) &&
-                this.index == wp.index &&
-                this.reqURL.equals(wp.reqURL));
-    }
-
-    @Override
-    public String toString() {
-        return "(" + reqType + ", " + index + ", " + reqURL + ")";
+        HTTPRequestWirePoint other = (HTTPRequestWirePoint) o;
+        return this.reqMethod.equals(other.reqMethod) && other.lineNum == this.lineNum;
     }
 
     @Override
     public int hashCode() {
-        return this.reqType.hashCode() + index + reqURL.hashCode();
+        return this.reqMethod.hashCode() + this.lineNum;
     }
+
 }

@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import soot.G;
+import soot.Printer;
 import soot.Scene;
 import soot.SootClass;
 import soot.baf.BafASMBackend;
@@ -37,10 +38,11 @@ public class CompileUtils {
             writer = new PrintWriter(bstream, true);
 
             // JimplePrinter printer = new JimplePrinter();
+            Printer.v().printTo(cl, writerfile);
             // printer.printTo(cl, writer);
 
             // printer.printTo(cl, writerfile);
-            // writerfile.close();
+            writerfile.close();
 
             // System.out.println(bstream.toString());
 
@@ -48,28 +50,7 @@ public class CompileUtils {
             // ByteArrayInputStream(bstream.toByteArray());
             // FileInputStream finput = new FileInputStream(file);
 
-            // G.reset();
-            // Options.v().set_prepend_classpath(true);
-            // Options.v().set_soot_classpath(analysisPath);
-            // Options.v().set_allow_phantom_elms(true);
-
-            // String arr[] = { analysisPath };
-            // Options.v().set_process_dir(Arrays.asList(arr));
-
-            // Options.v().set_write_local_annotations(true);
-            // Options.v().set_ignore_resolution_errors(true);
-            // Options.v().set_no_bodies_for_excluded(true);
-            // Options.v().set_allow_phantom_refs(true);
-            // Options.v().set_keep_line_number(true);
-            // Options.v().set_whole_program(true);
-            // Scene.v().loadNecessaryClasses();
-
-            // Scene.v().addBasicClass(launcher.service.LauncherService, HIERARCHY);
-            // JimpleAST jast = new JimpleAST(binput);
-
-            // soot.SootClass sclass = jast.createSootClass();
-
-            BafASMBackend backend = new BafASMBackend(cl, 8);
+            BafASMBackend backend = new BafASMBackend(cl, 0);
 
             File file2 = new File(outputDir + File.separator + cl.getName() + ".class");
             // writerfile = new PrintWriter(file2);
@@ -79,17 +60,8 @@ public class CompileUtils {
             // System.out.println(sclass.getMethods());
             // finput.close();
 
-            // soot.SootClass sclass = sclass = Parse.parse(binput, null);
-            // } catch (ParserException | LexerException | IOException e) {
-            // // // TODO Auto-generated catch block
-            // e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
-            // Thread.currentThread().getStackTrace();
-            // Thread.dumpStack();
-
-            // for (StackTraceElement e2 : e.getStackTrace())
-            // System.out.println(e2);
         }
 
     }
