@@ -170,8 +170,13 @@ public class App {
         for (JavaSootClass cls : view.getClasses()) {
             // ClassType classType = project.getIdentifierFactory().getClassType(clstr);
             // SootClass sootClass = view.getClass(classType).get();
+            if (cls.toString().contains("conf.HttpAspect")) {
+                continue;
+            }
             CompileUtils.outputJimple(cls);
             if (true)
+                // continue;
+
                 return;
             for (JavaSootMethod sm : cls.getMethods()) {
                 if (sm.isAbstract()) {
