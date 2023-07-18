@@ -1,28 +1,28 @@
 package com.lumos.common;
 
-import sootup.core.jimple.common.stmt.Stmt;
+import soot.Unit;
 
 public class Query {
     public RefSeq refSeq;
-    public Stmt stmt;
+    public Unit unit;
 
-    public Query(RefSeq refSeq, Stmt stmt) {
+    public Query(RefSeq refSeq, Unit unit) {
         this.refSeq = refSeq;
-        this.stmt = stmt;
+        this.unit = unit;
     }
 
     public String toString() {
-        return "[" + this.refSeq.toString() + " at " + stmt + "]";
+        return "[" + this.refSeq.toString() + " at " + unit + "]";
     }
 
     public boolean equals(Object o) {
         if (!(o instanceof Query) || o == null)
             return false;
         Query other = (Query) o;
-        return other.refSeq.equals(this.refSeq) && other.stmt.equals(this.stmt);
+        return other.refSeq.equals(this.refSeq) && other.unit.equals(this.unit);
     }
 
     public int hashCode() {
-        return refSeq.hashCode() + stmt.hashCode();
+        return refSeq.hashCode() + unit.hashCode();
     }
 }

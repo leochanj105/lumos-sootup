@@ -1,6 +1,6 @@
 package com.lumos.wire;
 
-import sootup.core.model.SootMethod;
+import soot.SootMethod;
 
 public class ReturnWirePoint {
     public SootMethod sm;

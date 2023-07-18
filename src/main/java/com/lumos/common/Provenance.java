@@ -1,8 +1,14 @@
 package com.lumos.common;
 
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.lumos.analysis.MethodInfo;
+
+import soot.Unit;
 
 public class Provenance {
     public Dependency dep;
@@ -33,7 +39,30 @@ public class Provenance {
         if (other.equals(this)) {
             return false;
         }
-        // this.minfo.wsm.
-        return this.minfo.sm.getBody().getStmtGraph().hasEdgeConnecting(this.dep.stmt, other.dep.stmt);
+
+        boolean found = false;
+        Deque<Unit> q = new ArrayDeque<>();
+        Set<Unit> visited = new HashSet<>();
+        q.add(this.dep.unit);
+        while (!found && !q.isEmpty()) {
+            Unit currUnit = q.pop();
+            if (visited.contains(currUnit)) {
+                continue;
+            } else {
+                visited.add(currUnit);
+            }
+            for (Unit succ : this.minfo.cfg.getSuccsOf(currUnit)) {
+                if (!visited.contains(succ)) {
+                    if (succ.equals(other.dep.unit)) {
+                        found = true;
+                        break;
+                    }
+                    q.add(succ);
+                }
+            }
+        }
+
+        return found;
     }
+
 }

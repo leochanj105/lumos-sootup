@@ -10,61 +10,54 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang3.SerializationUtils;
-
 // import com.lumos.common.Dependency.DepType;
 import com.lumos.common.Dependency;
 
-import java.util.HashSet;
-import java.util.List;
+import soot.Unit;
+import soot.Value;
+import soot.ValueBox;
+import soot.toolkits.graph.DirectedGraph;
 
-import sootup.core.graph.StmtGraph;
-import sootup.core.jimple.basic.Local;
-import sootup.core.jimple.basic.Value;
-import sootup.core.jimple.common.expr.AbstractInstanceInvokeExpr;
-import sootup.core.jimple.common.expr.AbstractInvokeExpr;
-import sootup.core.jimple.common.stmt.Stmt;
-import sootup.core.model.Position;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 // imp
 
 public class CFAnalysis {
-    public final Map<Stmt, Set<Dependency>> liveIn = new HashMap<>();
-    public final Map<Stmt, Set<Dependency>> liveOut = new HashMap<>();
+    public final Map<Unit, Set<Dependency>> liveIn = new HashMap<>();
+    public final Map<Unit, Set<Dependency>> liveOut = new HashMap<>();
     public ReachingDefAnalysis rwa;
 
-    public CFAnalysis(StmtGraph<?> graph, ReachingDefAnalysis rwa) {
+    public CFAnalysis(DirectedGraph<Unit> graph, ReachingDefAnalysis rwa) {
         this.rwa = rwa;
-        List<Stmt> startingStmts = new ArrayList<>();
-        for (Stmt stmt : graph.getNodes()) {
-            liveIn.put(stmt, Collections.emptySet());
-            liveOut.put(stmt, Collections.emptySet());
-            if (graph.predecessors(stmt).isEmpty() && graph.exceptionalPredecessors(stmt).isEmpty()) {
-                startingStmts.add(stmt);
+        List<Unit> startingUnits = new ArrayList<>();
+        for (Iterator<Unit> it = graph.iterator(); it.hasNext();) {
+            Unit unit = it.next();
+            liveIn.put(unit, Collections.emptySet());
+            liveOut.put(unit, Collections.emptySet());
+            if (graph.getPredsOf(unit).isEmpty()) {
+                startingUnits.add(unit);
             }
         }
 
         boolean fixed = false;
         while (!fixed) {
             fixed = true;
-            Deque<Stmt> queue = new ArrayDeque<>(startingStmts);
-            HashSet<Stmt> visitedStmts = new HashSet<>();
+            Deque<Unit> queue = new ArrayDeque<>(startingUnits);
+            HashSet<Unit> visitedUnits = new HashSet<>();
             while (!queue.isEmpty()) {
-                Stmt stmt = queue.removeFirst();
-                visitedStmts.add(stmt);
+                Unit unit = queue.removeFirst();
+                visitedUnits.add(unit);
 
-                Set<Dependency> in = new HashSet<>(liveIn.get(stmt));
-                for (Stmt pred : graph.predecessors(stmt)) {
+                Set<Dependency> in = new HashSet<>(liveIn.get(unit));
+                for (Unit pred : graph.getPredsOf(unit)) {
                     in = merge(in, liveOut.get(pred));
                 }
-                for (Stmt epred : graph.exceptionalPredecessors(stmt)) {
-                    in = merge(in, liveOut.get(epred));
-                    // System.out.println(stmt + " ---> " + epred);
-                }
 
-                if (isNotEqual(in, liveIn.get(stmt))) {
+                if (isNotEqual(in, liveIn.get(unit))) {
                     fixed = false;
-                    liveIn.put(stmt, new HashSet<>(in));
+                    liveIn.put(unit, new HashSet<>(in));
                 }
 
                 Set<Dependency> out = copy(in);
@@ -75,13 +68,14 @@ public class CFAnalysis {
                 List<Value> valtoremove = new ArrayList<>();
                 for (Dependency dep : out) {
                     boolean outofscope = true;
-                    for (Value vmp : stmt.getUses()) {
-                        Set<Dependency> rwadeps = rwa.getBeforeStmt(stmt).get(vmp);
+                    for (ValueBox vmpbox : unit.getUseBoxes()) {
+                        Value vmp = vmpbox.getValue();
+                        Set<Dependency> rwadeps = rwa.getBeforeUnit(unit).get(vmp);
                         if (rwadeps != null) {
-                            for (Dependency dpmp : rwa.getBeforeStmt(stmt).get(vmp)) {
-                                Position rwpos = dpmp.stmt.getPositionInfo().getStmtPosition();
-                                Position cfpos = dep.stmt.getPositionInfo().getStmtPosition();
-                                if (rwpos.compareTo(cfpos) >= 0) {
+                            for (Dependency dpmp : rwa.getBeforeUnit(unit).get(vmp)) {
+                                int rwpos = dpmp.unit.getJavaSourceStartLineNumber();
+                                int cfpos = dep.unit.getJavaSourceStartLineNumber();
+                                if (rwpos >= cfpos) {
                                     outofscope = false;
                                     break;
                                 }
@@ -104,25 +98,21 @@ public class CFAnalysis {
                 }
                 // }
 
-                if (graph.getAllSuccessors(stmt).size() > 1) {
-                    for (Value v : stmt.getUses()) {
-                        out.add(new Dependency(stmt, Dependency.DepType.CF));
+                if (graph.getSuccsOf(unit).size() > 1) {
+                    for (ValueBox vbox : unit.getUseBoxes()) {
+                        Value v = vbox.getValue();
+                        out.add(new Dependency(unit, Dependency.DepType.CF));
                     }
                 }
 
-                if (isNotEqual(out, liveOut.get(stmt))) {
+                if (isNotEqual(out, liveOut.get(unit))) {
                     fixed = false;
-                    liveOut.put(stmt, out);
+                    liveOut.put(unit, out);
                 }
 
-                for (Stmt succ : graph.successors(stmt)) {
-                    if (!visitedStmts.contains(succ)) {
+                for (Unit succ : graph.getSuccsOf(unit)) {
+                    if (!visitedUnits.contains(succ)) {
                         queue.addLast(succ);
-                    }
-                }
-                for (Stmt esucc : graph.exceptionalSuccessors(stmt).values()) {
-                    if (!visitedStmts.contains(esucc)) {
-                        queue.addLast(esucc);
                     }
                 }
 
@@ -138,20 +128,20 @@ public class CFAnalysis {
         return news;
     }
 
-    public Set<Dependency> getBeforeStmt(@Nonnull Stmt stmt) {
-        if (!liveIn.containsKey(stmt)) {
-            throw new RuntimeException("Stmt: " + stmt + " is not in StmtGraph!");
+    public Set<Dependency> getBeforeUnit(@Nonnull Unit unit) {
+        if (!liveIn.containsKey(unit)) {
+            throw new RuntimeException("Unit: " + unit + " is not in UnitGraph!");
         }
-        return liveIn.get(stmt);
+        return liveIn.get(unit);
     }
 
-    /** Get all live locals after the given stmt. */
+    /** Get all live locals after the given unit. */
 
-    public Set<Dependency> getAfterStmt(@Nonnull Stmt stmt) {
-        if (!liveOut.containsKey(stmt)) {
-            throw new RuntimeException("Stmt: " + stmt + " is not in StmtGraph!");
+    public Set<Dependency> getAfterUnit(@Nonnull Unit unit) {
+        if (!liveOut.containsKey(unit)) {
+            throw new RuntimeException("Unit: " + unit + " is not in UnitGraph!");
         }
-        return liveOut.get(stmt);
+        return liveOut.get(unit);
     }
 
     private Set<Dependency> merge(@Nonnull Set<Dependency> set1,

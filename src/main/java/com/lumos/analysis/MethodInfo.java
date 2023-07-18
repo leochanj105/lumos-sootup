@@ -2,6 +2,7 @@ package com.lumos.analysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,29 +10,28 @@ import java.util.Set;
 import com.lumos.common.Dependency;
 import com.lumos.common.TracePoint;
 
-import sootup.core.graph.StmtGraph;
-import sootup.core.jimple.basic.Local;
-import sootup.core.jimple.basic.Value;
-import sootup.core.jimple.common.ref.JInstanceFieldRef;
-import sootup.core.jimple.common.stmt.JAssignStmt;
-import sootup.core.jimple.common.stmt.JReturnStmt;
-import sootup.core.jimple.common.stmt.JReturnVoidStmt;
-import sootup.core.jimple.common.stmt.Stmt;
-import sootup.java.core.JavaSootMethod;
-import sootup.java.sourcecode.frontend.WalaSootMethod;
+import soot.SootMethod;
+import soot.Unit;
+import soot.Value;
+import soot.ValueBox;
+import soot.jimple.Stmt;
+import soot.jimple.internal.JReturnStmt;
+import soot.jimple.internal.JReturnVoidStmt;
+import soot.toolkits.graph.BriefUnitGraph;
 
 public class MethodInfo {
-    public JavaSootMethod sm;
+    public SootMethod sm;
     public Map<TracePoint, List<TracePoint>> depGraph;
     // public Map<Value, String> nameMap;
 
-    public Map<Stmt, Map<Value, TracePoint>> tpMap = new HashMap<>();
-    public Map<Integer, List<Stmt>> stmtMap = new HashMap<>();
+    public Map<Unit, Map<Value, TracePoint>> tpMap = new HashMap<>();
+    public Map<Integer, List<Unit>> stmtMap = new HashMap<>();
 
     public ReachingDefAnalysis reachingAnalysis;
     public CFAnalysis cfAnalysis;
+    public BriefUnitGraph cfg;
 
-    public MethodInfo(JavaSootMethod sm) {
+    public MethodInfo(SootMethod sm) {
         this.sm = sm;
         // buildNameMap();
     }
@@ -54,34 +54,37 @@ public class MethodInfo {
 
     public Map<TracePoint, List<TracePoint>> analyzeDef() {
         // System.out.println(this);
-        StmtGraph<?> cfg = sm.getBody().getStmtGraph();
+        this.cfg = new BriefUnitGraph(sm.getActiveBody());
 
-        reachingAnalysis = new ReachingDefAnalysis(cfg);
+        // sm.getActiveBody().
+        reachingAnalysis = new ReachingDefAnalysis(this.cfg);
 
         depGraph = new HashMap<>();
         // p(nmap + "\n -----");
-        for (Stmt stmt : cfg.getStmts()) {
+        for (Iterator<Unit> it = cfg.iterator(); it.hasNext();) {
+            Unit unit = it.next();
 
-            int lineNum = stmt.getPositionInfo().getStmtPosition().getFirstLine();
+            int lineNum = unit.getJavaSourceStartLineNumber();
             if (!stmtMap.containsKey(lineNum)) {
                 stmtMap.put(lineNum, new ArrayList<>());
             }
-            stmtMap.get(lineNum).add(stmt);
+            stmtMap.get(lineNum).add(unit);
 
-            if (!tpMap.containsKey(stmt)) {
-                tpMap.put(stmt, new HashMap<>());
+            if (!tpMap.containsKey(unit)) {
+                tpMap.put(unit, new HashMap<>());
             }
             // if (lineNum == 126) {
             // System.out.println(lineNum + ", " + stmt + ", " + stmtMap.get(lineNum) + ", "
             // + this + ", " + this.sm);
             // }
-            Map<Value, Set<Dependency>> dmap = reachingAnalysis.getBeforeStmt(stmt);
+            Map<Value, Set<Dependency>> dmap = reachingAnalysis.getBeforeUnit(unit);
 
-            Map<Value, TracePoint> currStmtMap = tpMap.get(stmt);
+            Map<Value, TracePoint> currStmtMap = tpMap.get(unit);
 
             String refName = null;
             // Create Tracepoints and add description texts from frontend
-            for (Value v : stmt.getUsesAndDefs()) {
+            for (ValueBox vbox : unit.getUseAndDefBoxes()) {
+                Value v = vbox.getValue();
 
                 // String name = null;
                 // name = nameMap.get(v);
@@ -100,7 +103,7 @@ public class MethodInfo {
                 // }
 
                 // TracePoint tmp = new TracePoint(stmt, v, name);
-                TracePoint tmp = new TracePoint(stmt, v, "");
+                TracePoint tmp = new TracePoint(unit, v, "");
                 currStmtMap.put(v, tmp);
                 if (!depGraph.containsKey(tmp)) {
                     depGraph.put(tmp, new ArrayList<>());
@@ -156,25 +159,25 @@ public class MethodInfo {
 
     public void printLine(int line) {
         // System.out.println(line + ".. " + stmtMap.get(line) + ", " + this.sm);
-        List<Stmt> sl = stmtMap.get(line);
+        List<Unit> sl = stmtMap.get(line);
         for (int i = 0; i < sl.size(); i++) {
             System.out.println(line + ": " + i + ", " + sl.get(i));
         }
     }
 
-    public Stmt getStmt(int line, int pos) {
+    public Unit getStmt(int line, int pos) {
         return stmtMap.get(line).get(pos);
     }
 
-    public Value getValue(Stmt stmt, int pos) {
-        List<Value> tpl = new ArrayList<>(tpMap.get(stmt).keySet());
+    public Value getValue(Unit unit, int pos) {
+        List<Value> tpl = new ArrayList<>(tpMap.get(unit).keySet());
         return tpl.get(pos);
     }
 
-    public void printValue(Stmt stmt) {
-        System.out.println(stmt + " at line " +
-                stmt.getPositionInfo().getStmtPosition().getFirstLine() + " : ******");
-        List<Value> tpl = new ArrayList<>(tpMap.get(stmt).keySet());
+    public void printValue(Unit unit) {
+        System.out.println(unit + " at line " +
+                unit.getJavaSourceStartLineNumber() + " : ******");
+        List<Value> tpl = new ArrayList<>(tpMap.get(unit).keySet());
         for (int i = 0; i < tpl.size(); i++) {
             System.out.println(i + ", " + tpl.get(i));
         }
@@ -185,7 +188,7 @@ public class MethodInfo {
             System.out.println("RA analysis not done before CF analysis!!");
             return;
         }
-        StmtGraph<?> cfg = sm.getBody().getStmtGraph();
+        // StmtGraph<?> cfg = sm.getBody().getStmtGraph();
         this.cfAnalysis = new CFAnalysis(cfg, reachingAnalysis);
     }
 
@@ -193,13 +196,13 @@ public class MethodInfo {
         return depGraph.get(tp);
     }
 
-    public Set<Dependency> getPrev(Stmt stmt, Value value) {
+    public Set<Dependency> getPrev(Unit unit, Value value) {
         // return getPrev(this.tpMap.get(stmt).get(value));
-        return this.reachingAnalysis.getBeforeStmt(stmt).get(value);
+        return this.reachingAnalysis.getBeforeUnit(unit).get(value);
     }
 
-    public Set<Dependency> getCF(Stmt stmt) {
-        return this.cfAnalysis.getBeforeStmt(stmt);
+    public Set<Dependency> getCF(Unit unit) {
+        return this.cfAnalysis.getBeforeUnit(unit);
     }
 
     public void printToJimple() {
@@ -209,9 +212,11 @@ public class MethodInfo {
     public List<TracePoint> getReturnTps() {
         List<TracePoint> tps = new ArrayList<>();
 
-        for (Stmt stmt : sm.getBody().getStmtGraph()) {
+        for (Iterator<Unit> it = cfg.iterator(); it.hasNext();) {
+            Unit unit = it.next();
+            Stmt stmt = (Stmt) unit;
             if (stmt instanceof JReturnStmt) {
-                tps.add(tpMap.get(stmt).get(((JReturnStmt) stmt).getUses().get(0)));
+                tps.add(tpMap.get(stmt).get(((JReturnStmt) stmt).getUseBoxes().get(0).getValue()));
             }
         }
         return tps;
@@ -220,7 +225,9 @@ public class MethodInfo {
     public List<Stmt> getReturnStmts() {
         List<Stmt> rets = new ArrayList<>();
 
-        for (Stmt stmt : sm.getBody().getStmtGraph()) {
+        for (Iterator<Unit> it = cfg.iterator(); it.hasNext();) {
+            Unit unit = it.next();
+            Stmt stmt = (Stmt) unit;
             if ((stmt instanceof JReturnStmt) || (stmt instanceof JReturnVoidStmt)) {
                 rets.add(stmt);
             }
@@ -231,9 +238,9 @@ public class MethodInfo {
     public List<Value> getParamValues() {
         List<Value> params = new ArrayList<>();
         if (!this.sm.isStatic()) {
-            params.add(this.sm.getBody().getThisLocal());
+            params.add(this.sm.getActiveBody().getThisLocal());
         }
-        for (Value v : this.sm.getBody().getParameterLocals()) {
+        for (Value v : this.sm.getActiveBody().getParameterLocals()) {
             params.add(v);
         }
         return params;

@@ -1,18 +1,18 @@
 package com.lumos.common;
 
-import sootup.core.jimple.common.stmt.Stmt;
+import soot.Unit;
 
 public class Dependency {
     public enum DepType {
         RW, CF, CALL
     };
 
-    public Stmt stmt;
+    public Unit unit;
     // public Value v;
     public DepType dtype;
 
-    public Dependency(Stmt stmt, DepType dtype) {
-        this.stmt = stmt;
+    public Dependency(Unit unit, DepType dtype) {
+        this.unit = unit;
         // this.v = v;
         this.dtype = dtype;
     }
@@ -31,7 +31,7 @@ public class Dependency {
 
     @Override
     public String toString() {
-        return "[" + this.typeString() + "] " + this.stmt;
+        return "[" + this.typeString() + "] " + this.unit;
     }
 
     public boolean equals(Object o) {
@@ -39,11 +39,11 @@ public class Dependency {
             return false;
         }
         Dependency other = (Dependency) o;
-        return this.stmt.equals(other.stmt) && this.dtype == other.dtype;
+        return this.unit.equals(other.unit) && this.dtype == other.dtype;
     }
 
     public int hashCode() {
-        int hashValue = stmt == null ? 0 : stmt.hashCode();
+        int hashValue = unit == null ? 0 : unit.hashCode();
         return hashValue + this.dtype.hashCode();
     }
 }

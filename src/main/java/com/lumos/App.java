@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
@@ -19,15 +20,6 @@ import java.util.HashSet;
 // import org.jf.dexlib2.analysis.ClassProvider;
 // import org.objectweb.asm.commons.JSRInlinerAdapter;
 
-import com.ibm.wala.cast.java.loader.JavaSourceLoaderImpl;
-import com.ibm.wala.cast.java.loader.JavaSourceLoaderImpl.ConcreteJavaMethod;
-import com.ibm.wala.cast.loader.AstMethod;
-import com.ibm.wala.cast.loader.AstMethod.DebuggingInformation;
-import com.ibm.wala.cfg.AbstractCFG;
-import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ssa.SSAInstruction;
-import com.ibm.wala.ssa.SymbolTable;
 import com.lumos.analysis.MethodInfo;
 import com.lumos.analysis.ReachingDefAnalysis;
 import com.lumos.common.BacktrackInfo;
@@ -41,53 +33,35 @@ import com.lumos.compile.CompileUtils;
 
 import fj.Unit;
 import fj.test.reflect.Check;
+import soot.Body;
 // import soot.toolkits.scalar.ForwardFlowAnalysis;
-import sootup.core.Project;
-// import sootup.core.frontend.ClassProvider;
-// import sootup.core.frontend.OverridingClassSource;
-// import sootup.core.frontend.SootClassSource;
-import sootup.core.graph.MutableBlockStmtGraph;
-import sootup.core.graph.MutableStmtGraph;
-import sootup.core.graph.StmtGraph;
-import sootup.core.inputlocation.AnalysisInputLocation;
-import sootup.core.jimple.basic.Local;
-import sootup.core.jimple.basic.Value;
-import sootup.core.jimple.common.constant.Constant;
-import sootup.core.jimple.common.constant.IntConstant;
-import sootup.core.jimple.common.expr.AbstractInstanceInvokeExpr;
-import sootup.core.jimple.common.expr.AbstractInvokeExpr;
-import sootup.core.jimple.common.expr.JCastExpr;
-import sootup.core.jimple.common.expr.JInterfaceInvokeExpr;
-import sootup.core.jimple.common.expr.JVirtualInvokeExpr;
-import sootup.core.jimple.common.ref.JFieldRef;
-import sootup.core.jimple.common.ref.JInstanceFieldRef;
-import sootup.core.jimple.common.stmt.JAssignStmt;
-import sootup.core.jimple.common.stmt.JIdentityStmt;
-import sootup.core.jimple.common.stmt.JInvokeStmt;
-import sootup.core.jimple.common.stmt.JReturnStmt;
-import sootup.core.jimple.common.stmt.Stmt;
-import sootup.core.model.Body;
-import sootup.core.model.SootClass;
-import sootup.core.model.SootField;
-import sootup.core.model.SootMethod;
-import sootup.core.model.SourceType;
-import sootup.core.model.Body.BodyBuilder;
-import sootup.core.signatures.FieldSignature;
-import sootup.core.signatures.MethodSignature;
-import sootup.core.types.ClassType;
-import sootup.java.bytecode.inputlocation.PathBasedAnalysisInputLocation;
-// import sootup.java.bytecode.inputlocation.PathBasedAnalysisInputLocation;
-import sootup.java.core.JavaProject;
-import sootup.java.core.JavaSootClass;
-import sootup.java.core.JavaSootClassSource;
-import sootup.java.core.JavaSootMethod;
-import sootup.java.core.OverridingJavaClassSource;
-import sootup.java.core.language.JavaLanguage;
-import sootup.java.core.views.JavaView;
 // import sootup.java.sourcecode.frontend.WalaIRToJimpleConverter;
 // import sootup.java.sourcecode.frontend.WalaJavaClassProvider;
 // import sootup.java.sourcecode.frontend.WalaSootMethod;
 // import sootup.java.sourcecode.inputlocation.JavaSourcePathAnalysisInputLocation;
+import soot.G;
+import soot.Local;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootFieldRef;
+import soot.SootMethod;
+import soot.Value;
+import soot.ValueBox;
+import soot.JastAddJ.Signatures.FieldSignature;
+import soot.JastAddJ.Signatures.MethodSignature;
+import soot.jbco.util.BodyBuilder;
+import soot.jimple.Constant;
+import soot.jimple.InvokeExpr;
+import soot.jimple.Stmt;
+import soot.jimple.internal.AbstractInstanceInvokeExpr;
+import soot.jimple.internal.AbstractInvokeExpr;
+import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JCastExpr;
+import soot.jimple.internal.JIdentityStmt;
+import soot.jimple.internal.JInstanceFieldRef;
+import soot.jimple.internal.JInvokeStmt;
+import soot.jimple.internal.JReturnStmt;
+import soot.options.Options;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -111,22 +85,22 @@ public class App {
     public static String outputFormat = "jimple";
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
-    public static Map<MethodSignature, MethodInfo> methodMap;
+    public static Map<String, MethodInfo> methodMap;
 
     public static void main(String[] args) {
         readParams();
         String[] services = new String[] { "ts-launcher" };
-        // analyzePath(be
-        // "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\ts-launcher\\target\\classes\\launcher\\service\\");
+        analyzePath("src/code");
         // analyzePath(
         // "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\ts-launcher\\target\\classes");
-        String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
-        String suffix = "\\target\\classes";
+        // String base =
+        // "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
+        // String suffix = "\\target\\classes";
 
-        for (String str : services) {
-            String complete = base + str + suffix;
-            analyzePath(complete);
-        }
+        // for (String str : services) {
+        // String complete = base + str + suffix;
+        // analyzePath(complete);
+        // }
 
         // WalaIRToJimpleConverter walaToSoot = new WalaIRToJimpleConverter();
         // JavaSourceLoaderImpl.JavaClass walaClass = loadWalaClass(signature,
@@ -134,87 +108,141 @@ public class App {
         // return Optional.ofNullable(walaClass).map(walaToSoot::convertClass);
     }
 
+    public static void setupSoot(String path) {
+        G.reset();
+
+        Options.v().set_prepend_classpath(true);
+        Options.v().set_allow_phantom_refs(true);
+        Options.v().set_keep_line_number(true);
+        Options.v().set_whole_program(true);
+        Options.v().set_validate(true);
+
+        Options.v().set_allow_phantom_elms(true);
+
+        // This is needed to prevent compile error for unimplemented
+        // methods in interfaces !!
+        Options.v().set_ignore_resolution_errors(true);
+
+        // Need this to makesure paramter names are kept!!
+        // Spring annotations rely on this!!
+        Options.v().set_write_local_annotations(true);
+
+        Options.v().set_soot_classpath(path);
+        // Options.v().set_process_dir(Collections.singletonList(sourceDirectory));
+        processList = new ArrayList<String>();
+        // try {
+        // File myObj = new File("listWire");
+        // Scanner myReader = new Scanner(myObj);
+        // while (myReader.hasNextLine()) {
+        // String data = myReader.nextLine();
+        // processList.add(sourceDirectory + "/" + data + "/original/BOOT-INF/classes");
+        // // System.out.println(data);
+        // }
+        // myReader.close();
+        // } catch (Exception e) {
+        // System.out.println("An error occurred.");
+        // e.printStackTrace();
+        // }
+        // Options.v().set_process_dir(processList);
+
+        // String arr[] = { "../cancel/BOOT-INF/classes" };
+        String arr[] = { path };
+        Options.v().set_process_dir(Arrays.asList(arr));
+
+        Options.v().set_output_dir(outputDirectory);
+        if (outputFormat.equals("jimple")) {
+            Options.v().set_output_format(Options.output_format_J);
+        } else if (outputFormat.equals("class")) {
+            Options.v().set_output_format(Options.output_format_class);
+        } else if (outputFormat.equals("none")) {
+            Options.v().set_output_format(Options.output_format_none);
+        }
+        // Turning off jimple body generation for dependency classes
+        // This should be turned off for more sound analysis
+        // String[] exClasses = {"price.repository.*"};
+        // List<String> excludePackagesList = Arrays.asList(exClasses);
+        // Options.v().set_exclude(excludePackagesList);
+
+        Options.v().set_no_bodies_for_excluded(true);
+        Options.v().set_print_tags_in_output(true);
+
+        // Use original names
+        Options.v().setPhaseOption("jb", "optimize:false");
+        Options.v().setPhaseOption("jb", "use-original-names:true");
+        // Options.v().setPhaseOption("jj", "use-original-names:true");
+        Options.v().setPhaseOption("jb", "preserve-source-annotations:true");
+
+        // Need this to avoid the need to provide an entry point
+        Options.v().setPhaseOption("cg", "all-reachable:true");
+
+        // Need this to include all subtypes
+        // Options.v().setPhaseOption("cg", "library:any-subtype");
+
+        Scene.v().loadNecessaryClasses();
+        Scene.v().addBasicClass("java.io.PrintStream", SootClass.SIGNATURES);
+        Scene.v().addBasicClass("java.lang.System", SootClass.SIGNATURES);
+        Scene.v().addBasicClass("java.lang.String", SootClass.SIGNATURES);
+        // Scene.v().loadClassAndSupport();
+
+    }
+
     public static void analyzePath(String path) {
         // path =
         // "C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code\\";
         p("Analyzing " + path);
-        // AnalysisInputLocation<JavaSootClass> inputLocation = new
-        // JavaSourcePathAnalysisInputLocation(
-        // SourceType.Application, Paths.get(path).toString());
+        setupSoot(path);
+        // String cname = "launcher.service.LauncherServiceImpl";
+        String cname = "Test";
 
-        // JavaLanguage language = new JavaLanguage(8);
-        // JavaProject project =
-        // JavaProject.builder(language).addInputLocation(inputLocation).build();
-        // JavaView view = project.createView();
-        Path pa = Paths.get(path);
-        p(pa.toAbsolutePath());
-        AnalysisInputLocation<JavaSootClass> inputLocation = new PathBasedAnalysisInputLocation(
-                pa, SourceType.Phantom);
-        AnalysisInputLocation<JavaSootClass> inputLocation2 = new PathBasedAnalysisInputLocation(
-                pa, SourceType.Application);
-        JavaLanguage language = new JavaLanguage(8);
-
-        JavaProject project = JavaProject.builder(language).addInputLocation(inputLocation)
-                .addInputLocation(inputLocation2).build();
-        JavaView view = project.createView();
-        // p(inputLocation.getSourceType());
-        // p(view.getScope());
-        String cname = "launcher.service.LauncherServiceImpl";
-        // String cname = "Test";
-        ClassType classType = project.getIdentifierFactory().getClassType(cname);
-        SootClass<JavaSootClassSource> sootClass = (SootClass<JavaSootClassSource>) view.getClass(classType).get();
-        // p(view.getClasses());
-        // if (true)
-        // return;
-        // String[] classes = new String[] { "Test", "Test$T", "Test$Order",
-        // "Test$Result" };
         methodMap = new HashMap<>();
-        // MethodSignature startMethod = null;
-        for (JavaSootClass cls : view.getClasses()) {
+        SootMethod sm;
+
+        for (SootClass cls) {
             // ClassType classType = project.getIdentifierFactory().getClassType(clstr);
             // SootClass sootClass = view.getClass(classType).get();
             if (cls.toString().contains("conf.HttpAspect")) {
                 continue;
             }
-            CompileUtils.outputJimple(cls, path);
-            if (true)
-                continue;
+            // CompileUtils.outputJimple(cls, path);
+            // if (true)
+            // continue;
 
-            // return;
-            for (JavaSootMethod sm : cls.getMethods()) {
-                if (sm.isAbstract()) {
-                    // p(sm);
-                    continue;
-                }
-                // WalaSootMethod wsm = (WalaSootMethod) sm;
-                // if (wsm.toString().contains("some")) {
-                MethodInfo minfo = new MethodInfo(sm);
-                Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
-                minfo.analyzeCF();
-                // if (wsm.toString().contains("some")) {
-                // startMethod = wsm.getSignature();
-                // }
-                // p();
-                methodMap.put(sm.getSignature(), minfo);
-            }
+            // // return;
+            // for (JavaSootMethod sm : cls.getMethods()) {
+            // if (sm.isAbstract()) {
+            // // p(sm);
+            // continue;
+            // }
+            // // WalaSootMethod wsm = (WalaSootMethod) sm;
+            // // if (wsm.toString().contains("some")) {
+            // MethodInfo minfo = new MethodInfo(sm);
+            // Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
+            // minfo.analyzeCF();
+            // // if (wsm.toString().contains("some")) {
+            // // startMethod = wsm.getSignature();
+            // // }
+            // // p();
+            // methodMap.put(sm.getSignature(), minfo);
+            // }
         }
 
-        p("----------");
+        // p("----------");
 
-        MethodInfo minfo = searchMethod("doErrorQueue", "LauncherServiceImpl");
-        for (Stmt stmt : minfo.sm.getBody().getStmts()) {
-            // p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
-            if (stmt.containsInvokeExpr()) {
-                p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
-                AbstractInvokeExpr aiexpr = stmt.getInvokeExpr();
-                for (Value v : aiexpr.getArgs()) {
-                    p(v + ", " + v.getClass());
-                }
-            }
-        }
-        p(minfo);
-        // minfo.printLine(125);
-        minfo.printLine(81);
+        // MethodInfo minfo = searchMethod("doErrorQueue", "LauncherServiceImpl");
+        // for (Stmt stmt : minfo.sm.getBody().getStmts()) {
+        // // p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
+        // if (stmt.containsInvokeExpr()) {
+        // p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
+        // AbstractInvokeExpr aiexpr = stmt.getInvokeExpr();
+        // for (Value v : aiexpr.getArgs()) {
+        // p(v + ", " + v.getClass());
+        // }
+        // }
+        // }
+        // p(minfo);
+        // // minfo.printLine(125);
+        // minfo.printLine(81);
+
         // Stmt start = minfo.getStmt(127, 0);
         // minfo.printValue(start);
         // Value startVal = minfo.getValue(start, 0);
@@ -228,7 +256,7 @@ public class App {
     }
 
     public static MethodInfo searchMethod(String... str) {
-        for (MethodSignature sig : methodMap.keySet()) {
+        for (String sig : methodMap.keySet()) {
             boolean match = true;
             for (String s : str) {
                 if (!sig.toString().contains(s)) {
@@ -259,19 +287,20 @@ public class App {
             visitedQueries.add(currQuery);
             Set<Provenance> pureDependencies = new HashSet<>();
             if (currQuery.refSeq.fields.size() > 0) {
-                Value refHead = new JInstanceFieldRef((Local) currQuery.refSeq.value, currQuery.refSeq.fields.get(0));
-                Set<Dependency> deps = minfo.getPrev(currQuery.stmt, refHead);
+                // new JInstanceFieldRef();
+                Value refHead = new JInstanceFieldRef(currQuery.refSeq.value, currQuery.refSeq.fields.get(0));
+                Set<Dependency> deps = minfo.getPrev(currQuery.unit, refHead);
 
                 // Urrr... JInstanceFieldRef does not have hashcode() implementation
                 // We might have to retrive equal idential ref values manually
                 if (deps == null) {
-                    Map<Value, Set<Dependency>> smap = minfo.reachingAnalysis.getBeforeStmt(currQuery.stmt);
+                    Map<Value, Set<Dependency>> smap = minfo.reachingAnalysis.getBeforeUnit(currQuery.unit);
                     for (Value v : smap.keySet()) {
                         if (v instanceof JInstanceFieldRef) {
                             JInstanceFieldRef iref = (JInstanceFieldRef) v;
                             JInstanceFieldRef href = (JInstanceFieldRef) refHead;
                             if (iref.getBase().equals(href.getBase())
-                                    && href.getFieldSignature().equals(href.getFieldSignature())) {
+                                    && href.getFieldRef().equals(href.getFieldRef())) {
                                 deps = smap.get(v);
                             }
                         }
@@ -290,7 +319,7 @@ public class App {
                     }
                 }
             }
-            Set<Dependency> deps = minfo.getPrev(currQuery.stmt, currQuery.refSeq.value);
+            Set<Dependency> deps = minfo.getPrev(currQuery.unit, currQuery.refSeq.value);
             if (deps != null) {
                 for (Dependency dep : deps) {
                     // if (!(dep.dtype == Dependency.DepType.CF)) {
@@ -298,7 +327,7 @@ public class App {
                     // }
                 }
             }
-            Set<Dependency> cfdeps = minfo.getCF(currQuery.stmt);
+            Set<Dependency> cfdeps = minfo.getCF(currQuery.unit);
 
             // RefSeq == null represents control-flow dependency
             for (Dependency dep : cfdeps) {
@@ -321,7 +350,7 @@ public class App {
             }
             boolean allId = true;
             for (Provenance prov : pureDependencies) {
-                if (!(prov.dep.stmt instanceof JIdentityStmt)) {
+                if (!(prov.dep.unit instanceof JIdentityStmt)) {
                     allId = false;
                     break;
                 }
@@ -337,9 +366,10 @@ public class App {
 
             for (Provenance prov : pureDependencies) {
                 if (prov.refSeq == null) {
-                    Stmt currStmt = prov.dep.stmt;
+                    Stmt currStmt = (Stmt) prov.dep.unit;
 
-                    for (Value use : currStmt.getUses()) {
+                    for (ValueBox usebox : currStmt.getUseBoxes()) {
+                        Value use = usebox.getValue();
                         p("[CF] " + use);
                         if (use instanceof Local) {
                             // CF usage tp put before the branching statement
@@ -356,7 +386,7 @@ public class App {
                     continue;
                 }
 
-                Stmt currStmt = prov.dep.stmt;
+                Stmt currStmt = (Stmt) prov.dep.unit;
 
                 p(prov.dep + " answering " + currQuery);
 
@@ -379,13 +409,13 @@ public class App {
                             currQueries.add(resolvedQuery);
                         }
                     } else {
-                        List<FieldSignature> currSuffix = currQuery.refSeq.fields;
-                        List<FieldSignature> newSuffix = currSuffix.subList(prov.prefix, currSuffix.size());
+                        List<SootFieldRef> currSuffix = currQuery.refSeq.fields;
+                        List<SootFieldRef> newSuffix = currSuffix.subList(prov.prefix, currSuffix.size());
                         // p("!!!!!! " + rop + ", " + rop.getClass() + " .... " + rop.getUses());
                         if (rop instanceof JInstanceFieldRef) {
                             JInstanceFieldRef tmpRef = (JInstanceFieldRef) rop;
                             RefSeq refSeq = new RefSeq(tmpRef.getBase(), newSuffix);
-                            refSeq.appendHead(tmpRef.getFieldSignature());
+                            refSeq.appendHead(tmpRef.getFieldRef());
                             currQueries.add(new Query(refSeq, currStmt));
                         } else if (rop instanceof JCastExpr) {
                             JCastExpr cexpr = (JCastExpr) rop;
@@ -394,7 +424,8 @@ public class App {
                         } else if (rop instanceof Local) {
                             currQueries.add(new Query(new RefSeq(rop, newSuffix), currStmt));
                         } else {
-                            for (Value use : rop.getUses()) {
+                            for (ValueBox usebox : rop.getUseBoxes()) {
+                                Value use = usebox.getValue();
                                 // p(use + " ========= " + use.getClass());
                                 if (use instanceof Local) {
                                     // p("***\n" + use + ": ");
@@ -413,7 +444,7 @@ public class App {
                 } else if (currStmt instanceof JIdentityStmt) {
                     // Do nothing; local identities already resolved
                 } else if (currStmt instanceof JInvokeStmt) {
-                    AbstractInvokeExpr iexpr = ((JInvokeStmt) currStmt).getInvokeExpr();
+                    InvokeExpr iexpr = ((JInvokeStmt) currStmt).getInvokeExpr();
                     List<Value> params = getParameters(iexpr);
                     int indexOfBase = params.indexOf(currQuery.refSeq.value);
                     p("Index: " + indexOfBase);
@@ -438,7 +469,7 @@ public class App {
         return currInfo;
     }
 
-    public static List<Value> getParameters(AbstractInvokeExpr iexpr) {
+    public static List<Value> getParameters(InvokeExpr iexpr) {
         List<Value> params = new ArrayList<>();
         if (iexpr instanceof AbstractInstanceInvokeExpr) {
             AbstractInstanceInvokeExpr aiexpr = (AbstractInstanceInvokeExpr) iexpr;
@@ -455,8 +486,8 @@ public class App {
         throw new RuntimeException("Not implemented");
     }
 
-    public static Set<Query> resolveMethod(AbstractInvokeExpr iexpr, Stmt stmt) {
-        String methodName = iexpr.getMethodSignature().toString();
+    public static Set<Query> resolveMethod(InvokeExpr iexpr, Stmt stmt) {
+        String methodName = iexpr.getMethod().getSignature();
         Set<Query> resolvedQueries = new HashSet<>();
         if (methodName.contains("java.lang.String: boolean equals(java.lang.Object)")) {
             p("Manually wired " + methodName);
@@ -464,16 +495,16 @@ public class App {
                 resolvedQueries.add(new Query(new RefSeq(v), stmt));
             }
         } else {
-            p("Method " + iexpr.getMethodSignature() + " not found.");
+            p("Method " + iexpr.getMethod().getSignature() + " not found.");
         }
         return resolvedQueries;
     }
 
     public static BacktrackInfo walkMethod(RefSeq seq, Stmt stmt, int baseIndex) {
-        AbstractInvokeExpr iexpr = stmt.getInvokeExpr();
+        InvokeExpr iexpr = stmt.getInvokeExpr();
         Set<Query> resolvedQueries = new HashSet<>();
         Set<InstrumentPoint> resolvedInsts = new HashSet<>();
-        MethodInfo minfo = searchMethod(iexpr.getMethodSignature().toString());
+        MethodInfo minfo = searchMethod(iexpr.getMethod().getSignature().toString());
         if (minfo == null) {
             resolvedQueries.addAll(resolveMethod(iexpr, stmt));
             return new BacktrackInfo(resolvedQueries, resolvedInsts);
@@ -512,42 +543,44 @@ public class App {
         return new BacktrackInfo(resolvedQueries, resolvedInsts);
     }
 
-    public static void analyzeExchange(SootMethod wsm) {
-        for (Stmt stmt : wsm.getBody().getStmts()) {
-            if (!stmt.containsInvokeExpr())
-                continue;
-            MethodSignature ms = stmt.getInvokeExpr().getMethodSignature();
-            if (!ms.toString().contains("fff(")) // This should be exchange, but I'm testing for now
-                continue;
+    // public static void analyzeExchange(SootMethod wsm) {
+    // for (Stmt stmt : wsm.getBody().getStmts()) {
+    // if (!stmt.containsInvokeExpr())
+    // continue;
+    // MethodSignature ms = stmt.getInvokeExpr().getMethodSignature();
+    // if (!ms.toString().contains("fff(")) // This should be exchange, but I'm
+    // testing for now
+    // continue;
 
-            // p(ms);
-            ReachingDefAnalysis rda = new ReachingDefAnalysis(wsm.getBody().getStmtGraph());
-            Map<Value, Set<Dependency>> mdep = rda.getBeforeStmt(stmt);
-            Value argURL = stmt.getInvokeExpr().getArg(0);
-            p(mdep.get(argURL));
-        }
-    }
+    // // p(ms);
+    // ReachingDefAnalysis rda = new
+    // ReachingDefAnalysis(wsm.getBody().getStmtGraph());
+    // Map<Value, Set<Dependency>> mdep = rda.getBeforeStmt(stmt);
+    // Value argURL = stmt.getInvokeExpr().getArg(0);
+    // p(mdep.get(argURL));
+    // }
+    // }
 
     public static List<Value> parameters(SootMethod wsm) {
         // int hasThis = wsm.isStatic() ? 0 : 1;
         // int methodParamCount = wsm.getParameterCount() + hasThis;
         List<Value> methodParams = new ArrayList<>();
         // int count = 0;
-        for (Value v : wsm.getBody().getParameterLocals()) {
+        for (Value v : wsm.getActiveBody().getParameterLocals()) {
             methodParams.add(v);
         }
         if (!wsm.isStatic()) {
-            methodParams.add(0, wsm.getBody().getThisLocal());
+            methodParams.add(0, wsm.getActiveBody().getThisLocal());
         }
         return methodParams;
 
     }
 
     public static Body insertBefore(SootMethod wsm, Stmt stmt, Stmt toinsert) {
-        // MutableStmtGraph graph = new MutableBlockStmtGraph(body.getStmtGraph());
-        BodyBuilder builder = Body.builder(wsm.getBody(), wsm.getModifiers());
-        builder.insertBefore(stmt, toinsert);
-        return builder.build();
+        // // MutableStmtGraph graph = new MutableBlockStmtGraph(body.getStmtGraph());
+        // BodyBuilder builder = Body.builder(wsm.getBody(), wsm.getModifiers());
+        // builder.insertBefore(stmt, toinsert);
+        return null;
     }
 
     public static void readParams() {

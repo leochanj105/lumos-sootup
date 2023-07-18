@@ -1,41 +1,40 @@
 package com.lumos.common;
 
-import sootup.core.jimple.basic.Trap;
-import sootup.core.jimple.basic.Value;
-import sootup.core.jimple.common.stmt.Stmt;
+import soot.Unit;
+import soot.Value;
 
 public class TracePoint {
-    public Stmt stmt;
+    public Unit unit;
     public Value value;
     public int lineNumber;
     public String name;
 
     public boolean isTraceable = false;
 
-    public TracePoint(Stmt stmt, Value value) {
-        this.stmt = stmt;
+    public TracePoint(Unit unit, Value value) {
+        this.unit = unit;
         this.value = value;
-        this.lineNumber = this.stmt.getPositionInfo().getStmtPosition().getFirstLine();
+        this.lineNumber = this.unit.getJavaSourceStartLineNumber();
     }
 
-    public TracePoint(Stmt stmt, Value value, String name) {
-        this(stmt, value);
+    public TracePoint(Unit unit, Value value, String name) {
+        this(unit, value);
         this.name = name;
     }
 
     public String toString() {
-        return "<" + (name != null ? name : value.toString()) + ", " + this.lineNumber + ", " + stmt + ">";
+        return "<" + (name != null ? name : value.toString()) + ", " + this.lineNumber + ", " + unit + ">";
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof TracePoint))
             return false;
         TracePoint other = (TracePoint) obj;
-        return this.stmt.equals(other.stmt) && this.value.equals(other.value);
+        return this.unit.equals(other.unit) && this.value.equals(other.value);
     }
 
     public int hashCode() {
-        int hashStmt = stmt == null ? 0 : stmt.hashCode();
+        int hashStmt = unit == null ? 0 : unit.hashCode();
         int hashValue = value == null ? 0 : value.hashCode();
         return hashValue + hashStmt;
     }

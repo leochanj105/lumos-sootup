@@ -13,15 +13,13 @@ import java.util.Arrays;
 
 import soot.G;
 import soot.Scene;
+import soot.SootClass;
 import soot.baf.BafASMBackend;
 import soot.jimple.parser.JimpleAST;
 import soot.jimple.parser.Parse;
 import soot.jimple.parser.lexer.LexerException;
 import soot.jimple.parser.parser.ParserException;
 import soot.options.Options;
-import sootup.core.model.SootClass;
-import sootup.core.util.printer.JimplePrinter;
-import sootup.java.core.JavaSootClass;
 
 public class CompileUtils {
 
@@ -38,11 +36,11 @@ public class CompileUtils {
             ByteArrayOutputStream bstream = new ByteArrayOutputStream(8192);
             writer = new PrintWriter(bstream, true);
 
-            JimplePrinter printer = new JimplePrinter();
-            printer.printTo(cl, writer);
+            // JimplePrinter printer = new JimplePrinter();
+            // printer.printTo(cl, writer);
 
-            printer.printTo(cl, writerfile);
-            writerfile.close();
+            // printer.printTo(cl, writerfile);
+            // writerfile.close();
 
             // System.out.println(bstream.toString());
 

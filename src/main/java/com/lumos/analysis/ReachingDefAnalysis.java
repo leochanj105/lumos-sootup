@@ -10,96 +10,108 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang3.SerializationUtils;
-
 // import com.lumos.common.DepType;
 import com.lumos.common.Dependency;
 
-import java.util.HashSet;
-import java.util.List;
+import soot.Unit;
+import soot.Value;
+import soot.ValueBox;
+import soot.baf.Inst;
+import soot.jimple.InvokeExpr;
+import soot.jimple.Stmt;
+import soot.jimple.internal.AbstractInstanceInvokeExpr;
+import soot.jimple.internal.AbstractInvokeExpr;
+import soot.toolkits.graph.BriefUnitGraph;
+import soot.toolkits.graph.DirectedGraph;
 
-import sootup.core.graph.StmtGraph;
-import sootup.core.jimple.basic.Local;
-import sootup.core.jimple.basic.Value;
-import sootup.core.jimple.common.expr.AbstractInstanceInvokeExpr;
-import sootup.core.jimple.common.expr.AbstractInvokeExpr;
-import sootup.core.jimple.common.stmt.Stmt;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 // imp
 
 public class ReachingDefAnalysis {
-    public final Map<Stmt, Map<Value, Set<Dependency>>> liveIn = new HashMap<>();
-    public final Map<Stmt, Map<Value, Set<Dependency>>> liveOut = new HashMap<>();
+    public final Map<Unit, Map<Value, Set<Dependency>>> liveIn = new HashMap<>();
+    public final Map<Unit, Map<Value, Set<Dependency>>> liveOut = new HashMap<>();
 
-    public ReachingDefAnalysis(StmtGraph<?> graph) {
-        List<Stmt> startingStmts = new ArrayList<>();
-        for (Stmt stmt : graph.getNodes()) {
-            liveIn.put(stmt, Collections.emptyMap());
-            liveOut.put(stmt, Collections.emptyMap());
-            if (graph.predecessors(stmt).isEmpty() && graph.exceptionalPredecessors(stmt).isEmpty()) {
-                startingStmts.add(stmt);
+    public ReachingDefAnalysis(DirectedGraph<Unit> cfg) {
+        List<Unit> startingUnits = new ArrayList<>();
+        for (Iterator<Unit> it = cfg.iterator(); it.hasNext();) {
+            Unit unit = it.next();
+            liveIn.put(unit, Collections.emptyMap());
+            liveOut.put(unit, Collections.emptyMap());
+            if (cfg.getPredsOf(unit).isEmpty()) {
+                startingUnits.add(unit);
             }
         }
 
         boolean fixed = false;
         while (!fixed) {
             fixed = true;
-            Deque<Stmt> queue = new ArrayDeque<>(startingStmts);
-            HashSet<Stmt> visitedStmts = new HashSet<>();
+            Deque<Unit> queue = new ArrayDeque<>(startingUnits);
+            HashSet<Unit> visitedUnits = new HashSet<>();
             while (!queue.isEmpty()) {
-                Stmt stmt = queue.removeFirst();
-                visitedStmts.add(stmt);
+                Unit unit = queue.removeFirst();
+                visitedUnits.add(unit);
+                // if (!(unit instanceof Unit)) {
+                // continue;
+                // }
 
-                Map<Value, Set<Dependency>> in = new HashMap<>(liveIn.get(stmt));
-                for (Stmt pred : graph.predecessors(stmt)) {
+                Map<Value, Set<Dependency>> in = new HashMap<>(liveIn.get(unit));
+                for (Unit pred : cfg.getPredsOf(unit)) {
                     in = merge(in, liveOut.get(pred));
                 }
-                for (Stmt epred : graph.exceptionalPredecessors(stmt)) {
-                    in = merge(in, liveOut.get(epred));
-                    // System.out.println(stmt + " ---> " + epred);
-                }
+                // for (Unit epred : graph.exceptionalPredecessors(unit)) {
+                // in = merge(in, liveOut.get(epred));
+                // // System.out.println(unit + " ---> " + epred);
+                // }
 
-                if (isNotEqual(in, liveIn.get(stmt))) {
+                if (isNotEqual(in, liveIn.get(unit))) {
                     fixed = false;
-                    liveIn.put(stmt, new HashMap<>(in));
+                    liveIn.put(unit, new HashMap<>(in));
                 }
 
                 Map<Value, Set<Dependency>> out = copy(in);
-                for (Value v : stmt.getDefs()) {
+                for (ValueBox vbox : unit.getDefBoxes()) {
+                    Value v = vbox.getValue();
                     out = kill(out, v);
-                    out = generate(out, v, new Dependency(stmt, Dependency.DepType.RW));
+                    out = generate(out, v, new Dependency(unit, Dependency.DepType.RW));
                 }
 
                 // This conservatively assume a function call changes all parameters
                 // This is the "safe" data-flow function approach
-                if (stmt.containsInvokeExpr()) {
-                    // System.out.println(stmt + " === " + in);
-                    AbstractInvokeExpr iexpr = stmt.getInvokeExpr();
-                    if (iexpr instanceof AbstractInstanceInvokeExpr) {
-                        Value caller = ((AbstractInstanceInvokeExpr) iexpr).getBase();
-                        out = generate(out, caller, new Dependency(stmt, Dependency.DepType.CALL));
-                    }
-                    for (int i = 0; i < iexpr.getArgCount(); i++) {
-                        Value arg = iexpr.getArg(i);
-                        out = generate(out, arg, new Dependency(stmt, Dependency.DepType.CALL));
+                if (unit instanceof Stmt) {
+                    Stmt stmt = (Stmt) unit;
+
+                    if (stmt.containsInvokeExpr()) {
+                        // System.out.println(unit + " === " + in);
+                        InvokeExpr iexpr = stmt.getInvokeExpr();
+                        if (iexpr instanceof AbstractInstanceInvokeExpr) {
+                            Value caller = ((AbstractInstanceInvokeExpr) iexpr).getBase();
+                            out = generate(out, caller, new Dependency(unit, Dependency.DepType.CALL));
+                        }
+                        for (int i = 0; i < iexpr.getArgCount(); i++) {
+                            Value arg = iexpr.getArg(i);
+                            out = generate(out, arg, new Dependency(unit, Dependency.DepType.CALL));
+                        }
                     }
                 }
 
-                if (isNotEqual(out, liveOut.get(stmt))) {
+                if (isNotEqual(out, liveOut.get(unit))) {
                     fixed = false;
-                    liveOut.put(stmt, out);
+                    liveOut.put(unit, out);
                 }
 
-                for (Stmt succ : graph.successors(stmt)) {
-                    if (!visitedStmts.contains(succ)) {
+                for (Unit succ : cfg.getSuccsOf(unit)) {
+                    if (!visitedUnits.contains(succ)) {
                         queue.addLast(succ);
                     }
                 }
-                for (Stmt esucc : graph.exceptionalSuccessors(stmt).values()) {
-                    if (!visitedStmts.contains(esucc)) {
-                        queue.addLast(esucc);
-                    }
-                }
+                // for (Unit esucc : graph.exceptionalSuccessors(unit).values()) {
+                // if (!visitedUnits.contains(esucc)) {
+                // queue.addLast(esucc);
+                // }
+                // }
 
             }
         }
@@ -113,18 +125,18 @@ public class ReachingDefAnalysis {
         return newm;
     }
 
-    public Map<Value, Set<Dependency>> getBeforeStmt(@Nonnull Stmt stmt) {
-        if (!liveIn.containsKey(stmt)) {
-            throw new RuntimeException("Stmt: " + stmt + " is not in StmtGraph!");
+    public Map<Value, Set<Dependency>> getBeforeUnit(@Nonnull Unit unit) {
+        if (!liveIn.containsKey(unit)) {
+            throw new RuntimeException("Unit: " + unit + " is not in UnitGraph!");
         }
-        return liveIn.get(stmt);
+        return liveIn.get(unit);
     }
 
-    public Map<Value, Set<Dependency>> getAfterStmt(@Nonnull Stmt stmt) {
-        if (!liveOut.containsKey(stmt)) {
-            throw new RuntimeException("Stmt: " + stmt + " is not in StmtGraph!");
+    public Map<Value, Set<Dependency>> getAfterUnit(@Nonnull Unit unit) {
+        if (!liveOut.containsKey(unit)) {
+            throw new RuntimeException("Unit: " + unit + " is not in UnitGraph!");
         }
-        return liveOut.get(stmt);
+        return liveOut.get(unit);
     }
 
     private Map<Value, Set<Dependency>> merge(@Nonnull Map<Value, Set<Dependency>> set1,

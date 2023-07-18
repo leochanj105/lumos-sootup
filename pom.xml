@@ -35,27 +35,27 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.soot-oss</groupId>
+    <!-- <dependency> -->
+      <!-- <groupId>org.soot-oss</groupId>
       <artifactId>sootup.core</artifactId>
-      <version>1.1.2</version>
+      <version>1.1.2</version> -->
       <!-- <scope>system</scope> -->
       <!-- <systemPath>C:\Users\jchen\Desktop\Academic\sootup\SootUp\sootup.core\target\sootup.core-1.1.2-SNAPSHOT.jar</systemPath> -->
-    </dependency>
-    <dependency>
+    <!-- </dependency> -->
+    <!-- <dependency>
       <groupId>org.soot-oss</groupId>
       <artifactId>sootup.java.core</artifactId>
       <version>1.1.2</version>
     </dependency>
-    <dependency>
-      <groupId>org.soot-oss</groupId>
-      <artifactId>sootup.java.sourcecode</artifactId>
+    <dependency> -->
+      <!-- <groupId>org.soot-oss</groupId> -->
+      <!-- <artifactId>sootup.java.sourcecode</artifactId> -->
       <!-- <version>1.1.2</version> -->
-      <version>1.1.2-SNAPSHOT</version>
-      <scope>system</scope>
-      <systemPath>C:\Users\jchen\Desktop\Academic\sootup\SootUp\sootup.java.sourcecode\target\sootup.java.sourcecode-1.1.2-SNAPSHOT-jar-with-dependencies.jar</systemPath>
-    </dependency>
-    <dependency>
+      <!-- <version>1.1.2-SNAPSHOT</version> -->
+      <!-- <scope>system</scope> -->
+      <!-- <systemPath>C:\Users\jchen\Desktop\Academic\sootup\SootUp\sootup.java.sourcecode\target\sootup.java.sourcecode-1.1.2-SNAPSHOT-jar-with-dependencies.jar</systemPath> -->
+    <!-- </dependency> -->
+    <!-- <dependency>
       <groupId>org.soot-oss</groupId>
       <artifactId>sootup.java.bytecode</artifactId>
       <version>1.1.2</version>
@@ -70,11 +70,11 @@
       <artifactId>sootup.callgraph</artifactId>
       <version>1.1.2</version>
     </dependency>
-    <dependency>
-      <groupId>org.soot-oss</groupId>
-      <artifactId>sootup.analysis</artifactId>
-      <version>1.1.2</version>
-    </dependency>
+    <dependency> -->
+      <!-- <groupId>org.soot-oss</groupId> -->
+      <!-- <artifactId>sootup.analysis</artifactId> -->
+      <!-- <version>1.1.2</version> -->
+    <!-- </dependency> -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
