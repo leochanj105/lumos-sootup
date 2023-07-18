@@ -37,14 +37,15 @@ import com.lumos.common.Provenance;
 import com.lumos.common.Query;
 import com.lumos.common.RefSeq;
 import com.lumos.common.TracePoint;
+import com.lumos.compile.CompileUtils;
 
 import fj.Unit;
 import fj.test.reflect.Check;
 // import soot.toolkits.scalar.ForwardFlowAnalysis;
 import sootup.core.Project;
-import sootup.core.frontend.ClassProvider;
-import sootup.core.frontend.OverridingClassSource;
-import sootup.core.frontend.SootClassSource;
+// import sootup.core.frontend.ClassProvider;
+// import sootup.core.frontend.OverridingClassSource;
+// import sootup.core.frontend.SootClassSource;
 import sootup.core.graph.MutableBlockStmtGraph;
 import sootup.core.graph.MutableStmtGraph;
 import sootup.core.graph.StmtGraph;
@@ -83,10 +84,10 @@ import sootup.java.core.JavaSootMethod;
 import sootup.java.core.OverridingJavaClassSource;
 import sootup.java.core.language.JavaLanguage;
 import sootup.java.core.views.JavaView;
-import sootup.java.sourcecode.frontend.WalaIRToJimpleConverter;
-import sootup.java.sourcecode.frontend.WalaJavaClassProvider;
-import sootup.java.sourcecode.frontend.WalaSootMethod;
-import sootup.java.sourcecode.inputlocation.JavaSourcePathAnalysisInputLocation;
+// import sootup.java.sourcecode.frontend.WalaIRToJimpleConverter;
+// import sootup.java.sourcecode.frontend.WalaJavaClassProvider;
+// import sootup.java.sourcecode.frontend.WalaSootMethod;
+// import sootup.java.sourcecode.inputlocation.JavaSourcePathAnalysisInputLocation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -115,16 +116,16 @@ public class App {
     public static void main(String[] args) {
         readParams();
         String[] services = new String[] { "ts-launcher" };
-        // analyzePath(
+        // analyzePath(be
         // "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\ts-launcher\\target\\classes\\launcher\\service\\");
-        analyzePath(
-                "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\ts-launcher\\src\\main\\java\\launcher\\service\\");
+        // analyzePath(
+        // "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\ts-launcher\\target\\classes");
         String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
-        // String suffix = "src\main\java\launcher";
+        String suffix = "\\target\\classes";
 
         for (String str : services) {
-            String complete = base + str;
-            // analyzePath(complete + "\\src\\main\\java\\launcher\\service");
+            String complete = base + str + suffix;
+            analyzePath(complete);
         }
 
         // WalaIRToJimpleConverter walaToSoot = new WalaIRToJimpleConverter();
@@ -137,8 +138,9 @@ public class App {
         // path =
         // "C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code\\";
         p("Analyzing " + path);
-        AnalysisInputLocation<JavaSootClass> inputLocation = new JavaSourcePathAnalysisInputLocation(
-                SourceType.Application, Paths.get(path).toString());
+        // AnalysisInputLocation<JavaSootClass> inputLocation = new
+        // JavaSourcePathAnalysisInputLocation(
+        // SourceType.Application, Paths.get(path).toString());
 
         // JavaLanguage language = new JavaLanguage(8);
         // JavaProject project =
@@ -146,50 +148,72 @@ public class App {
         // JavaView view = project.createView();
         Path pa = Paths.get(path);
         p(pa.toAbsolutePath());
-        // AnalysisInputLocation<JavaSootClass> inputLocation = new
-        // PathBasedAnalysisInputLocation(
-        // pa, SourceType.Application);
+        AnalysisInputLocation<JavaSootClass> inputLocation = new PathBasedAnalysisInputLocation(
+                pa, SourceType.Application);
         JavaLanguage language = new JavaLanguage(8);
 
         JavaProject project = JavaProject.builder(language).addInputLocation(inputLocation).build();
         JavaView view = project.createView();
         // p(inputLocation.getSourceType());
         // p(view.getScope());
-        String cname = "LauncherServiceImpl";
+        String cname = "launcher.service.LauncherServiceImpl";
         // String cname = "Test";
         ClassType classType = project.getIdentifierFactory().getClassType(cname);
         SootClass<JavaSootClassSource> sootClass = (SootClass<JavaSootClassSource>) view.getClass(classType).get();
-        p(sootClass.getMethods());
-        if (true)
-            return;
+        // p(view.getClasses());
+        // if (true)
+        // return;
         // String[] classes = new String[] { "Test", "Test$T", "Test$Order",
         // "Test$Result" };
-        // methodMap = new HashMap<>();
+        methodMap = new HashMap<>();
         // MethodSignature startMethod = null;
-        // for (String clstr : classes) {
-        // ClassType classType = project.getIdentifierFactory().getClassType(clstr);
-        // SootClass sootClass = view.getClass(classType).get();
-
-        // for (JavaSootMethod sm : ((JavaSootClass) sootClass).getMethods()) {
-        // WalaSootMethod wsm = (WalaSootMethod) sm;
-        // // if (wsm.toString().contains("some")) {
-        // MethodInfo minfo = new MethodInfo(wsm);
-        // Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
-        // minfo.analyzeCF();
-        // // if (wsm.toString().contains("some")) {
-        // // startMethod = wsm.getSignature();
-        // // }
-        // methodMap.put(wsm.getSignature(), minfo);
-        // }
-        // }
+        for (JavaSootClass cls : view.getClasses()) {
+            // ClassType classType = project.getIdentifierFactory().getClassType(clstr);
+            // SootClass sootClass = view.getClass(classType).get();
+            CompileUtils.outputJimple(cls);
+            if (true)
+                return;
+            for (JavaSootMethod sm : cls.getMethods()) {
+                if (sm.isAbstract()) {
+                    // p(sm);
+                    continue;
+                }
+                // WalaSootMethod wsm = (WalaSootMethod) sm;
+                // if (wsm.toString().contains("some")) {
+                MethodInfo minfo = new MethodInfo(sm);
+                Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
+                minfo.analyzeCF();
+                // if (wsm.toString().contains("some")) {
+                // startMethod = wsm.getSignature();
+                // }
+                // p();
+                methodMap.put(sm.getSignature(), minfo);
+            }
+        }
 
         p("----------");
 
-        // MethodInfo minfo = searchMethod("some");
-        // TracePoint target = minfo.getReturnTps().get(0);
+        MethodInfo minfo = searchMethod("doErrorQueue", "LauncherServiceImpl");
+        for (Stmt stmt : minfo.sm.getBody().getStmts()) {
+            // p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
+            if (stmt.containsInvokeExpr()) {
+                p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
+                AbstractInvokeExpr aiexpr = stmt.getInvokeExpr();
+                for (Value v : aiexpr.getArgs()) {
+                    p(v + ", " + v.getClass());
+                }
+            }
+        }
+        p(minfo);
+        // minfo.printLine(125);
+        minfo.printLine(81);
+        // Stmt start = minfo.getStmt(127, 0);
+        // minfo.printValue(start);
+        // Value startVal = minfo.getValue(start, 0);
+        // p(startVal);
 
-        // BacktrackInfo binfo = backtrack(new Query(new RefSeq(target.value, null),
-        // target.stmt), minfo);
+        // BacktrackInfo binfo = backtrack(new Query(new RefSeq(startVal, null),
+        // start), minfo);
         // for (InstrumentPoint ipoint : binfo.insPoints) {
         // p(ipoint);
         // }
@@ -212,7 +236,7 @@ public class App {
     }
 
     public static BacktrackInfo backtrack(Query query, MethodInfo minfo) {
-        p("BackTracking " + query + " in " + minfo.wsm.getName());
+        p("BackTracking " + query + " in " + minfo.sm.getName());
         Deque<Query> currQueries = new ArrayDeque<>();
         Set<Query> visitedQueries = new HashSet<>();
         currQueries.add(query);
@@ -449,7 +473,7 @@ public class App {
         List<Value> parameters = getParameters(iexpr);
         List<Value> actualParams = minfo.getParamValues();
 
-        p("WALK in " + minfo.wsm.getName() + ": " + seq + ", " + stmt);
+        p("WALK in " + minfo.sm.getName() + ": " + seq + ", " + stmt);
         for (Stmt retPoint : minfo.getReturnStmts()) {
             Value baseVal = null;
             if (baseIndex == -1) {
@@ -476,11 +500,11 @@ public class App {
                 }
             }
         }
-        p("Finished WALK in " + minfo.wsm.getName() + ": " + seq + ", " + stmt);
+        p("Finished WALK in " + minfo.sm.getName() + ": " + seq + ", " + stmt);
         return new BacktrackInfo(resolvedQueries, resolvedInsts);
     }
 
-    public static void analyzeExchange(WalaSootMethod wsm) {
+    public static void analyzeExchange(SootMethod wsm) {
         for (Stmt stmt : wsm.getBody().getStmts()) {
             if (!stmt.containsInvokeExpr())
                 continue;
@@ -496,7 +520,7 @@ public class App {
         }
     }
 
-    public static List<Value> parameters(WalaSootMethod wsm) {
+    public static List<Value> parameters(SootMethod wsm) {
         // int hasThis = wsm.isStatic() ? 0 : 1;
         // int methodParamCount = wsm.getParameterCount() + hasThis;
         List<Value> methodParams = new ArrayList<>();
@@ -511,7 +535,7 @@ public class App {
 
     }
 
-    public static Body insertBefore(WalaSootMethod wsm, Stmt stmt, Stmt toinsert) {
+    public static Body insertBefore(SootMethod wsm, Stmt stmt, Stmt toinsert) {
         // MutableStmtGraph graph = new MutableBlockStmtGraph(body.getStmtGraph());
         BodyBuilder builder = Body.builder(wsm.getBody(), wsm.getModifiers());
         builder.insertBefore(stmt, toinsert);

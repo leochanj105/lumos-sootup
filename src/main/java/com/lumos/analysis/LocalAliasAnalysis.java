@@ -27,12 +27,13 @@ import sootup.core.jimple.common.stmt.JAssignStmt;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.types.ReferenceType;
 import sootup.core.types.Type;
+import sootup.java.core.JavaSootMethod;
 import sootup.java.core.types.JavaClassType;
 import sootup.java.sourcecode.frontend.WalaSootMethod;
 
 public class LocalAliasAnalysis {
     MethodInfo minfo;
-    WalaSootMethod wsm;
+    JavaSootMethod sm;
 
     StmtGraph<?> graph;
 
@@ -45,14 +46,14 @@ public class LocalAliasAnalysis {
     public LocalAliasAnalysis(MethodInfo minfo) {
         this.minfo = minfo;
 
-        this.graph = minfo.wsm.getBody().getStmtGraph();
-        this.wsm = minfo.wsm;
-        System.out.println(minfo.nameMap);
+        this.graph = minfo.sm.getBody().getStmtGraph();
+        this.sm = minfo.sm;
+        // System.out.println(minfo.nameMap);
         doAnalysis();
     }
 
     public void doAnalysis() {
-        System.out.println(this.wsm.getBody().getParameterLocals());
+        System.out.println(this.sm.getBody().getParameterLocals());
         List<Stmt> startingStmts = new ArrayList<>();
         for (Stmt stmt : graph.getNodes()) {
             liveIn.put(stmt, Collections.emptyMap());
@@ -121,7 +122,7 @@ public class LocalAliasAnalysis {
 
         // }
 
-        for (Stmt stmt : this.minfo.wsm.getBody().getStmts()) {
+        for (Stmt stmt : this.minfo.sm.getBody().getStmts()) {
             // System.out.println(stmt);
             // if (stmt instanceof JAssignStmt) {
             // JAssignStmt astmt = (JAssignStmt) stmt;

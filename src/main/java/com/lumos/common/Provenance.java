@@ -34,6 +34,6 @@ public class Provenance {
             return false;
         }
         // this.minfo.wsm.
-        return this.minfo.wsm.getBody().getStmtGraph().hasEdgeConnecting(this.dep.stmt, other.dep.stmt);
+        return this.minfo.sm.getBody().getStmtGraph().hasEdgeConnecting(this.dep.stmt, other.dep.stmt);
     }
 }

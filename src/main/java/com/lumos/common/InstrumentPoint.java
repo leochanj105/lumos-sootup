@@ -43,11 +43,11 @@ public class InstrumentPoint {
     }
 
     public InstrumentPoint(Stmt stmt, Value value, MethodInfo minfo, boolean isBefore) {
-        this(stmt, value, minfo.wsm.getBody().getMethodSignature(), isBefore);
+        this(stmt, value, minfo.sm.getBody().getMethodSignature(), isBefore);
     }
 
     public InstrumentPoint(Stmt stmt, Value value, MethodInfo minfo) {
-        this(stmt, value, minfo.wsm.getBody().getMethodSignature());
+        this(stmt, value, minfo.sm.getBody().getMethodSignature());
     }
 
     public InstrumentPoint(TracePoint tp, MethodInfo minfo) {
