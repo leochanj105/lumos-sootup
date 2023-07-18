@@ -62,8 +62,8 @@ public class InstrumentPoint {
     }
 
     public String toString() {
-        return "[" + name + " " + (this.isBefore ? "before"
-                : "after") + " " + unit + "  line " + unit.getJavaSourceStartLineNumber()
+        return "[" + value + " " + (this.isBefore ? "before"
+                : "after") + " " + unit + " line " + unit.getJavaSourceStartLineNumber()
                 + " in " + msig + "]";
     }
 

@@ -4,7 +4,6 @@ public class Test {
         public Boolean body;
 
         public T(boolean b) {
-
             this.body = b;
             // this.body
         }

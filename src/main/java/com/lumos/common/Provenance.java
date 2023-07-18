@@ -61,7 +61,6 @@ public class Provenance {
                 }
             }
         }
-
         return found;
     }
 

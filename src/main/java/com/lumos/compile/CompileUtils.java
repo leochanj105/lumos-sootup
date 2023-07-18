@@ -44,31 +44,32 @@ public class CompileUtils {
 
             // System.out.println(bstream.toString());
 
-            ByteArrayInputStream binput = new ByteArrayInputStream(bstream.toByteArray());
+            // ByteArrayInputStream binput = new
+            // ByteArrayInputStream(bstream.toByteArray());
             // FileInputStream finput = new FileInputStream(file);
 
-            G.reset();
-            Options.v().set_prepend_classpath(true);
-            Options.v().set_soot_classpath(analysisPath);
-            Options.v().set_allow_phantom_elms(true);
+            // G.reset();
+            // Options.v().set_prepend_classpath(true);
+            // Options.v().set_soot_classpath(analysisPath);
+            // Options.v().set_allow_phantom_elms(true);
 
-            String arr[] = { analysisPath };
-            Options.v().set_process_dir(Arrays.asList(arr));
+            // String arr[] = { analysisPath };
+            // Options.v().set_process_dir(Arrays.asList(arr));
 
-            Options.v().set_write_local_annotations(true);
-            Options.v().set_ignore_resolution_errors(true);
-            Options.v().set_no_bodies_for_excluded(true);
-            Options.v().set_allow_phantom_refs(true);
-            Options.v().set_keep_line_number(true);
-            Options.v().set_whole_program(true);
-            Scene.v().loadNecessaryClasses();
+            // Options.v().set_write_local_annotations(true);
+            // Options.v().set_ignore_resolution_errors(true);
+            // Options.v().set_no_bodies_for_excluded(true);
+            // Options.v().set_allow_phantom_refs(true);
+            // Options.v().set_keep_line_number(true);
+            // Options.v().set_whole_program(true);
+            // Scene.v().loadNecessaryClasses();
 
             // Scene.v().addBasicClass(launcher.service.LauncherService, HIERARCHY);
-            JimpleAST jast = new JimpleAST(binput);
+            // JimpleAST jast = new JimpleAST(binput);
 
-            soot.SootClass sclass = jast.createSootClass();
+            // soot.SootClass sclass = jast.createSootClass();
 
-            BafASMBackend backend = new BafASMBackend(sclass, 8);
+            BafASMBackend backend = new BafASMBackend(cl, 8);
 
             File file2 = new File(outputDir + File.separator + cl.getName() + ".class");
             // writerfile = new PrintWriter(file2);

@@ -21,6 +21,7 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.internal.AbstractInstanceInvokeExpr;
 import soot.jimple.internal.AbstractInvokeExpr;
+import soot.jimple.internal.JReturnVoidStmt;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.DirectedGraph;
 
@@ -53,6 +54,7 @@ public class ReachingDefAnalysis {
             while (!queue.isEmpty()) {
                 Unit unit = queue.removeFirst();
                 visitedUnits.add(unit);
+                // System.out.println(unit);
                 // if (!(unit instanceof Unit)) {
                 // continue;
                 // }
@@ -70,6 +72,10 @@ public class ReachingDefAnalysis {
                     fixed = false;
                     liveIn.put(unit, new HashMap<>(in));
                 }
+
+                // if (unit instanceof JReturnVoidStmt) {
+                // System.out.println("--- " + liveIn.get(unit));
+                // }
 
                 Map<Value, Set<Dependency>> out = copy(in);
                 for (ValueBox vbox : unit.getDefBoxes()) {
@@ -115,6 +121,8 @@ public class ReachingDefAnalysis {
 
             }
         }
+        // System.out.println(liveIn.get(cfg.getTails().get(0)));
+
     }
 
     public Map<Value, Set<Dependency>> copy(Map<Value, Set<Dependency>> original) {

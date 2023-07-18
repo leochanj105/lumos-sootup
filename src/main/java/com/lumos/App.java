@@ -31,8 +31,6 @@ import com.lumos.common.RefSeq;
 import com.lumos.common.TracePoint;
 import com.lumos.compile.CompileUtils;
 
-import fj.Unit;
-import fj.test.reflect.Check;
 import soot.Body;
 // import soot.toolkits.scalar.ForwardFlowAnalysis;
 // import sootup.java.sourcecode.frontend.WalaIRToJimpleConverter;
@@ -45,6 +43,7 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootFieldRef;
 import soot.SootMethod;
+import soot.Unit;
 import soot.Value;
 import soot.ValueBox;
 import soot.JastAddJ.Signatures.FieldSignature;
@@ -195,40 +194,55 @@ public class App {
         String cname = "Test";
 
         methodMap = new HashMap<>();
-        SootMethod sm;
-
-        for (SootClass cls) {
+        // SootMethod sm;
+        for (SootClass cls : Scene.v().getApplicationClasses()) {
+            // p(cls);
+            Scene.v().forceResolve(cls.getName(), SootClass.BODIES);
             // ClassType classType = project.getIdentifierFactory().getClassType(clstr);
             // SootClass sootClass = view.getClass(classType).get();
-            if (cls.toString().contains("conf.HttpAspect")) {
-                continue;
+            // if (cls.toString().contains("conf.HttpAspect")) {
+            // continue;
+            // }
+
+            // // return;
+            for (SootMethod sm : cls.getMethods()) {
+                // Scene.v().forceResolve(sm.getName(), SootMethod.);
+                sm.retrieveActiveBody();
+                // p(sm.getActiveBody());
+                if (sm.isAbstract()) {
+                    continue;
+                }
+                // if (!sm.toString().contains("Test$T: void <init>(Test,boolean)")) {
+                // continue;
+                // minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0));
+                // }
+                // // WalaSootMethod wsm = (WalaSootMethod) sm;
+                // // if (wsm.toString().contains("some")) {
+                MethodInfo minfo = new MethodInfo(sm);
+                Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
+                minfo.analyzeCF();
+                // p(sm.getActiveBody());
+                if (sm.toString().contains("Test$T: void <init>(Test,boolean)")) {
+                    p("--- " +
+                            minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0)));
+                }
+                // // if (wsm.toString().contains("some")) {
+                // // startMethod = wsm.getSignature();
+                // // }
+                // // p();
+                methodMap.put(sm.getSignature(), minfo);
             }
             // CompileUtils.outputJimple(cls, path);
             // if (true)
             // continue;
-
-            // // return;
-            // for (JavaSootMethod sm : cls.getMethods()) {
-            // if (sm.isAbstract()) {
-            // // p(sm);
-            // continue;
-            // }
-            // // WalaSootMethod wsm = (WalaSootMethod) sm;
-            // // if (wsm.toString().contains("some")) {
-            // MethodInfo minfo = new MethodInfo(sm);
-            // Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
-            // minfo.analyzeCF();
-            // // if (wsm.toString().contains("some")) {
-            // // startMethod = wsm.getSignature();
-            // // }
-            // // p();
-            // methodMap.put(sm.getSignature(), minfo);
-            // }
         }
 
-        // p("----------");
-
+        p("----------");
+        // if (true)
+        // return;
         // MethodInfo minfo = searchMethod("doErrorQueue", "LauncherServiceImpl");
+        MethodInfo minfo = searchMethod("some", "Test");
+        // p(minfo);
         // for (Stmt stmt : minfo.sm.getBody().getStmts()) {
         // // p(stmt.getPositionInfo().getStmtPosition().getFirstLine() + ", " + stmt);
         // if (stmt.containsInvokeExpr()) {
@@ -243,16 +257,17 @@ public class App {
         // // minfo.printLine(125);
         // minfo.printLine(81);
 
-        // Stmt start = minfo.getStmt(127, 0);
+        Unit start = minfo.getStmt(68, 0);
+        // p(start);
         // minfo.printValue(start);
-        // Value startVal = minfo.getValue(start, 0);
-        // p(startVal);
+        Value startVal = minfo.getValue(start, 0);
+        p(startVal);
 
-        // BacktrackInfo binfo = backtrack(new Query(new RefSeq(startVal, null),
-        // start), minfo);
-        // for (InstrumentPoint ipoint : binfo.insPoints) {
-        // p(ipoint);
-        // }
+        BacktrackInfo binfo = backtrack(new Query(new RefSeq(startVal, null),
+                start), minfo);
+        for (InstrumentPoint ipoint : binfo.insPoints) {
+            p(ipoint);
+        }
     }
 
     public static MethodInfo searchMethod(String... str) {
@@ -272,7 +287,8 @@ public class App {
     }
 
     public static BacktrackInfo backtrack(Query query, MethodInfo minfo) {
-        p("BackTracking " + query + " in " + minfo.sm.getName());
+        p("BackTracking " + query + " in " + minfo.sm.getName() + ", " + minfo.getParamValues());
+
         Deque<Query> currQueries = new ArrayDeque<>();
         Set<Query> visitedQueries = new HashSet<>();
         currQueries.add(query);
@@ -289,6 +305,7 @@ public class App {
             if (currQuery.refSeq.fields.size() > 0) {
                 // new JInstanceFieldRef();
                 Value refHead = new JInstanceFieldRef(currQuery.refSeq.value, currQuery.refSeq.fields.get(0));
+
                 Set<Dependency> deps = minfo.getPrev(currQuery.unit, refHead);
 
                 // Urrr... JInstanceFieldRef does not have hashcode() implementation
@@ -300,7 +317,7 @@ public class App {
                             JInstanceFieldRef iref = (JInstanceFieldRef) v;
                             JInstanceFieldRef href = (JInstanceFieldRef) refHead;
                             if (iref.getBase().equals(href.getBase())
-                                    && href.getFieldRef().equals(href.getFieldRef())) {
+                                    && iref.getFieldRef().equals(href.getFieldRef())) {
                                 deps = smap.get(v);
                             }
                         }
@@ -309,6 +326,7 @@ public class App {
 
                 // Should check all aliases of prefixes of reference sequence
                 if (deps != null) {
+
                     for (Dependency dep : deps) {
                         // if (!(dep.dtype == Dependency.DepType.CF)) {
                         if (dep.dtype == Dependency.DepType.CF) {
@@ -333,6 +351,7 @@ public class App {
             for (Dependency dep : cfdeps) {
                 pureDependencies.add(new Provenance(dep, minfo, null, -2));
             }
+
             // Find closest dependencies
 
             List<Provenance> toRemove = new ArrayList<>();
@@ -350,6 +369,9 @@ public class App {
             }
             boolean allId = true;
             for (Provenance prov : pureDependencies) {
+                // if (currQuery.toString().contains("l0.[<Test$T: java.lang.Boolean body>")) {
+                // p(prov.dep);
+                // }
                 if (!(prov.dep.unit instanceof JIdentityStmt)) {
                     allId = false;
                     break;
@@ -490,6 +512,12 @@ public class App {
         String methodName = iexpr.getMethod().getSignature();
         Set<Query> resolvedQueries = new HashSet<>();
         if (methodName.contains("java.lang.String: boolean equals(java.lang.Object)")) {
+            p("Manually wired " + methodName);
+            for (Value v : getParameters(iexpr)) {
+                resolvedQueries.add(new Query(new RefSeq(v), stmt));
+            }
+        }
+        if (methodName.contains("java.lang.Boolean: ")) {
             p("Manually wired " + methodName);
             for (Value v : getParameters(iexpr)) {
                 resolvedQueries.add(new Query(new RefSeq(v), stmt));
