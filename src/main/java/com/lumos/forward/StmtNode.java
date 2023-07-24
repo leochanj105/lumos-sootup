@@ -3,8 +3,8 @@ package com.lumos.forward;
 import soot.jimple.Stmt;
 
 public class StmtNode extends IPNode {
-    Context context;
-    Stmt stmt;
+    // Context context;
+    // Stmt stmt;
 
     public Context getContext() {
         return this.context;
@@ -13,6 +13,7 @@ public class StmtNode extends IPNode {
     public StmtNode(Context context, Stmt stmt) {
         this.context = context;
         this.stmt = stmt;
+        this.type = "stmt";
     }
 
     // public void setContext(Context context) {
@@ -30,6 +31,11 @@ public class StmtNode extends IPNode {
     public StmtNode(Stmt stmt) {
         super();
         this.stmt = stmt;
+    }
+
+    @Override
+    public String toString() {
+        return "StmtNode [stmt=" + stmt + "]";
     }
 
 }

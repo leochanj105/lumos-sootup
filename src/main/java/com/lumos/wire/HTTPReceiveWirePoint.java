@@ -7,14 +7,17 @@ import soot.jimple.InvokeExpr;
 public class HTTPReceiveWirePoint {
     public String targetMethod;
 
-    public List<Integer> sendParamIndices;
-    public List<Integer> recvParamIndices;
+    public List<String> sendParams;
+    public List<String> recvParams;
 
-    public HTTPReceiveWirePoint(String targetMethod, List<Integer> sendParamIndices,
-            List<Integer> recvParamIndices) {
-        this.targetMethod = targetMethod;
-        this.sendParamIndices = sendParamIndices;
-        this.recvParamIndices = recvParamIndices;
+    public String retWireName;
+
+    public String getRetWireName() {
+        return retWireName;
+    }
+
+    public void setRetWireName(String retWireName) {
+        this.retWireName = retWireName;
     }
 
     @Override
@@ -22,13 +25,45 @@ public class HTTPReceiveWirePoint {
         return "HTTPReceiveWirePoint [targetMethod=" + targetMethod + "]";
     }
 
+    public HTTPReceiveWirePoint(String targetMethod, List<String> sendParams, List<String> recvParams,
+            String retWireName) {
+        this.targetMethod = targetMethod;
+        this.sendParams = sendParams;
+        this.recvParams = recvParams;
+        this.retWireName = retWireName;
+    }
+
+    public String getTargetMethod() {
+        return targetMethod;
+    }
+
+    public void setTargetMethod(String targetMethod) {
+        this.targetMethod = targetMethod;
+    }
+
+    public List<String> getSendParams() {
+        return sendParams;
+    }
+
+    public void setSendParams(List<String> sendParams) {
+        this.sendParams = sendParams;
+    }
+
+    public List<String> getRecvParams() {
+        return recvParams;
+    }
+
+    public void setRecvParams(List<String> recvParams) {
+        this.recvParams = recvParams;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((targetMethod == null) ? 0 : targetMethod.hashCode());
-        result = prime * result + ((sendParamIndices == null) ? 0 : sendParamIndices.hashCode());
-        result = prime * result + ((recvParamIndices == null) ? 0 : recvParamIndices.hashCode());
+        result = prime * result + ((sendParams == null) ? 0 : sendParams.hashCode());
+        result = prime * result + ((recvParams == null) ? 0 : recvParams.hashCode());
         return result;
     }
 
@@ -46,15 +81,15 @@ public class HTTPReceiveWirePoint {
                 return false;
         } else if (!targetMethod.equals(other.targetMethod))
             return false;
-        if (sendParamIndices == null) {
-            if (other.sendParamIndices != null)
+        if (sendParams == null) {
+            if (other.sendParams != null)
                 return false;
-        } else if (!sendParamIndices.equals(other.sendParamIndices))
+        } else if (!sendParams.equals(other.sendParams))
             return false;
-        if (recvParamIndices == null) {
-            if (other.recvParamIndices != null)
+        if (recvParams == null) {
+            if (other.recvParams != null)
                 return false;
-        } else if (!recvParamIndices.equals(other.recvParamIndices))
+        } else if (!recvParams.equals(other.recvParams))
             return false;
         return true;
     }

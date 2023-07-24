@@ -31,6 +31,10 @@ import com.lumos.common.RefSeq;
 import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
+import com.lumos.forward.ContextSensitiveInfo;
+import com.lumos.forward.EnterNode;
+import com.lumos.forward.ExitNode;
+import com.lumos.forward.IPNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.WireForAllParams;
@@ -95,7 +99,8 @@ public class App {
         readParams();
         String[] services = new String[] {
                 "ts-launcher",
-                "ts-inside-payment-service"
+                "ts-inside-payment-service",
+                "ts-order-service"
         };
         // analyzePath("src/code");
         String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
@@ -110,18 +115,49 @@ public class App {
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
         // igraph.build(services);
         MethodInfo minfo = searchMethod("sendInsidePayment");
-        igraph.build("sendInsidePayment");
+        ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
+
+        IPNode fnode = cinfo.getFirstNode();
+        Deque<IPNode> queue = new ArrayDeque<>();
+        Set<IPNode> nset = new HashSet<>();
+        queue.add(fnode);
+        // p(fnode);
+        // p(fnode.getSuccessors());
+        while (!queue.isEmpty()) {
+            IPNode node = queue.pop();
+            // p("==== " + node + ", " + node.getStmt());
+            // if (node.getStmt().toString().contains("$u0 = new
+            // launcher.domain.PaymentInfo")) {
+            // p(":::::!!!!!");
+            // }
+            if (nset.contains(node)) {
+                continue;
+            }
+            nset.add(node);
+
+            if (node instanceof EnterNode) {
+                p("Enter Node: " + ((EnterNode) node).getSm().getSignature() + " at "
+                        + node.getStmt().getJavaSourceStartLineNumber());
+                // p(node.getSuccessors());
+            }
+            if (node instanceof ExitNode) {
+                p("Exit Node: " + ((ExitNode) node).getSm().getSignature() + " at "
+                        + node.getStmt().getJavaSourceStartLineNumber());
+            }
+            for (IPNode n2 : node.getSuccessors()) {
+                queue.addFirst(n2);
+            }
+        }
         // p(minfo.sm);
-        // Unit start = minfo.getStmt(68, 0);
+        // Unit start =
         // // p(start);
         // // minfo.printValue(start);
-        // Value startVal = minfo.getValue(start, 0);
-        // p(startVal);
+        // Value startV
 
-        // BacktrackInfo binfo = backtrack(new Query(new RefSeq(startVal, null),
+        // BacktrackInfo b
         // start), minfo);
-        // for (InstrumentPoint ipoint : binfo.insPoints) {
-        // p(ipoint);
+        // for (Instr
+        // p
         // }
         // play();
     }
@@ -259,15 +295,16 @@ public class App {
                 // p("--- " +
                 // minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0)));
                 // }
-                // if (sm.getSignature().contains("pay")) {
-                // p("!! " + sm.getSignature());
-                // }
+                if (sm.getSignature().contains("getOrderById")) {
+                    p("!! " + sm.getSignature());
+                }
                 methodMap.put(sm.getSignature(), minfo);
             }
             // CompileUtils.outputJimple(cls, path);
         }
 
         p("----------");
+        // panicni();
 
     }
 

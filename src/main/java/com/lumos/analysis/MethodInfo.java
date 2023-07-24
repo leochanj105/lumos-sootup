@@ -10,6 +10,7 @@ import java.util.Set;
 import com.lumos.common.Dependency;
 import com.lumos.common.TracePoint;
 
+import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -31,12 +32,31 @@ public class MethodInfo {
     public CFAnalysis cfAnalysis;
     public BriefUnitGraph cfg;
 
+    public Map<String, Value> localMap;
+
     public MethodInfo(SootMethod sm) {
         this.sm = sm;
         this.cfg = new BriefUnitGraph(sm.getActiveBody());
+        buildLocalMap();
         // buildNameMap();
     }
 
+    public void buildLocalMap() {
+        localMap = new HashMap<>();
+        for (Iterator<Unit> it = cfg.iterator(); it.hasNext();) {
+            Unit unit = it.next();
+            for (ValueBox vb : unit.getUseAndDefBoxes()) {
+                Value v = vb.getValue();
+                if (v instanceof Local) {
+                    localMap.put(v.toString(), v);
+                }
+            }
+        }
+    }
+
+    public Value getLocal(String name) {
+        return localMap.get(name);
+    }
     // public void buildNameMap() {
     // String[][] names = this.wsm.getDebugInfo().getSourceNamesForValues();
 

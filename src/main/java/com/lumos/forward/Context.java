@@ -72,6 +72,9 @@ public class Context {
     }
 
     public MethodInfo getStackLast() {
+        if (ctrace.size() == 0) {
+            return null;
+        }
         CallSite cs = ctrace.get(ctrace.size() - 1);
         return cs.minfo;
     }
