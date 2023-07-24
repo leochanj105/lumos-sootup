@@ -33,6 +33,7 @@ public class MethodInfo {
 
     public MethodInfo(SootMethod sm) {
         this.sm = sm;
+        this.cfg = new BriefUnitGraph(sm.getActiveBody());
         // buildNameMap();
     }
 
@@ -54,7 +55,6 @@ public class MethodInfo {
 
     public Map<TracePoint, List<TracePoint>> analyzeDef() {
         // System.out.println(this);
-        this.cfg = new BriefUnitGraph(sm.getActiveBody());
 
         // sm.getActiveBody().
         reachingAnalysis = new ReachingDefAnalysis(this.cfg);

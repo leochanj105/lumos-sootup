@@ -31,6 +31,7 @@ import com.lumos.common.RefSeq;
 import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
+import com.lumos.forward.InterProcedureGraph;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.WireForAllParams;
 import com.lumos.wire.WireHTTP;
@@ -92,7 +93,10 @@ public class App {
 
     public static void main(String[] args) {
         readParams();
-        String[] services = new String[] { "ts-launcher", "ts-inside-payment-service" };
+        String[] services = new String[] {
+                "ts-launcher",
+                "ts-inside-payment-service"
+        };
         // analyzePath("src/code");
         String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
         String suffix = "\\target\\classes";
@@ -102,7 +106,12 @@ public class App {
             String complete = base + str + suffix;
             analyzePath(complete);
         }
-        // MethodInfo minfo = searchMethod("some", "Test");
+
+        InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
+        // igraph.build(services);
+        MethodInfo minfo = searchMethod("sendInsidePayment");
+        igraph.build("sendInsidePayment");
+        // p(minfo.sm);
         // Unit start = minfo.getStmt(68, 0);
         // // p(start);
         // // minfo.printValue(start);
@@ -114,7 +123,7 @@ public class App {
         // for (InstrumentPoint ipoint : binfo.insPoints) {
         // p(ipoint);
         // }
-        play();
+        // play();
     }
 
     public static void play() {
@@ -243,13 +252,16 @@ public class App {
                 // // WalaSootMethod wsm = (WalaSootMethod) sm;
                 // // if (wsm.toString().contains("some")) {
                 MethodInfo minfo = new MethodInfo(sm);
-                Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
-                minfo.analyzeCF();
+                // Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
+                // minfo.analyzeCF();
                 // p(sm.getActiveBody());
-                if (sm.toString().contains("Test$T: void <init>(Test,boolean)")) {
-                    p("--- " +
-                            minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0)));
-                }
+                // if (sm.toString().contains("Test$T: void <init>(Test,boolean)")) {
+                // p("--- " +
+                // minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0)));
+                // }
+                // if (sm.getSignature().contains("pay")) {
+                // p("!! " + sm.getSignature());
+                // }
                 methodMap.put(sm.getSignature(), minfo);
             }
             // CompileUtils.outputJimple(cls, path);

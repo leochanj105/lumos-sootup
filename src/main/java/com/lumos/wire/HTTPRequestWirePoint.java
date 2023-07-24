@@ -21,17 +21,37 @@ public class HTTPRequestWirePoint {
         // this.recvParamIndices = recvParamIndices;
     }
 
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof HTTPRequestWirePoint)) {
-            return false;
-        }
-        HTTPRequestWirePoint other = (HTTPRequestWirePoint) o;
-        return this.reqMethod.equals(other.reqMethod) && other.lineNum == this.lineNum;
+    @Override
+    public String toString() {
+        return "HTTPRequestWirePoint [reqMethod=" + reqMethod + ", lineNum=" + lineNum + "]";
     }
 
     @Override
     public int hashCode() {
-        return this.reqMethod.hashCode() + this.lineNum;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((reqMethod == null) ? 0 : reqMethod.hashCode());
+        result = prime * result + lineNum;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        HTTPRequestWirePoint other = (HTTPRequestWirePoint) obj;
+        if (reqMethod == null) {
+            if (other.reqMethod != null)
+                return false;
+        } else if (!reqMethod.equals(other.reqMethod))
+            return false;
+        if (lineNum != other.lineNum)
+            return false;
+        return true;
     }
 
 }

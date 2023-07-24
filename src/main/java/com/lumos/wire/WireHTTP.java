@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.lumos.App;
+
 public class WireHTTP {
     private static Map<HTTPRequestWirePoint, HTTPReceiveWirePoint> wps = null;
 
@@ -19,7 +21,9 @@ public class WireHTTP {
         }
         // System.out.println(reqMethod + ", " + lineNum);
         for (HTTPRequestWirePoint wp : wps.keySet()) {
+
             if (reqMethod.contains(wp.reqMethod) && lineNum == wp.lineNum) {
+                // App.p("!!!" + wp + ", " + reqMethod + ", " + wps.get(wp));
                 return wps.get(wp);
             }
         }
