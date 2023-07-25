@@ -24,6 +24,14 @@ public class ExitNode extends IPNode {
     public List<Stmt> returnStmts;
     public Value ret;
 
+    public List<Stmt> getReturnStmts() {
+        return returnStmts;
+    }
+
+    public void setReturnStmts(List<Stmt> returnStmts) {
+        this.returnStmts = returnStmts;
+    }
+
     public SootMethod getSm() {
         return sm;
     }

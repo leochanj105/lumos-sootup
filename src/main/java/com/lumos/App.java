@@ -34,6 +34,7 @@ import com.lumos.compile.CompileUtils;
 import com.lumos.forward.ContextSensitiveInfo;
 import com.lumos.forward.EnterNode;
 import com.lumos.forward.ExitNode;
+import com.lumos.forward.ForwardIPAnalysis;
 import com.lumos.forward.IPNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.wire.HTTPReceiveWirePoint;
@@ -117,48 +118,8 @@ public class App {
         MethodInfo minfo = searchMethod("sendInsidePayment");
         ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
 
-        IPNode fnode = cinfo.getFirstNode();
-        Deque<IPNode> queue = new ArrayDeque<>();
-        Set<IPNode> nset = new HashSet<>();
-        queue.add(fnode);
-        // p(fnode);
-        // p(fnode.getSuccessors());
-        while (!queue.isEmpty()) {
-            IPNode node = queue.pop();
-            // p("==== " + node + ", " + node.getStmt());
-            // if (node.getStmt().toString().contains("$u0 = new
-            // launcher.domain.PaymentInfo")) {
-            // p(":::::!!!!!");
-            // }
-            if (nset.contains(node)) {
-                continue;
-            }
-            nset.add(node);
+        ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
 
-            if (node instanceof EnterNode) {
-                p("Enter Node: " + ((EnterNode) node).getSm().getSignature() + " at "
-                        + node.getStmt().getJavaSourceStartLineNumber());
-                // p(node.getSuccessors());
-            }
-            if (node instanceof ExitNode) {
-                p("Exit Node: " + ((ExitNode) node).getSm().getSignature() + " at "
-                        + node.getStmt().getJavaSourceStartLineNumber());
-            }
-            for (IPNode n2 : node.getSuccessors()) {
-                queue.addFirst(n2);
-            }
-        }
-        // p(minfo.sm);
-        // Unit start =
-        // // p(start);
-        // // minfo.printValue(start);
-        // Value startV
-
-        // BacktrackInfo b
-        // start), minfo);
-        // for (Instr
-        // p
-        // }
         // play();
     }
 

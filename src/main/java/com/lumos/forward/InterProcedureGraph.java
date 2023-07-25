@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
@@ -26,7 +28,9 @@ import soot.toolkits.graph.BriefUnitGraph;
 public class InterProcedureGraph {
 
     public static Map<String, MethodInfo> methodMap;
-    public static Map<Context, Map<Unit, IPNode>> stmtMap;
+    public Map<Context, Map<Unit, IPNode>> stmtMap;
+
+    public Set<IPNode> nodes = new HashSet<>();
 
     public InterProcedureGraph(Map<String, MethodInfo> methodMap) {
         this.methodMap = methodMap;
@@ -241,7 +245,7 @@ public class InterProcedureGraph {
                     ExitNode exit = new ExitNode(context, stmt);
                     enter.setSuccessors(Collections.singletonList(newcinfo.getFirstNode()));
                     newcinfo.getFirstNode().setPredecesors(Collections.singletonList(enter));
-
+                    exit.setReturnStmts(calleeinfo.getReturnStmts());
                     exit.setPredecesors(newcinfo.getRetNodes());
                     for (IPNode n : newcinfo.getRetNodes()) {
                         n.setSuccessors(Collections.singletonList(exit));
@@ -265,7 +269,7 @@ public class InterProcedureGraph {
                                 App.p("Wiring null values!");
                                 App.panicni();
                             }
-                            enter.addAlising(Arrays.asList(new Value[] { v1, v2 }));
+                            enter.addAlising(v1, v2);
                             // App.p("Added aliasing pairs: " + v1 + " in " + callerinfo.sm + " and " + v2 +
                             // " in "
                             // + calleeinfo.sm);
@@ -294,7 +298,10 @@ public class InterProcedureGraph {
                 snode = new StmtNode(context, stmt);
             }
             umap.put(stmt, snode);
-        } else {
+            nodes.add(snode);
+        } else
+
+        {
             snode = umap.get(stmt);
         }
         return snode;

@@ -2,10 +2,13 @@ package com.lumos.forward;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.lumos.App;
 
+// import fj.data.HashSet;
 import polyglot.ast.Call;
 import soot.Local;
 import soot.SootMethod;
@@ -21,9 +24,12 @@ public class EnterNode extends IPNode {
 
     public List<Value> arguments;
     public List<Local> parameters;
-    public List<List<Value>> aliasPairs;
-
+    public List<Set<Value>> aliasPairs;
     public CallSite lastCall;
+
+    public List<Set<Value>> getAliasPairs() {
+        return aliasPairs;
+    }
 
     public SootMethod getSm() {
         return sm;
@@ -53,7 +59,7 @@ public class EnterNode extends IPNode {
         // this.parameters = this.sm.getActiveBody().getParameterLocals();
     }
 
-    public void addAlising(List<Value> pair) {
+    public void addAlising(Set<Value> pair) {
         if (pair.size() != 2) {
             App.p("This should be a pair!");
             App.panicni();
@@ -62,7 +68,7 @@ public class EnterNode extends IPNode {
     }
 
     public void addAlising(Value v1, Value v2) {
-        this.aliasPairs.add(Arrays.asList(new Value[] { v1, v2 }));
+        this.aliasPairs.add(new HashSet<Value>(Arrays.asList(new Value[] { v1, v2 })));
     }
 
     @Override
