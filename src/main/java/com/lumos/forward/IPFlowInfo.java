@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.lumos.App;
+
 import soot.Local;
 import soot.Value;
 import soot.jimple.internal.JInstanceFieldRef;
@@ -31,11 +33,17 @@ public class IPFlowInfo {
     }
 
     public Set<Value> addAlias(Set<Value> sv) {
+
         aliases.add(sv);
         for (Value v : sv) {
             aliasMap.put(v, sv);
         }
+        // App.p("!!! " + aliasMap);
         return merge(sv);
+    }
+
+    public void put(Value v, Set<Value> sv) {
+        aliasMap.put(v, sv);
     }
 
     public Set<Value> merge(Set<Value> sv) {
@@ -44,6 +52,7 @@ public class IPFlowInfo {
             if (candidate.equals(sv)) {
                 continue;
             }
+            // App.p(sv);
             if (canMerge(candidate, sv)) {
                 toMerge = candidate;
                 break;
@@ -55,23 +64,35 @@ public class IPFlowInfo {
                 toMerge.add(v);
                 aliasMap.put(v, toMerge);
             }
+            return merge(toMerge);
         }
-        return merge(toMerge);
+        return sv;
     }
 
     public boolean canAlias(Value v1, Value v2) {
+
         if (v1.equals(v2)) {
             return true;
         }
-        if ((v1 instanceof Local) || (v2 instanceof Local)) {
-            return aliasMap.get(v1).contains(v2);
-        }
-        JInstanceFieldRef ref1 = (JInstanceFieldRef) v1;
-        JInstanceFieldRef ref2 = (JInstanceFieldRef) v2;
-        if (ref1.getField().getName().equals(ref2.getField().getName())) {
-            return canAlias(ref1.getBase(), ref2.getBase());
+        if ((v1 instanceof JInstanceFieldRef) && (v2 instanceof JInstanceFieldRef)) {
+            JInstanceFieldRef ref1 = (JInstanceFieldRef) v1;
+            JInstanceFieldRef ref2 = (JInstanceFieldRef) v2;
+            if (ref1.getField().getName().equals(ref2.getField().getName())) {
+                // App.p(ref1 + ", " + ref2);
+                return canAlias(ref1.getBase(), ref2.getBase());
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            // if (v1.hashCode() == 1946962024) {
+            // App.p(aliasMap);
+            // App.p(v1.getClass());
+            // }
+            if (!aliasMap.containsKey(v1)) {
+                return false;
+            }
+            return aliasMap.get(v1).contains(v2);
+            // App.p(v1);
         }
     }
 
@@ -81,6 +102,7 @@ public class IPFlowInfo {
         }
         for (Value v1 : sv1) {
             for (Value v2 : sv2) {
+
                 if (canAlias(v1, v2)) {
                     return true;
                 }

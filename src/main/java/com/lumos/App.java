@@ -116,10 +116,13 @@ public class App {
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
         // igraph.build(services);
         MethodInfo minfo = searchMethod("sendInsidePayment");
-        ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
+        // ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
+        ContextSensitiveInfo cinfo = igraph.build("getOrderById");
 
+        long start = System.currentTimeMillis();
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
-
+        long stop = System.currentTimeMillis();
+        App.p((stop - start) / 1000.0);
         // play();
     }
 

@@ -27,10 +27,12 @@ import soot.toolkits.graph.BriefUnitGraph;
 
 public class InterProcedureGraph {
 
-    public static Map<String, MethodInfo> methodMap;
+    public Map<String, MethodInfo> methodMap;
     public Map<Context, Map<Unit, IPNode>> stmtMap;
 
     public Set<IPNode> nodes = new HashSet<>();
+
+    public IPNode initialNode;
 
     public InterProcedureGraph(Map<String, MethodInfo> methodMap) {
         this.methodMap = methodMap;
@@ -298,7 +300,13 @@ public class InterProcedureGraph {
                 snode = new StmtNode(context, stmt);
             }
             umap.put(stmt, snode);
-            nodes.add(snode);
+            if (snode instanceof WrapperNode) {
+                WrapperNode wnode = (WrapperNode) snode;
+                nodes.add(wnode.getEnter());
+                nodes.add(wnode.getExit());
+            } else {
+                nodes.add(snode);
+            }
         } else
 
         {

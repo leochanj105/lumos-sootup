@@ -40,12 +40,18 @@ public class ForwardIPAnalysis {
             // Unit unit = it.next();
             liveIn.put(node, new IPFlowInfo());
             liveOut.put(node, new IPFlowInfo());
+            // if (node.getPredecesors() == null) {
+            // App.p(((WrapperNode) node).getEnter());
+            // }
             if (node.getPredecesors().isEmpty()) {
                 startingNodes.add(node);
             }
         }
+        int round = 0;
         boolean fixed = false;
         while (!fixed) {
+            round += 1;
+            App.p("Round " + round);
             fixed = true;
             Deque<IPNode> queue = new ArrayDeque<>(startingNodes);
             HashSet<IPNode> visitedNodes = new HashSet<>();
@@ -68,7 +74,9 @@ public class ForwardIPAnalysis {
                 if (node instanceof EnterNode) {
                     EnterNode enode = (EnterNode) node;
                     // out.aliases.addAll(enode.getAliasPairs());
+                    // App.p(enode.getSm());
                     for (Set<Value> aliasp : enode.getAliasPairs()) {
+                        // App.p("!!! " + aliasp);
                         out.addAlias(aliasp);
                     }
                 } else if (node instanceof ExitNode) {
@@ -76,18 +84,22 @@ public class ForwardIPAnalysis {
                     Value ret = enode.getRet();
                     if (ret != null) {
                         for (Stmt stmt : enode.getReturnStmts()) {
-                            out.addAlias(((JReturnStmt) stmt).getOp(), ret);
+                            Value vv = ((JReturnStmt) stmt).getOp();
+                            if (!vv.toString().contains("null")) {
+                                out.addAlias(vv, ret);
+                            }
                         }
                         out.autoDefs.add(ret);
                     }
                 } else if (node instanceof StmtNode) {
                     Stmt stmt = node.getStmt();
                     if (stmt instanceof JIdentityStmt) {
-                        continue;
+                        // continue;
+                        // App.p("Skipping " + node);
                     } else if (stmt instanceof JAssignStmt) {
                         JAssignStmt astmt = (JAssignStmt) stmt;
                         Value lop = astmt.getLeftOp();
-                        Value rop = astmt.getLeftOp();
+                        Value rop = astmt.getRightOp();
                         Set<IPNode> nset = new HashSet<>();
                         nset.add(node);
                         if (lop instanceof Local) {
@@ -96,11 +108,13 @@ public class ForwardIPAnalysis {
                                 sv.remove(lop);
                             }
                             if (rop instanceof Local || rop instanceof JInstanceFieldRef) {
+                                // App.p("@@ " + stmt);
                                 out.addAlias(rop, lop);
                             }
 
                         } else if (lop instanceof JInstanceFieldRef) {
                             // Set<Value> newer = null;
+                            // App.p(stmt);
                             if (!out.aliasMap.containsKey(lop)) {
                                 out.addAlias(lop);
                             }
@@ -145,6 +159,7 @@ public class ForwardIPAnalysis {
                 }
 
                 for (IPNode succ : node.getSuccessors()) {
+
                     if (!visitedNodes.contains(succ)) {
                         queue.addLast(succ);
                     }
@@ -161,15 +176,19 @@ public class ForwardIPAnalysis {
         }
 
         for (Set<Value> s : original.aliases) {
-            newm.aliases.add(s);
+            Set<Value> news = new HashSet<>(s);
+            Set<Value> actual = newm.addAlias(news);
+            for (Value v : news) {
+                newm.put(v, actual);
+            }
         }
         for (Value v : original.autoDefs) {
             newm.autoDefs.add(v);
         }
 
-        for (Value v : original.aliasMap.keySet()) {
-            newm.aliasMap.put(v, original.aliasMap.get(v));
-        }
+        // for (Value v : original.aliasMap.keySet()) {
+        // newm.aliasMap.put(v, original.aliasMap.get(v));
+        // }
         return newm;
     }
 
@@ -178,6 +197,9 @@ public class ForwardIPAnalysis {
         IPFlowInfo f3 = copy(f1);
         for (Value v : f2.defSet.keySet()) {
             for (IPNode node : f2.defSet.get(v)) {
+                if (!f3.defSet.containsKey(v)) {
+                    f3.defSet.put(v, new HashSet<>());
+                }
                 f3.defSet.get(v).add(node);
             }
         }
