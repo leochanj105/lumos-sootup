@@ -1,4 +1,5 @@
 public class Test {
+    Result x;
 
     class T {
         public Boolean body;
@@ -40,6 +41,7 @@ public class Test {
         Order order;
 
         public void setOrder(Order order) {
+            this.order = null;
             this.order = order;
         }
 
@@ -88,6 +90,9 @@ public class Test {
     }
 
     public T exchange(String url) {
+        x.order.status = "!";
+        pay();
+        x.order.status = "?";
         // T t = new T();
         // r1 = pay();
         // t.init(r1); r1

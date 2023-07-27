@@ -103,26 +103,26 @@ public class App {
                 "ts-inside-payment-service",
                 "ts-order-service"
         };
-        // analyzePath("src/code");
+        methodMap = new HashMap<>();
+        analyzePath("C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code");
         String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
         String suffix = "\\target\\classes";
-        methodMap = new HashMap<>();
 
         for (String str : services) {
             String complete = base + str + suffix;
-            analyzePath(complete);
+            // analyzePath(complete);
         }
 
-        InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
-        // igraph.build(services);
-        MethodInfo minfo = searchMethod("sendInsidePayment");
-        // ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
-        ContextSensitiveInfo cinfo = igraph.build("getOrderById");
+        // InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
+        // // igraph.build(services);
+        // MethodInfo minfo = searchMethod("sendInsidePayment");
+        // // ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
+        // ContextSensitiveInfo cinfo = igraph.build("getOrderById");
 
-        long start = System.currentTimeMillis();
-        ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
-        long stop = System.currentTimeMillis();
-        App.p((stop - start) / 1000.0);
+        // long start = System.currentTimeMillis();
+        // ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
+        // long stop = System.currentTimeMillis();
+        // App.p((stop - start) / 1000.0);
         // play();
     }
 
@@ -228,7 +228,7 @@ public class App {
         p("Analyzing " + path);
         setupSoot(path);
         // String cname = "launcher.service.LauncherServiceImpl";
-        String cname = "Test";
+        // String cname = "Test";
 
         // SootMethod sm;
         for (SootClass cls : Scene.v().getApplicationClasses()) {
@@ -241,6 +241,7 @@ public class App {
                 if (sm.isAbstract()) {
                     continue;
                 }
+                // p(sm.getSignature());
                 // p(sm.getSignature());
                 sm.retrieveActiveBody();
                 // p(sm.getActiveBody());
@@ -259,12 +260,12 @@ public class App {
                 // p("--- " +
                 // minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0)));
                 // }
-                if (sm.getSignature().contains("getOrderById")) {
-                    p("!! " + sm.getSignature());
-                }
+                // if (sm.getSignature().contains("getOrderById")) {
+                // p("!! " + sm.getSignature());
+                // }
                 methodMap.put(sm.getSignature(), minfo);
             }
-            // CompileUtils.outputJimple(cls, path);
+            CompileUtils.outputJimple(cls, path);
         }
 
         p("----------");
