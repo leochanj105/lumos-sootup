@@ -8,144 +8,179 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.glassfish.jaxb.core.v2.model.core.Ref;
+
 import com.lumos.App;
 
 import soot.Local;
+import soot.RefLikeType;
 import soot.Value;
+import soot.jimple.Jimple;
 import soot.jimple.internal.JInstanceFieldRef;
 
 public class IPFlowInfo {
-    public Map<Value, Set<IPNode>> defSet = new HashMap<>();
-    public Set<Set<Value>> aliases = new HashSet<>();
-    public Set<Value> autoDefs = new HashSet<>();
+    // Map<ContextSensitiveValue, Set<UniqueName>> uniqueNames;
+    Map<UniqueName, Set<Definition>> currMapping;
+    IPNode ipnode;
 
-    public Map<Value, Set<Value>> aliasMap = new HashMap<>();
-
-    public void addAlias(Value v1, Value v2) {
-        Set<Value> sv = new HashSet<>(Arrays.asList(new Value[] { v1, v2 }));
-        addAlias(sv);
+    public IPNode getIpnode() {
+        return ipnode;
     }
 
-    public void addAlias(Value v) {
-        Set<Value> sv = new HashSet<>();
-        sv.add(v);
-        addAlias(sv);
+    public void setIpnode(IPNode ipnode) {
+        this.ipnode = ipnode;
     }
 
-    public Set<Value> addAlias(Set<Value> sv) {
-
-        aliases.add(sv);
-        for (Value v : sv) {
-            aliasMap.put(v, sv);
-        }
-        // App.p("!!! " + aliasMap);
-        return merge(sv);
+    public Map<UniqueName, Set<Definition>> getCurrMapping() {
+        return currMapping;
     }
 
-    public void put(Value v, Set<Value> sv) {
-        aliasMap.put(v, sv);
+    public void setCurrMapping(Map<UniqueName, Set<Definition>> currMapping) {
+        this.currMapping = currMapping;
     }
 
-    public Set<Value> merge(Set<Value> sv) {
-        Set<Value> toMerge = null;
-        for (Set<Value> candidate : aliases) {
-            if (candidate.equals(sv)) {
-                continue;
+    public IPFlowInfo() {
+        // this.uniqueNames = new HashMap<>();
+        this.currMapping = new HashMap<>();
+    }
+
+    public IPFlowInfo(IPFlowInfo other) {
+        this();
+        // Map<ContextSensitiveValue, Set<UniqueName>> original =
+        // other.getUniqueNames();
+
+        // for (ContextSensitiveValue cv : original.keySet()) {
+        // Set<UniqueName> snames = new HashSet<>();
+        // for (UniqueName un : original.get(cv)) {
+        // snames.add(un);
+        // }
+        // this.uniqueNames.put(cv, snames);
+        // }
+
+        Map<UniqueName, Set<Definition>> mappings = other.getCurrMapping();
+
+        for (UniqueName un : mappings.keySet()) {
+            Set<Definition> unames = new HashSet<>();
+            for (Definition un2 : mappings.get(un)) {
+                unames.add(un2);
             }
-            // App.p(sv);
-            if (canMerge(candidate, sv)) {
-                toMerge = candidate;
-                break;
-            }
+            this.currMapping.put(un, unames);
         }
-        if (toMerge != null) {
-            aliases.remove(sv);
-            for (Value v : sv) {
-                toMerge.add(v);
-                aliasMap.put(v, toMerge);
-            }
-            return merge(toMerge);
-        }
-        return sv;
+        assert (this.equals(other));
     }
 
-    public boolean canAlias(Value v1, Value v2) {
-
-        if (v1.equals(v2)) {
-            return true;
-        }
-        if ((v1 instanceof JInstanceFieldRef) && (v2 instanceof JInstanceFieldRef)) {
-            JInstanceFieldRef ref1 = (JInstanceFieldRef) v1;
-            JInstanceFieldRef ref2 = (JInstanceFieldRef) v2;
-            if (ref1.getField().getName().equals(ref2.getField().getName())) {
-                // App.p(ref1 + ", " + ref2);
-                return canAlias(ref1.getBase(), ref2.getBase());
+    public Set<Definition> getHeapDefinitions(Set<UniqueName> unames) {
+        Set<Definition> definitions = new HashSet<>();
+        for (UniqueName un : unames) {
+            Set<Definition> heapNames = currMapping.get(un);
+            if (heapNames != null) {
+                definitions.addAll(heapNames);
             } else {
-                return false;
+                definitions.add(Definition.getDefinition(un, ipnode));
+                this.currMapping.put(un, definitions);
+            }
+        }
+        return definitions;
+    }
+    // public IPFlowInfo(Map<ContextSensitiveValue, Set<UniqueName>> original) {
+    // this();
+    // for (ContextSensitiveValue cv : original.keySet()) {
+    // Set<UniqueName> snames = new HashSet<>();
+    // for (UniqueName un : original.get(cv)) {
+    // snames.add(un);
+    // }
+    // this.uniqueNames.put(cv, snames);
+    // }
+    // }
+
+    public Set<Definition> getDefinitionsByCV(Context c, Value v) {
+        ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
+        Set<Definition> resultDefs = new HashSet<>();
+        if (cv.getValue() instanceof JInstanceFieldRef) {
+            // return currMapping.get(cv);
+            JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
+            ContextSensitiveValue cvbase = new ContextSensitiveValue(cv.getContext(), ref.getBase());
+            // Set<UniqueName> unames = uniqueNames.get(cvbase);
+            Set<UniqueName> basenames = getUnamesByCV(cvbase);
+            if (basenames == null) {
+                App.p(cv);
+                App.panicni();
+            }
+
+            for (UniqueName un : basenames) {
+                UniqueName unref = null;
+                if (un.getBase().toString().equals(null)) {
+                    unref = new UniqueName(un, null);
+                }
+                unref = new UniqueName(un, ref.getField().getName());
+                resultNames.add(unref);
             }
         } else {
-            // if (v1.hashCode() == 1946962024) {
-            // App.p(aliasMap);
-            // App.p(v1.getClass());
-            // }
-            if (!aliasMap.containsKey(v1)) {
-                return false;
-            }
-            return aliasMap.get(v1).contains(v2);
-            // App.p(v1);
-        }
-    }
-
-    public boolean canMerge(Set<Value> sv1, Set<Value> sv2) {
-        if (sv1.equals(sv2)) {
-            return false;
-        }
-        for (Value v1 : sv1) {
-            for (Value v2 : sv2) {
-
-                if (canAlias(v1, v2)) {
-                    return true;
+            Set<UniqueName> unames = uniqueNames.get(cv);
+            if (unames == null || unames.isEmpty()) {
+                if (cv.getValue().getType() instanceof RefLikeType) {
+                    UniqueName u = new UniqueName(cv, null);
+                    resultNames.add(u);
                 }
+            } else {
+                resultNames.addAll(unames);
             }
         }
-        return false;
+        // if (resultNames.isEmpty()) {
+        // App.p("!!!!!!!! " + cv + ", " + cv.getValue().getClass() + ", "
+        // + (cv.getValue().getType() instanceof RefLikeType));
+        // }
+        return resultNames;
+    }
+
+    public void putUname(ContextSensitiveValue cv, UniqueName un) {
+        if (!uniqueNames.containsKey(cv)) {
+            uniqueNames.put(cv, new HashSet<>());
+        }
+        uniqueNames.get(cv).add(un);
+    }
+
+    public void putUname(ContextSensitiveValue cv, Set<UniqueName> unames) {
+        if (!uniqueNames.containsKey(cv)) {
+            uniqueNames.put(cv, new HashSet<>());
+        }
+        for (UniqueName un : unames) {
+            Set<UniqueName> targetSet = uniqueNames.get(cv);
+            if (targetSet == null) {
+                App.p(cv);
+            }
+            targetSet.add(un);
+        }
+    }
+
+    public void putUname(ContextSensitiveValue cv) {
+        putUname(cv, new UniqueName(cv, null));
+    }
+
+    public Map<ContextSensitiveValue, Set<UniqueName>> getUniqueNames() {
+        return uniqueNames;
+    }
+
+    public void setUniqueNames(Map<ContextSensitiveValue, Set<UniqueName>> original) {
+        this.uniqueNames = original;
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((defSet == null) ? 0 : defSet.hashCode());
-        result = prime * result + ((aliases == null) ? 0 : aliases.hashCode());
-        result = prime * result + ((autoDefs == null) ? 0 : autoDefs.hashCode());
+    public String toString() {
+        String result = "";
+        result += "IPFlowInfo: \n";
+        result += "UniqueNames:\n";
+        for (ContextSensitiveValue cv : uniqueNames.keySet()) {
+            result += cv + ": " + uniqueNames.get(cv);
+            result += "\n";
+        }
+        result += "\nMapping:\n";
+        for (UniqueName un : currMapping.keySet()) {
+            result += un + ": " + currMapping.get(un);
+            result += "\n";
+        }
+        // [uniqueNames=" + uniqueNames + ", currMapping=" + currMapping + "]";
         return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        IPFlowInfo other = (IPFlowInfo) obj;
-        if (defSet == null) {
-            if (other.defSet != null)
-                return false;
-        } else if (!defSet.equals(other.defSet))
-            return false;
-        if (aliases == null) {
-            if (other.aliases != null)
-                return false;
-        } else if (!aliases.equals(other.aliases))
-            return false;
-        if (autoDefs == null) {
-            if (other.autoDefs != null)
-                return false;
-        } else if (!autoDefs.equals(other.autoDefs))
-            return false;
-        return true;
     }
 
 }

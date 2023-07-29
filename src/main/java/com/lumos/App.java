@@ -37,6 +37,7 @@ import com.lumos.forward.ExitNode;
 import com.lumos.forward.ForwardIPAnalysis;
 import com.lumos.forward.IPNode;
 import com.lumos.forward.InterProcedureGraph;
+import com.lumos.forward.StmtNode;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.WireForAllParams;
 import com.lumos.wire.WireHTTP;
@@ -104,23 +105,39 @@ public class App {
                 "ts-order-service"
         };
         methodMap = new HashMap<>();
-        analyzePath("C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code");
+        // analyzePath("C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code");
         String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
         String suffix = "\\target\\classes";
 
         for (String str : services) {
             String complete = base + str + suffix;
-            // analyzePath(complete);
+            analyzePath(complete);
         }
 
-        // InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
+        InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
         // // igraph.build(services);
         // MethodInfo minfo = searchMethod("sendInsidePayment");
         // // ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
-        // ContextSensitiveInfo cinfo = igraph.build("getOrderById");
+        ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
+        p(cinfo.getFirstNode());
 
         // long start = System.currentTimeMillis();
-        // ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
+        ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
+        IPNode ipnode = igraph.getLastNode();
+        p(((StmtNode) ipnode).getContext().getStackLast().sm + ", " + ipnode.getDescription());
+        // IPNode ipnode = igraph.searchNode("getOrderById", "getOrderId",
+        // "$stack1 = this.<order.domain.GetOrderByIdInfo: java.lang.String orderId>",
+        // "stmt");
+        // p(ipnode);
+        // p(fia.getBefore(ipnode));
+        p(fia.getAfter(ipnode));
+        // p("!!! " + ipnode.getSuccessors());
+
+        // ipnode = igraph.searchNode("getOrderById", "getOrderId",
+        // "return $stack1",
+        // "stmt");
+        // p(fia.getBefore(ipnode));
+        // p(fia.getBefore(ipnode).getCurrMapping());
         // long stop = System.currentTimeMillis();
         // App.p((stop - start) / 1000.0);
         // play();
@@ -265,7 +282,7 @@ public class App {
                 // }
                 methodMap.put(sm.getSignature(), minfo);
             }
-            CompileUtils.outputJimple(cls, path);
+            // CompileUtils.outputJimple(cls, path);
         }
 
         p("----------");

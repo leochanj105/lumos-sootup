@@ -24,10 +24,20 @@ public class EnterNode extends IPNode {
 
     public List<Value> arguments;
     public List<Local> parameters;
-    public List<Set<Value>> aliasPairs;
+    public List<List<ContextSensitiveValue>> aliasPairs;
     public CallSite lastCall;
 
-    public List<Set<Value>> getAliasPairs() {
+    boolean isRemote;
+
+    public boolean isRemote() {
+        return isRemote;
+    }
+
+    public void setRemote(boolean isRemote) {
+        this.isRemote = isRemote;
+    }
+
+    public List<List<ContextSensitiveValue>> getAliasPairs() {
         return aliasPairs;
     }
 
@@ -56,10 +66,11 @@ public class EnterNode extends IPNode {
         this.arguments = lastCall.getCallingStmt().getInvokeExpr().getArgs();
         this.aliasPairs = new ArrayList<>();
         this.type = "enter";
+        this.isRemote = false;
         // this.parameters = this.sm.getActiveBody().getParameterLocals();
     }
 
-    public void addAlising(Set<Value> pair) {
+    public void addAlising(List<ContextSensitiveValue> pair) {
         if (pair.size() != 2) {
             App.p("This should be a pair!");
             App.panicni();
@@ -67,8 +78,8 @@ public class EnterNode extends IPNode {
         this.aliasPairs.add(pair);
     }
 
-    public void addAlising(Value v1, Value v2) {
-        this.aliasPairs.add(new HashSet<Value>(Arrays.asList(new Value[] { v1, v2 })));
+    public void addAlising(ContextSensitiveValue v1, ContextSensitiveValue v2) {
+        this.aliasPairs.add(Arrays.asList(new ContextSensitiveValue[] { v1, v2 }));
     }
 
     @Override

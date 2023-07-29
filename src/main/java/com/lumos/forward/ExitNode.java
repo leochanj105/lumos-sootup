@@ -22,7 +22,7 @@ public class ExitNode extends IPNode {
     // public List<Local> parameters;
     public CallSite lastCall;
     public List<Stmt> returnStmts;
-    public Value ret;
+    public ContextSensitiveValue ret;
 
     public List<Stmt> getReturnStmts() {
         return returnStmts;
@@ -40,11 +40,11 @@ public class ExitNode extends IPNode {
         this.sm = sm;
     }
 
-    public Value getRet() {
+    public ContextSensitiveValue getRet() {
         return ret;
     }
 
-    public void setRet(Value ret) {
+    public void setRet(ContextSensitiveValue ret) {
         this.ret = ret;
     }
 

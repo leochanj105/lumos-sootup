@@ -19,11 +19,14 @@ import com.lumos.common.Dependency;
 import fj.P;
 import java_cup.terminal;
 import soot.Local;
+import soot.RefLikeType;
 import soot.Unit;
 import soot.Value;
 import soot.ValueBox;
+import soot.jimple.Constant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JCastExpr;
 import soot.jimple.internal.JIdentityStmt;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JReturnStmt;
@@ -35,7 +38,7 @@ public class ForwardIPAnalysis {
     public final Map<IPNode, IPFlowInfo> liveOut = new HashMap<>();
 
     public ForwardIPAnalysis(InterProcedureGraph igraph) {
-        List<IPNode> startingNodes = new ArrayList<>();
+        Set<IPNode> workList = new HashSet<>();
         for (IPNode node : igraph.nodes) {
             // Unit unit = it.next();
             liveIn.put(node, new IPFlowInfo());
@@ -43,148 +46,168 @@ public class ForwardIPAnalysis {
             // if (node.getPredecesors() == null) {
             // App.p(((WrapperNode) node).getEnter());
             // }
-            if (node.getPredecesors().isEmpty()) {
-                startingNodes.add(node);
-            }
+            // if (node.getPredecesors().isEmpty()) {
+            workList.add(node);
+            // App.p(node);
+            // }
         }
         int round = 0;
-        boolean fixed = false;
-        while (!fixed) {
+
+        // boolean fixed = false;
+        while (!workList.isEmpty()) {
+            // fixed = true;
             round += 1;
             App.p("Round " + round);
-            fixed = true;
-            Deque<IPNode> queue = new ArrayDeque<>(startingNodes);
-            HashSet<IPNode> visitedNodes = new HashSet<>();
-            while (!queue.isEmpty()) {
-                IPNode node = queue.removeFirst();
-                visitedNodes.add(node);
+            // fixed = true;
+            // Deque<IPNode> queue = new ArrayDeque<>(startingNodes);
+            // HashSet<IPNode> visitedNodes = new HashSet<>();
+            // while (!queue.isEmpty()) {
+            IPNode node = workList.iterator().next();
 
-                IPFlowInfo in = copy(liveIn.get(node));
-                for (IPNode pred : node.getPredecesors()) {
-                    in = merge(in, liveOut.get(pred));
-                }
-                boolean currChanged = false;
-                if (isNotEqual(in, liveIn.get(node))) {
-                    currChanged = true;
-                    fixed = false;
-                    liveIn.put(node, in);
-                }
+            workList.remove(node);
+            // visitedNodes.add(node);
 
-                IPFlowInfo out = copy(in);
-                if (node instanceof EnterNode) {
-                    EnterNode enode = (EnterNode) node;
-                    // out.aliases.addAll(enode.getAliasPairs());
-                    // App.p(enode.getSm());
-                    for (Set<Value> aliasp : enode.getAliasPairs()) {
-                        // App.p("!!! " + aliasp);
-                        out.addAlias(aliasp);
-                    }
-                } else if (node instanceof ExitNode) {
-                    ExitNode enode = (ExitNode) node;
-                    Value ret = enode.getRet();
-                    if (ret != null) {
-                        for (Stmt stmt : enode.getReturnStmts()) {
-                            Value vv = ((JReturnStmt) stmt).getOp();
-                            if (!vv.toString().contains("null")) {
-                                out.addAlias(vv, ret);
-                            }
-                        }
-                        out.autoDefs.add(ret);
-                    }
-                } else if (node instanceof StmtNode) {
-                    Stmt stmt = node.getStmt();
-                    if (stmt instanceof JIdentityStmt) {
-                        // continue;
-                        // App.p("Skipping " + node);
-                    } else if (stmt instanceof JAssignStmt) {
-                        JAssignStmt astmt = (JAssignStmt) stmt;
-                        Value lop = astmt.getLeftOp();
-                        Value rop = astmt.getRightOp();
-                        Set<IPNode> nset = new HashSet<>();
-                        nset.add(node);
-                        if (lop instanceof Local) {
-                            Set<Value> sv = out.aliasMap.remove(lop);
-                            if (sv != null) {
-                                sv.remove(lop);
-                            }
-                            if (rop instanceof Local || rop instanceof JInstanceFieldRef) {
-                                // App.p("@@ " + stmt);
-                                out.addAlias(rop, lop);
-                            }
-
-                        } else if (lop instanceof JInstanceFieldRef) {
-                            // Set<Value> newer = null;
-                            // App.p(stmt);
-                            if (!out.aliasMap.containsKey(lop)) {
-                                out.addAlias(lop);
-                            }
-                            // if (out.aliasMap.containsKey(lop)) {
-                            Set<Value> original = out.aliasMap.get(lop);
-                            Set<Value> detach = new HashSet<>();
-                            for (Value val : original) {
-                                if (val instanceof JInstanceFieldRef) {
-                                    detach.add(val);
-                                }
-                            }
-                            for (Value val : detach) {
-                                original.remove(val);
-                            }
-                            detach.add(rop);
-                            Set<Value> merged = out.addAlias(detach);
-
-                            Set<Value> toremove = new HashSet<>();
-                            for (Value v : out.defSet.keySet()) {
-                                if ((v instanceof JInstanceFieldRef) && merged.contains(v)) {
-                                    toremove.add(v);
-                                }
-                            }
-                            for (Value v : toremove) {
-                                out.defSet.put(v, nset);
-                            }
-                        }
-
-                        out.defSet.put(lop, nset);
-                    }
-
-                } else if (node instanceof NoopNode) {
-                    // NOOP; just flow through
-                } else {
-                    App.p("WTH??");
-                    App.panicni();
-                }
-
-                if (isNotEqual(out, liveOut.get(node))) {
-                    fixed = false;
-                    liveOut.put(node, out);
-                }
-
-                for (IPNode succ : node.getSuccessors()) {
-
-                    if (!visitedNodes.contains(succ)) {
-                        queue.addLast(succ);
-                    }
-                }
+            // IPFlowInfo in = copy(liveIn.get(node));
+            IPFlowInfo in = new IPFlowInfo();
+            for (IPNode pred : node.getPredecesors()) {
+                in = merge(in, liveOut.get(pred));
             }
+
+            if (isNotEqual(in, liveIn.get(node))) {
+                // fixed = false;
+                liveIn.put(node, in);
+            }
+
+            IPFlowInfo out = copy(in);
+            if (node instanceof EnterNode) {
+                EnterNode enode = (EnterNode) node;
+
+                for (List<ContextSensitiveValue> aliasp : enode.getAliasPairs()) {
+                    ContextSensitiveValue cv1 = aliasp.get(0);
+                    ContextSensitiveValue cv2 = aliasp.get(1);
+                    if (!enode.isRemote()) {
+                        Set<UniqueName> unames = out.getUnamesByCV(cv1);
+                        // for (UniqueName un : unames) {
+                        // out.putUname(cv2, un);
+                        // }
+                        out.putUname(cv2, unames);
+                    } else {
+                        out.putUname(cv2);
+                    }
+                }
+
+            } else if (node instanceof ExitNode) {
+                ExitNode enode = (ExitNode) node;
+                ContextSensitiveValue cvcaller = enode.getRet();
+                if (cvcaller != null) {
+                    for (Stmt stmt : enode.getReturnStmts()) {
+                        if (stmt instanceof JReturnStmt) {
+                            // Value vv = ((JReturnStmt) stmt).getOp();
+                            ContextSensitiveValue cvcallee = new ContextSensitiveValue(enode.getContext(),
+                                    ((JReturnStmt) stmt).getOp());
+                            if (!cvcallee.getValue().toString().contains("null")) {
+                                // for (UniqueName un : out.getUniqueNames().get(cvcallee)) {
+                                // out.putUname(cvcaller, un);
+                                // }
+                                out.putUname(cvcaller, out.getUnamesByCV(cvcallee));
+                                // App.p("!!! " + cvcaller + ", " + cvcallee);
+                            }
+                        }
+                    }
+                    // out.autoDefs.add(ret);
+                    // App.p("!!!!!!!!!!!!!!! \n" + enode.getContext() + "\n" + out);
+                }
+            } else if (node instanceof StmtNode) {
+                Stmt stmt = node.getStmt();
+                if (stmt instanceof JIdentityStmt) {
+                    // continue;
+                } else if (stmt instanceof JAssignStmt) {
+                    JAssignStmt astmt = (JAssignStmt) stmt;
+                    Value lop = astmt.getLeftOp();
+                    Value rop = astmt.getRightOp();
+                    if (rop instanceof JCastExpr) {
+                        rop = ((JCastExpr) rop).getOp();
+                    }
+                    ContextSensitiveValue cvlop = new ContextSensitiveValue(node.getContext(), lop);
+                    ContextSensitiveValue cvrop = new ContextSensitiveValue(node.getContext(), rop);
+                    if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)) {
+                        if (lop instanceof Local) {
+                            Set<UniqueName> unames = out.getUnamesByCV(cvrop);
+                            if (unames == null) {
+                                if (lop.getType() instanceof RefLikeType) {
+                                    App.p("This is not possible...");
+                                    out.putUname(cvlop);
+                                }
+                            } else {
+                                if (rop instanceof JInstanceFieldRef) {
+                                    Set<UniqueName> possibleNames = out.getHeapNames(unames);
+                                    out.putUname(cvlop, possibleNames);
+                                } else {
+                                    out.putUname(cvlop, unames);
+                                }
+                            }
+                        } else if (lop instanceof JInstanceFieldRef) {
+                            Set<UniqueName> unames = out.getUnamesByCV(cvrop);
+                            Set<UniqueName> possibleNames = out.getUnamesByCV(cvlop);
+                            if (possibleNames == null || possibleNames.isEmpty()) {
+                                // App.p(stmt);
+                                // App.p(cvlop);
+                                App.p("This can't be unresolved");
+                            }
+
+                            for (UniqueName uname : possibleNames) {
+                                if (possibleNames.size() == 1) {
+                                    out.getCurrMapping().put(uname, unames);
+                                } else {
+                                    out.getCurrMapping().get(uname).addAll(unames);
+                                }
+                            }
+                            // Set<UniqueName> runames = out.getUnamesByCV(cvrop);
+
+                            // if (runames == null) {
+                            // App.panicni();
+                            // }
+                            // Set<UniqueName> lunames = out.getUnamesByCV(cvlop);
+
+                            // out.currMapping.put()
+                        } else {
+                            App.panicni();
+                        }
+                    }
+                }
+                // if (stmt.toString()
+                // .contains("return $stack1")) {
+                // for (IPNode pred : node.getPredecesors()) {
+                // App.p(pred + " =====" + liveOut.get(pred));
+                // }
+                // App.p(in);
+                // }
+            } else if (node instanceof NoopNode) {
+                // NOOP; just flow through
+            } else {
+                App.p("WTH??");
+                App.panicni();
+            }
+
+            // App.p(node.getStmt());
+            // App.p(out);
+            if (isNotEqual(out, liveOut.get(node))) {
+                // fixed = false;
+                for (IPNode succ : node.getSuccessors()) {
+                    // if (!workList.contains(succ)) {
+                    workList.add(succ);
+                    // }
+                }
+                liveOut.put(node, out);
+            }
+
+            // }
         }
 
     }
 
     public IPFlowInfo copy(IPFlowInfo original) {
-        IPFlowInfo newm = new IPFlowInfo();
-        for (Value v : original.defSet.keySet()) {
-            newm.defSet.put(v, new HashSet<>(original.defSet.get(v)));
-        }
-
-        for (Set<Value> s : original.aliases) {
-            Set<Value> news = new HashSet<>(s);
-            Set<Value> actual = newm.addAlias(news);
-            for (Value v : news) {
-                newm.put(v, actual);
-            }
-        }
-        for (Value v : original.autoDefs) {
-            newm.autoDefs.add(v);
-        }
+        IPFlowInfo newm = new IPFlowInfo(original);
 
         // for (Value v : original.aliasMap.keySet()) {
         // newm.aliasMap.put(v, original.aliasMap.get(v));
@@ -193,23 +216,27 @@ public class ForwardIPAnalysis {
     }
 
     private IPFlowInfo merge(IPFlowInfo f1, IPFlowInfo f2) {
-
         IPFlowInfo f3 = copy(f1);
-        for (Value v : f2.defSet.keySet()) {
-            for (IPNode node : f2.defSet.get(v)) {
-                if (!f3.defSet.containsKey(v)) {
-                    f3.defSet.put(v, new HashSet<>());
-                }
-                f3.defSet.get(v).add(node);
+        for (ContextSensitiveValue cv : f2.getUniqueNames().keySet()) {
+            Map<ContextSensitiveValue, Set<UniqueName>> fun = f3.getUniqueNames();
+            if (!fun.containsKey(cv)) {
+                fun.put(cv, new HashSet<>());
+            }
+            for (UniqueName un : f2.getUniqueNames().get(cv)) {
+                fun.get(cv).add(un);
             }
         }
 
-        for (Set<Value> s : f2.aliases) {
-            f3.aliases.add(s);
+        for (UniqueName un : f2.getCurrMapping().keySet()) {
+            Map<UniqueName, Set<UniqueName>> mapping = f3.getCurrMapping();
+            if (!mapping.containsKey(un)) {
+                mapping.put(un, new HashSet<>());
+            }
+            for (UniqueName un2 : f2.getCurrMapping().get(un)) {
+                mapping.get(un).add(un2);
+            }
         }
-        for (Value v : f2.autoDefs) {
-            f3.autoDefs.add(v);
-        }
+
         return f3;
 
     }
@@ -218,4 +245,11 @@ public class ForwardIPAnalysis {
         return !f1.equals(f2);
     }
 
+    public IPFlowInfo getBefore(IPNode node) {
+        return this.liveIn.get(node);
+    }
+
+    public IPFlowInfo getAfter(IPNode node) {
+        return this.liveOut.get(node);
+    }
 }

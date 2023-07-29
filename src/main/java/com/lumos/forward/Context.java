@@ -15,7 +15,12 @@ public class Context {
 
     @Override
     public String toString() {
-        return "Context [ctrace=" + ctrace + "]";
+        String result = "";
+        for (CallSite cs : ctrace) {
+            result += cs.getMinfo().sm.getName() + ",";
+        }
+        result = result.substring(0, result.length() - 1);
+        return result;
     }
 
     @Override

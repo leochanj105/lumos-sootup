@@ -40,7 +40,35 @@ public class InterProcedureGraph {
 
     }
 
-    public static MethodInfo searchMethod(String... str) {
+    public IPNode getLastNode() {
+        for (IPNode node : nodes) {
+            if (node.getSuccessors().isEmpty()) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    public IPNode searchNode(String... str) {
+        for (IPNode node : nodes) {
+            // if (!node.getType().equals("stmt")) {
+            // continue;
+            // }
+            boolean match = true;
+            for (String s : str) {
+                if (!node.getDescription().contains(s)) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    public MethodInfo searchMethod(String... str) {
         for (String sig : methodMap.keySet()) {
             boolean match = true;
             for (String s : str) {
@@ -56,7 +84,7 @@ public class InterProcedureGraph {
         return null;
     }
 
-    public static ResolveResult resolveMethod(Context context, Stmt stmt) {
+    public ResolveResult resolveMethod(Context context, Stmt stmt) {
         SootMethod sm = stmt.getInvokeExpr().getMethod();
         MethodInfo minfo = null;
         // App.p(context + ", " + stmt);
@@ -71,7 +99,6 @@ public class InterProcedureGraph {
             // stmt.getJavaSourceStartLineNumber());
             // }
             if (hwire != null) {
-
                 String target = hwire.targetMethod;
                 minfo = searchMethod(target);
                 if (minfo != null) {
@@ -193,7 +220,7 @@ public class InterProcedureGraph {
             App.p(method + " Not found");
             return null;
         }
-
+        App.p("buiding " + minfo.sm);
         return build(topContext(minfo));
     }
 
@@ -244,7 +271,8 @@ public class InterProcedureGraph {
                     if (stmt instanceof JAssignStmt) {
                         ret = ((JAssignStmt) stmt).getLeftOp();
                     }
-                    ExitNode exit = new ExitNode(context, stmt);
+                    ExitNode exit = new ExitNode(nctx, stmt);
+
                     enter.setSuccessors(Collections.singletonList(newcinfo.getFirstNode()));
                     newcinfo.getFirstNode().setPredecesors(Collections.singletonList(enter));
                     exit.setReturnStmts(calleeinfo.getReturnStmts());
@@ -271,7 +299,10 @@ public class InterProcedureGraph {
                                 App.p("Wiring null values!");
                                 App.panicni();
                             }
-                            enter.addAlising(v1, v2);
+                            ContextSensitiveValue cv1 = new ContextSensitiveValue(context, v2);
+                            ContextSensitiveValue cv2 = new ContextSensitiveValue(nctx, v2);
+                            enter.addAlising(cv1, cv2);
+                            enter.setRemote(true);
                             // App.p("Added aliasing pairs: " + v1 + " in " + callerinfo.sm + " and " + v2 +
                             // " in "
                             // + calleeinfo.sm);
@@ -287,13 +318,19 @@ public class InterProcedureGraph {
                         if (!calleesm.isStatic()) {
                             Value base = ((AbstractInstanceInvokeExpr) iexpr).getBase();
                             Value calleethis = calleesm.getActiveBody().getThisLocal();
-                            enter.addAlising(base, calleethis);
+                            ContextSensitiveValue cvbase = new ContextSensitiveValue(context, base);
+                            ContextSensitiveValue cvcallee = new ContextSensitiveValue(nctx, calleethis);
+                            enter.addAlising(cvbase, cvcallee);
                         }
                         for (int i = 0; i < calleesm.getParameterCount(); i++) {
-                            enter.addAlising(iexpr.getArg(i), calleesm.getActiveBody().getParameterLocal(i));
+                            ContextSensitiveValue cvcaller = new ContextSensitiveValue(context, iexpr.getArg(i));
+                            ContextSensitiveValue cvcallee = new ContextSensitiveValue(nctx,
+                                    calleesm.getActiveBody().getParameterLocal(i));
+                            enter.addAlising(cvcaller, cvcallee);
                         }
                     }
-                    exit.setRet(ret);
+                    ContextSensitiveValue cvret = new ContextSensitiveValue(context, ret);
+                    exit.setRet(cvret);
                     snode = new WrapperNode(context, enter, exit, stmt);
                 }
             } else {

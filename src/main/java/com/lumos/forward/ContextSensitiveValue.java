@@ -1,10 +1,37 @@
 package com.lumos.forward;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import soot.Value;
 
 public class ContextSensitiveValue {
     public Context context;
     public Value value;
+
+    public static Map<Context, Map<Value, ContextSensitiveValue>> cache;
+    // public UniqueName uniqueName;
+
+    // public UniqueName getUniqueName() {
+    // return uniqueName;
+    // }
+
+    // public void setUniqueName(UniqueName uniqueName) {
+    // this.uniqueName = uniqueName;
+    // }
+
+    public static ContextSensitiveValue getCValue(Context context, Value value) {
+        Map<Value, ContextSensitiveValue> map1 = cache.get(context);
+        if (map1 == null) {
+            map1 = new HashMap<>();
+            cache.put(context, map1);
+        }
+        if (!map1.containsKey(value)) {
+            ContextSensitiveValue cvalue = new ContextSensitiveValue(context, value);
+            map1.put(value, cvalue);
+        }
+        return cache.get(context).get(value);
+    }
 
     public ContextSensitiveValue(Context context, Value value) {
         this.context = context;
@@ -56,6 +83,11 @@ public class ContextSensitiveValue {
 
     public void setValue(Value value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "" + context + " ==> " + value + "";
     }
 
 }

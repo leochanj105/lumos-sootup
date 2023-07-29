@@ -52,6 +52,10 @@ public abstract class IPNode {
         this.successors = successors;
     }
 
+    public String getDescription() {
+        return this.context.toString() + ", " + this.stmt.toString() + ", " + this.type;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
