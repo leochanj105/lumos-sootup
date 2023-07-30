@@ -65,18 +65,18 @@ public class ForwardIPAnalysis {
             IPNode node = workList.iterator().next();
 
             workList.remove(node);
-            if (workList.size() < 50) {
-                for (IPNode nd : workList) {
-                    // App.p(nd + ", " + nd.getContext());
-                    // if (!liveIn.get(nd).getCurrMapping().isEmpty())
-                    // App.p(liveOut.get(nd));
-                }
-                // App.p("\n\n\n\n");
-                // App.p(liveOut);
-                if (round > 4010) {
-                    break;
-                }
-            }
+            // if (workList.size() < 50) {
+            // for (IPNode nd : workList) {
+            // // App.p(nd + ", " + nd.getContext());
+            // // if (!liveIn.get(nd).getCurrMapping().isEmpty())
+            // // App.p(liveOut.get(nd));
+            // }
+            // // App.p("\n\n\n\n");
+            // // App.p(liveOut);
+            // if (round > 4010) {
+            // break;
+            // }
+            // }
 
             // visitedNodes.add(node);
 
@@ -214,13 +214,13 @@ public class ForwardIPAnalysis {
             // App.p(out);
             if (isNotEqual(out, liveOut.get(node))) {
                 // fixed = false;
-                if (round > 4000) {
-                    App.p("***************    " + node + ", " + node.getContext());
+                // if (round > 4000) {
+                // App.p("*************** " + node + ", " + node.getContext());
 
-                    App.p(out);
-                    App.p("---------");
-                    App.p(liveOut.get(node));
-                }
+                // App.p(out);
+                // App.p("---------");
+                // App.p(liveOut.get(node));
+                // }
                 for (IPNode succ : node.getSuccessors()) {
                     // if (!workList.contains(succ)) {
                     workList.add(succ);
