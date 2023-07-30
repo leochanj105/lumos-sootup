@@ -21,18 +21,43 @@ import soot.jimple.internal.JInstanceFieldRef;
 public class IPFlowInfo {
     // Map<ContextSensitiveValue, Set<UniqueName>> uniqueNames;
     Map<UniqueName, Set<Definition>> currMapping;
-    IPNode ipnode;
+    // IPNode ipnode;
 
-    public IPNode getIpnode() {
-        return ipnode;
-    }
+    // public IPNode getIpnode() {
+    // return ipnode;
+    // }
 
-    public void setIpnode(IPNode ipnode) {
-        this.ipnode = ipnode;
-    }
+    // public void setIpnode(IPNode ipnode) {
+    // this.ipnode = ipnode;
+    // }
 
     public Map<UniqueName, Set<Definition>> getCurrMapping() {
         return currMapping;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((currMapping == null) ? 0 : currMapping.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        IPFlowInfo other = (IPFlowInfo) obj;
+        if (currMapping == null) {
+            if (other.currMapping != null)
+                return false;
+        } else if (!currMapping.equals(other.currMapping))
+            return false;
+        return true;
     }
 
     public void setCurrMapping(Map<UniqueName, Set<Definition>> currMapping) {
@@ -69,19 +94,19 @@ public class IPFlowInfo {
         assert (this.equals(other));
     }
 
-    public Set<Definition> getHeapDefinitions(Set<UniqueName> unames) {
-        Set<Definition> definitions = new HashSet<>();
-        for (UniqueName un : unames) {
-            Set<Definition> heapNames = currMapping.get(un);
-            if (heapNames != null) {
-                definitions.addAll(heapNames);
-            } else {
-                definitions.add(Definition.getDefinition(un, ipnode));
-                this.currMapping.put(un, definitions);
-            }
-        }
-        return definitions;
-    }
+    // public Set<Definition> getHeapDefinitions(Set<UniqueName> unames) {
+    // Set<Definition> definitions = new HashSet<>();
+    // for (UniqueName un : unames) {
+    // Set<Definition> heapNames = currMapping.get(un);
+    // if (heapNames != null) {
+    // definitions.addAll(heapNames);
+    // } else {
+    // definitions.add(Definition.getDefinition(un, null));
+    // this.currMapping.put(un, definitions);
+    // }
+    // }
+    // return definitions;
+    // }
     // public IPFlowInfo(Map<ContextSensitiveValue, Set<UniqueName>> original) {
     // this();
     // for (ContextSensitiveValue cv : original.keySet()) {
@@ -95,85 +120,138 @@ public class IPFlowInfo {
 
     public Set<Definition> getDefinitionsByCV(Context c, Value v) {
         ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
+        return getDefinitionsByCV(cv);
+    }
+
+    public Set<UniqueName> getUniqueNamesForRef(ContextSensitiveValue cv) {
+        JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
+        Set<Definition> baseDefs = getDefinitionsByCV(cv.getContext(), ref.getBase());
+        if (baseDefs == null) {
+            App.p(cv);
+            App.panicni();
+        }
+
+        Set<UniqueName> unames = new HashSet<>();
+
+        for (Definition def : baseDefs) {
+            UniqueName unref = null;
+            if (def.getDefinedValue().getBase().toString().equals("null")) {
+                unref = new UniqueName(def.getDefinedValue(), "null");
+            } else {
+                unref = new UniqueName(def.getDefinedValue(), ref.getField().getName());
+            }
+            unames.add(unref);
+        }
+        return unames;
+    }
+
+    public Set<Definition> getDefinitionsByCV(ContextSensitiveValue cv) {
+        //
         Set<Definition> resultDefs = new HashSet<>();
         if (cv.getValue() instanceof JInstanceFieldRef) {
             // return currMapping.get(cv);
-            JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
-            ContextSensitiveValue cvbase = new ContextSensitiveValue(cv.getContext(), ref.getBase());
-            // Set<UniqueName> unames = uniqueNames.get(cvbase);
-            Set<UniqueName> basenames = getUnamesByCV(cvbase);
-            if (basenames == null) {
-                App.p(cv);
-                App.panicni();
-            }
-
-            for (UniqueName un : basenames) {
-                UniqueName unref = null;
-                if (un.getBase().toString().equals(null)) {
-                    unref = new UniqueName(un, null);
+            for (UniqueName unref : getUniqueNamesForRef(cv)) {
+                Set<Definition> definitions = new HashSet<>();
+                Set<Definition> heapDefs = currMapping.get(unref);
+                if (heapDefs != null) {
+                    definitions.addAll(heapDefs);
+                } else {
+                    definitions.add(Definition.getDefinition(unref, null));
+                    this.currMapping.put(unref, definitions);
                 }
-                unref = new UniqueName(un, ref.getField().getName());
-                resultNames.add(unref);
+                // }
+                resultDefs.addAll(definitions);
             }
         } else {
-            Set<UniqueName> unames = uniqueNames.get(cv);
-            if (unames == null || unames.isEmpty()) {
-                if (cv.getValue().getType() instanceof RefLikeType) {
-                    UniqueName u = new UniqueName(cv, null);
-                    resultNames.add(u);
-                }
+            UniqueName un = new UniqueName(cv);
+            Set<Definition> defs = currMapping.get(un);
+            if (defs == null || defs.isEmpty()) {
+                // if (v.getValue().getType() instanceof RefLikeType) {
+                // UniqueName u = new UniqueName(cv);
+                currMapping.put(un, new HashSet<>());
+                resultDefs.add(Definition.getDefinition(un, null));
+                // }
             } else {
-                resultNames.addAll(unames);
+                resultDefs.addAll(defs);
             }
         }
         // if (resultNames.isEmpty()) {
         // App.p("!!!!!!!! " + cv + ", " + cv.getValue().getClass() + ", "
         // + (cv.getValue().getType() instanceof RefLikeType));
         // }
-        return resultNames;
+        return resultDefs;
     }
 
-    public void putUname(ContextSensitiveValue cv, UniqueName un) {
-        if (!uniqueNames.containsKey(cv)) {
-            uniqueNames.put(cv, new HashSet<>());
+    public void putDefinition(UniqueName un, Definition def) {
+        if (!currMapping.containsKey(un)) {
+            currMapping.put(un, new HashSet<>());
         }
-        uniqueNames.get(cv).add(un);
+        currMapping.get(un).add(def);
     }
 
-    public void putUname(ContextSensitiveValue cv, Set<UniqueName> unames) {
-        if (!uniqueNames.containsKey(cv)) {
-            uniqueNames.put(cv, new HashSet<>());
+    public void putDefinition(UniqueName un, Set<Definition> defs) {
+        if (!currMapping.containsKey(un)) {
+            currMapping.put(un, new HashSet<>());
         }
-        for (UniqueName un : unames) {
-            Set<UniqueName> targetSet = uniqueNames.get(cv);
-            if (targetSet == null) {
-                App.p(cv);
-            }
-            targetSet.add(un);
-        }
+        currMapping.get(un).addAll(defs);
     }
 
-    public void putUname(ContextSensitiveValue cv) {
-        putUname(cv, new UniqueName(cv, null));
+    public void putDefinition(ContextSensitiveValue cv, Definition def) {
+        UniqueName un = new UniqueName(cv);
+        putDefinition(un, def);
     }
 
-    public Map<ContextSensitiveValue, Set<UniqueName>> getUniqueNames() {
-        return uniqueNames;
+    public void putDefinition(Context c, Value v, Definition def) {
+        ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
+        putDefinition(cv, def);
     }
 
-    public void setUniqueNames(Map<ContextSensitiveValue, Set<UniqueName>> original) {
-        this.uniqueNames = original;
+    public void putDefinition(Context c, Value v, UniqueName uname) {
+        ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
+        putDefinition(cv, Definition.getDefinition(uname, null));
     }
+
+    public void putDefinition(ContextSensitiveValue cv, UniqueName uname) {
+        putDefinition(cv, Definition.getDefinition(uname, null));
+    }
+
+    public void putDefinition(ContextSensitiveValue cv, Set<Definition> defs) {
+        UniqueName un = new UniqueName(cv);
+        putDefinition(un, defs);
+    }
+
+    public void putDefinition(Context c, Value v, Set<Definition> defs) {
+        ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
+        putDefinition(cv, defs);
+    }
+
+    public void putDefinition(Context c, Value v) {
+        ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
+        putDefinition(cv, new UniqueName(cv, null));
+    }
+
+    public void putDefinition(ContextSensitiveValue cv) {
+        putDefinition(cv, new UniqueName(cv, null));
+    }
+
+    // public Map<ContextSensitiveValue, Set<UniqueName>> getUniqueNames() {
+    // return uniqueNames;
+    // }
+
+    // public void setUniqueNames(Map<ContextSensitiveValue, Set<UniqueName>>
+    // original) {
+    // this.uniqueNames = original;
+    // }
 
     @Override
     public String toString() {
         String result = "";
         result += "IPFlowInfo: \n";
-        result += "UniqueNames:\n";
-        for (ContextSensitiveValue cv : uniqueNames.keySet()) {
-            result += cv + ": " + uniqueNames.get(cv);
-            result += "\n";
-        }
+        // result += "UniqueNames:\n";
+        // for (ContextSensitiveValue cv : uniqueNames.keySet()) {
+        // result += cv + ": " + uniqueNames.get(cv);
+        // result += "\n";
+        // }
         result += "\nMapping:\n";
         for (UniqueName un : currMapping.keySet()) {
             result += un + ": " + currMapping.get(un);

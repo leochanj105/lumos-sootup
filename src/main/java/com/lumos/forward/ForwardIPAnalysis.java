@@ -65,6 +65,19 @@ public class ForwardIPAnalysis {
             IPNode node = workList.iterator().next();
 
             workList.remove(node);
+            if (workList.size() < 50) {
+                for (IPNode nd : workList) {
+                    // App.p(nd + ", " + nd.getContext());
+                    // if (!liveIn.get(nd).getCurrMapping().isEmpty())
+                    // App.p(liveOut.get(nd));
+                }
+                // App.p("\n\n\n\n");
+                // App.p(liveOut);
+                if (round > 4010) {
+                    break;
+                }
+            }
+
             // visitedNodes.add(node);
 
             // IPFlowInfo in = copy(liveIn.get(node));
@@ -86,13 +99,13 @@ public class ForwardIPAnalysis {
                     ContextSensitiveValue cv1 = aliasp.get(0);
                     ContextSensitiveValue cv2 = aliasp.get(1);
                     if (!enode.isRemote()) {
-                        Set<UniqueName> unames = out.getUnamesByCV(cv1);
+                        Set<Definition> defs = out.getDefinitionsByCV(cv1);
                         // for (UniqueName un : unames) {
                         // out.putUname(cv2, un);
                         // }
-                        out.putUname(cv2, unames);
+                        out.putDefinition(cv2, defs);
                     } else {
-                        out.putUname(cv2);
+                        out.putDefinition(cv2);
                     }
                 }
 
@@ -103,13 +116,13 @@ public class ForwardIPAnalysis {
                     for (Stmt stmt : enode.getReturnStmts()) {
                         if (stmt instanceof JReturnStmt) {
                             // Value vv = ((JReturnStmt) stmt).getOp();
-                            ContextSensitiveValue cvcallee = new ContextSensitiveValue(enode.getContext(),
+                            ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(enode.getContext(),
                                     ((JReturnStmt) stmt).getOp());
                             if (!cvcallee.getValue().toString().contains("null")) {
                                 // for (UniqueName un : out.getUniqueNames().get(cvcallee)) {
                                 // out.putUname(cvcaller, un);
                                 // }
-                                out.putUname(cvcaller, out.getUnamesByCV(cvcallee));
+                                out.putDefinition(cvcaller, out.getDefinitionsByCV(cvcallee));
                                 // App.p("!!! " + cvcaller + ", " + cvcallee);
                             }
                         }
@@ -128,38 +141,46 @@ public class ForwardIPAnalysis {
                     if (rop instanceof JCastExpr) {
                         rop = ((JCastExpr) rop).getOp();
                     }
-                    ContextSensitiveValue cvlop = new ContextSensitiveValue(node.getContext(), lop);
-                    ContextSensitiveValue cvrop = new ContextSensitiveValue(node.getContext(), rop);
+                    ContextSensitiveValue cvlop = ContextSensitiveValue.getCValue(node.getContext(), lop);
+                    ContextSensitiveValue cvrop = ContextSensitiveValue.getCValue(node.getContext(), rop);
                     if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)) {
+                        Set<Definition> defs = out.getDefinitionsByCV(cvrop);
                         if (lop instanceof Local) {
-                            Set<UniqueName> unames = out.getUnamesByCV(cvrop);
-                            if (unames == null) {
+                            // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
+                            if (defs == null) {
                                 if (lop.getType() instanceof RefLikeType) {
                                     App.p("This is not possible...");
-                                    out.putUname(cvlop);
+                                    App.panicni();
+                                    // out.putUname(cvlop);
                                 }
                             } else {
-                                if (rop instanceof JInstanceFieldRef) {
-                                    Set<UniqueName> possibleNames = out.getHeapNames(unames);
-                                    out.putUname(cvlop, possibleNames);
-                                } else {
-                                    out.putUname(cvlop, unames);
+                                Set<Definition> newdefs = new HashSet<>();
+                                for (Definition def : defs) {
+                                    UniqueName value = def.getDefinedValue();
+                                    newdefs.add(Definition.getDefinition(value, node));
                                 }
+                                out.putDefinition(cvrop, newdefs);
                             }
                         } else if (lop instanceof JInstanceFieldRef) {
-                            Set<UniqueName> unames = out.getUnamesByCV(cvrop);
-                            Set<UniqueName> possibleNames = out.getUnamesByCV(cvlop);
-                            if (possibleNames == null || possibleNames.isEmpty()) {
+                            Set<UniqueName> unames = out.getUniqueNamesForRef(cvlop);
+                            Set<Definition> possibleDefinitions = out.getDefinitionsByCV(cvrop);
+                            if (unames == null || unames.isEmpty()) {
                                 // App.p(stmt);
                                 // App.p(cvlop);
                                 App.p("This can't be unresolved");
                             }
 
-                            for (UniqueName uname : possibleNames) {
-                                if (possibleNames.size() == 1) {
-                                    out.getCurrMapping().put(uname, unames);
+                            Set<Definition> currDefs = new HashSet<>();
+
+                            for (Definition def : possibleDefinitions) {
+                                currDefs.add(Definition.getDefinition(def.definedValue, node));
+                            }
+
+                            for (UniqueName uname : unames) {
+                                if (unames.size() == 1) {
+                                    out.putDefinition(uname, currDefs);
                                 } else {
-                                    out.getCurrMapping().get(uname).addAll(unames);
+                                    out.getCurrMapping().get(uname).addAll(currDefs);
                                 }
                             }
                             // Set<UniqueName> runames = out.getUnamesByCV(cvrop);
@@ -193,6 +214,13 @@ public class ForwardIPAnalysis {
             // App.p(out);
             if (isNotEqual(out, liveOut.get(node))) {
                 // fixed = false;
+                if (round > 4000) {
+                    App.p("***************    " + node + ", " + node.getContext());
+
+                    App.p(out);
+                    App.p("---------");
+                    App.p(liveOut.get(node));
+                }
                 for (IPNode succ : node.getSuccessors()) {
                     // if (!workList.contains(succ)) {
                     workList.add(succ);
@@ -217,23 +245,23 @@ public class ForwardIPAnalysis {
 
     private IPFlowInfo merge(IPFlowInfo f1, IPFlowInfo f2) {
         IPFlowInfo f3 = copy(f1);
-        for (ContextSensitiveValue cv : f2.getUniqueNames().keySet()) {
-            Map<ContextSensitiveValue, Set<UniqueName>> fun = f3.getUniqueNames();
-            if (!fun.containsKey(cv)) {
-                fun.put(cv, new HashSet<>());
-            }
-            for (UniqueName un : f2.getUniqueNames().get(cv)) {
-                fun.get(cv).add(un);
-            }
-        }
+        // for (ContextSensitiveValue cv : f2.getUniqueNames().keySet()) {
+        // Map<ContextSensitiveValue, Set<UniqueName>> fun = f3.getUniqueNames();
+        // if (!fun.containsKey(cv)) {
+        // fun.put(cv, new HashSet<>());
+        // }
+        // for (UniqueName un : f2.getUniqueNames().get(cv)) {
+        // fun.get(cv).add(un);
+        // }
+        // }
 
         for (UniqueName un : f2.getCurrMapping().keySet()) {
-            Map<UniqueName, Set<UniqueName>> mapping = f3.getCurrMapping();
+            Map<UniqueName, Set<Definition>> mapping = f3.getCurrMapping();
             if (!mapping.containsKey(un)) {
                 mapping.put(un, new HashSet<>());
             }
-            for (UniqueName un2 : f2.getCurrMapping().get(un)) {
-                mapping.get(un).add(un2);
+            for (Definition def : f2.getCurrMapping().get(un)) {
+                mapping.get(un).add(def);
             }
         }
 

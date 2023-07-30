@@ -8,4 +8,10 @@ public class NoopNode extends IPNode {
         this.stmt = stmt;
         this.type = "noop";
     }
+
+    @Override
+    public String toString() {
+        return "NoopNode [" + this.stmt + "]";
+    }
+
 }

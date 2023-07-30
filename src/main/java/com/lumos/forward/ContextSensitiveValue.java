@@ -3,13 +3,15 @@ package com.lumos.forward;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.lumos.App;
+
 import soot.Value;
 
 public class ContextSensitiveValue {
     public Context context;
     public Value value;
 
-    public static Map<Context, Map<Value, ContextSensitiveValue>> cache;
+    public static Map<Context, Map<Value, ContextSensitiveValue>> cache = new HashMap<>();
     // public UniqueName uniqueName;
 
     // public UniqueName getUniqueName() {
@@ -21,6 +23,7 @@ public class ContextSensitiveValue {
     // }
 
     public static ContextSensitiveValue getCValue(Context context, Value value) {
+        // App.p(context);
         Map<Value, ContextSensitiveValue> map1 = cache.get(context);
         if (map1 == null) {
             map1 = new HashMap<>();

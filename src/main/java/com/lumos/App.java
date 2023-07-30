@@ -117,8 +117,9 @@ public class App {
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
         // // igraph.build(services);
         // MethodInfo minfo = searchMethod("sendInsidePayment");
-        // // ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
         ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
+        // ContextSensitiveInfo cinfo = igraph.build("InsidePaymentServiceImpl",
+        // "pay(");
         p(cinfo.getFirstNode());
 
         // long start = System.currentTimeMillis();

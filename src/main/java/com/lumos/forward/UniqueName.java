@@ -40,6 +40,10 @@ public class UniqueName {
         this.append(ref);
     }
 
+    public UniqueName(ContextSensitiveValue cv) {
+        this(cv, null);
+    }
+
     public void append(String fref) {
         suffix.add(fref);
     }

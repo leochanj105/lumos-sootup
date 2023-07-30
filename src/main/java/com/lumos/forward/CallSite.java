@@ -44,8 +44,7 @@ public class CallSite {
 
     @Override
     public String toString() {
-        return "CallSite [callingStmt=" + (callingStmt == null ? "None" : callingStmt) + ", method="
-                + minfo.sm.getName() + "]";
+        return (callingStmt == null ? "None" : callingStmt.toString());
     }
 
     @Override

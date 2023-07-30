@@ -84,6 +84,6 @@ public class EnterNode extends IPNode {
 
     @Override
     public String toString() {
-        return "EnterNode [sm=" + sm.getName() + ", lastCall=" + lastCall + "]";
+        return "EnterNode [" + sm.getName() + ", " + lastCall + "]";
     }
 }

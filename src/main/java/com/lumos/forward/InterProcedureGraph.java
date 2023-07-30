@@ -299,8 +299,8 @@ public class InterProcedureGraph {
                                 App.p("Wiring null values!");
                                 App.panicni();
                             }
-                            ContextSensitiveValue cv1 = new ContextSensitiveValue(context, v2);
-                            ContextSensitiveValue cv2 = new ContextSensitiveValue(nctx, v2);
+                            ContextSensitiveValue cv1 = ContextSensitiveValue.getCValue(context, v2);
+                            ContextSensitiveValue cv2 = ContextSensitiveValue.getCValue(nctx, v2);
                             enter.addAlising(cv1, cv2);
                             enter.setRemote(true);
                             // App.p("Added aliasing pairs: " + v1 + " in " + callerinfo.sm + " and " + v2 +
@@ -318,18 +318,18 @@ public class InterProcedureGraph {
                         if (!calleesm.isStatic()) {
                             Value base = ((AbstractInstanceInvokeExpr) iexpr).getBase();
                             Value calleethis = calleesm.getActiveBody().getThisLocal();
-                            ContextSensitiveValue cvbase = new ContextSensitiveValue(context, base);
-                            ContextSensitiveValue cvcallee = new ContextSensitiveValue(nctx, calleethis);
+                            ContextSensitiveValue cvbase = ContextSensitiveValue.getCValue(context, base);
+                            ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(nctx, calleethis);
                             enter.addAlising(cvbase, cvcallee);
                         }
                         for (int i = 0; i < calleesm.getParameterCount(); i++) {
-                            ContextSensitiveValue cvcaller = new ContextSensitiveValue(context, iexpr.getArg(i));
-                            ContextSensitiveValue cvcallee = new ContextSensitiveValue(nctx,
+                            ContextSensitiveValue cvcaller = ContextSensitiveValue.getCValue(context, iexpr.getArg(i));
+                            ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(nctx,
                                     calleesm.getActiveBody().getParameterLocal(i));
                             enter.addAlising(cvcaller, cvcallee);
                         }
                     }
-                    ContextSensitiveValue cvret = new ContextSensitiveValue(context, ret);
+                    ContextSensitiveValue cvret = ContextSensitiveValue.getCValue(context, ret);
                     exit.setRet(cvret);
                     snode = new WrapperNode(context, enter, exit, stmt);
                 }

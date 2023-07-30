@@ -58,4 +58,9 @@ public class ExitNode extends IPNode {
         // List<Stmt> rets = new ArrayList<>();
         // this.ret = ret;
     }
+
+    @Override
+    public String toString() {
+        return "ExitNode [" + sm.getName() + ", " + lastCall + "]";
+    }
 }

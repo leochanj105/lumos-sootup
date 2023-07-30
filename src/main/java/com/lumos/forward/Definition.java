@@ -9,11 +9,16 @@ public class Definition {
     public UniqueName definedValue;
     public IPNode definedLocation;
 
-    public static Map<UniqueName, Map<IPNode, Definition>> cache;
+    public static Map<UniqueName, Map<IPNode, Definition>> cache = new HashMap<>();
 
     public Definition(UniqueName definedValue, IPNode definedLocation) {
         this.definedValue = definedValue;
         this.definedLocation = definedLocation;
+    }
+
+    @Override
+    public String toString() {
+        return definedValue + "";
     }
 
     public static Definition getDefinition(UniqueName un, IPNode node) {
@@ -22,7 +27,7 @@ public class Definition {
             map1 = new HashMap<>();
             cache.put(un, map1);
         }
-        if (!map1.containsKey(node)) {
+        if (node == null || !map1.containsKey(node)) {
             Definition def = new Definition(un, node);
             map1.put(node, def);
         }
