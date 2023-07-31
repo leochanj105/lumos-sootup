@@ -38,6 +38,8 @@ public class MethodInfo {
 
     public Map<String, Value> localMap;
 
+    public Map<Stmt, Set<Stmt>> cfDependency;
+
     public MethodInfo(SootMethod sm) {
         this.sm = sm;
         this.cfg = new BriefUnitGraph(sm.getActiveBody());
@@ -232,9 +234,8 @@ public class MethodInfo {
     public void buildPostDominanceFrontier() {
         Map<Stmt, Set<Stmt>> dominators = new HashMap<>();
         Set<Stmt> worklist = new HashSet<>();
-        // Map<Stmt, Set<Stmt>> frontier = new HashMap<>();
         Map<Stmt, Set<Stmt>> cfdeps = new HashMap<>();
-        Set<Stmt> allStmt = new HashSet<>();
+        // Set<Stmt> allStmt = new HashSet<>();
         for (Unit u : this.sm.getActiveBody().getUnits()) {
             Stmt stmt = (Stmt) u;
             // allStmt.add(stmt);
@@ -242,18 +243,6 @@ public class MethodInfo {
             dominators.put(stmt, new HashSet<>());
             cfdeps.put(stmt, new HashSet<>());
         }
-
-        // for (Unit u : this.sm.getActiveBody().getUnits()) {
-        // Stmt stmt = (Stmt) u;
-        // if (cfg.getSuccsOf(u).isEmpty()) {
-        // frontier.put(stmt, new HashSet<>(Collections.singletonList(stmt)));
-        // } else {
-        // frontier.put(stmt, new HashSet<>(allStmt));
-        // }
-        // cfdeps.put(stmt, new HashSet<>());
-        // }
-
-        // boolean changed = true;
 
         while (!worklist.isEmpty()) {
             // changed = false;
@@ -276,16 +265,6 @@ public class MethodInfo {
             if (!(intersection == null)) {
                 pds.addAll(intersection);
             }
-            // if (stmt.toString().contains("if $stack26 == $stack28")) {
-            // HashSet<Stmt> tmp = new
-            // HashSet<>(dominators.get(cfg.getSuccsOf(stmt).get(0)));
-            // tmp.retainAll(dominators.get(cfg.getSuccsOf(stmt).get(1)));
-            // App.p("^^^^^^^^^^^^\n"
-            // + intersection);
-            // App.p("*********\n"
-            // + tmp);
-            // App.p("*********\n" + dominators.get(stmt));
-            // }
             if (!pds.equals(dominators.get(stmt))) {
                 for (Unit pred : cfg.getPredsOf(stmt)) {
                     Stmt predStmt = (Stmt) pred;
@@ -303,43 +282,14 @@ public class MethodInfo {
                 Stmt succstmt = (Stmt) succ;
                 pdsuccs.addAll(dominators.get(succstmt));
             }
-            // if (stmt.toString().contains("if $stack26 == $stack28")) {
-            // for (Unit un : cfg.getSuccsOf(stmt)) {
-            // Stmt unst = (Stmt) un;
-            // App.p("----------------\n" + unst);
-            // for (Stmt ss : dominators.get(unst)) {
-            // App.p(ss);
-            // }
-            // }
-
-            // }
             for (Stmt st : pdsuccs) {
-                // if (stmt.toString().contains("if $stack26 == $stack28")) {
-                // App.p(dominators.get(stmt));
-                // App.p(st);
-                // }
                 if (!dominators.get(stmt).contains(st)) {
-
                     cfdeps.get(st).add(stmt);
                 }
             }
-            // for (Stmt st : pds) {
-            // cfdeps.get(st).add(stmt);
-            // }
         }
 
-        if (sm.getName().contains("pay")) {
-            for (Unit u : this.sm.getActiveBody().getUnits()) {
-                Stmt stmt = (Stmt) u;
-                if (stmt.toString().contains("return 0") &&
-                        stmt.getJavaSourceStartLineNumber() == 59) {
-
-                    for (Stmt st : cfdeps.get(stmt)) {
-                        App.p(st.getJavaSourceStartLineNumber() + ", " + st);
-                    }
-                }
-            }
-        }
+        this.cfDependency = cfdeps;
     }
 
     public void printToJimple() {

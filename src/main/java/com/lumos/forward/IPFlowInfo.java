@@ -71,16 +71,6 @@ public class IPFlowInfo {
 
     public IPFlowInfo(IPFlowInfo other) {
         this();
-        // Map<ContextSensitiveValue, Set<UniqueName>> original =
-        // other.getUniqueNames();
-
-        // for (ContextSensitiveValue cv : original.keySet()) {
-        // Set<UniqueName> snames = new HashSet<>();
-        // for (UniqueName un : original.get(cv)) {
-        // snames.add(un);
-        // }
-        // this.uniqueNames.put(cv, snames);
-        // }
 
         Map<UniqueName, Set<Definition>> mappings = other.getCurrMapping();
 
@@ -93,30 +83,6 @@ public class IPFlowInfo {
         }
         assert (this.equals(other));
     }
-
-    // public Set<Definition> getHeapDefinitions(Set<UniqueName> unames) {
-    // Set<Definition> definitions = new HashSet<>();
-    // for (UniqueName un : unames) {
-    // Set<Definition> heapNames = currMapping.get(un);
-    // if (heapNames != null) {
-    // definitions.addAll(heapNames);
-    // } else {
-    // definitions.add(Definition.getDefinition(un, null));
-    // this.currMapping.put(un, definitions);
-    // }
-    // }
-    // return definitions;
-    // }
-    // public IPFlowInfo(Map<ContextSensitiveValue, Set<UniqueName>> original) {
-    // this();
-    // for (ContextSensitiveValue cv : original.keySet()) {
-    // Set<UniqueName> snames = new HashSet<>();
-    // for (UniqueName un : original.get(cv)) {
-    // snames.add(un);
-    // }
-    // this.uniqueNames.put(cv, snames);
-    // }
-    // }
 
     public Set<Definition> getDefinitionsByCV(Context c, Value v) {
         ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);

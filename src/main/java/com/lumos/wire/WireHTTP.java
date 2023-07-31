@@ -20,7 +20,7 @@ public class WireHTTP {
                     "inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)",
                     new String[] { "$u0" }, new String[] { "info" }, "$stack29");
             add("boolean pay", 46, "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById",
-                    new String[] { "$stack17" }, new String[] { "info" }, "result");
+                    new String[] { "$stack17" }, new String[] { "info" }, "$stack23");
         }
         // System.out.println(reqMethod + ", " + lineNum);
         for (HTTPRequestWirePoint wp : wps.keySet()) {

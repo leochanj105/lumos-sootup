@@ -142,7 +142,11 @@ public class ForwardIPAnalysis {
                 Stmt stmt = node.getStmt();
                 if (stmt instanceof JIdentityStmt) {
                     // continue;
-                } else if (stmt instanceof JAssignStmt) {
+                }
+                // else if (stmt instanceof JReturnStmt) {
+                // // out.putDefinition();
+                // }
+                else if (stmt instanceof JAssignStmt) {
                     JAssignStmt astmt = (JAssignStmt) stmt;
                     Value lop = astmt.getLeftOp();
                     Value rop = astmt.getRightOp();
@@ -160,6 +164,10 @@ public class ForwardIPAnalysis {
                                     App.p("This is not possible...");
                                     App.panicni();
                                     // out.putUname(cvlop);
+                                } else {
+                                    App.p("oh no........");
+                                    App.p(node);
+                                    App.panicni();
                                 }
                             } else {
                                 Set<Definition> newdefs = new HashSet<>();
@@ -167,8 +175,9 @@ public class ForwardIPAnalysis {
                                     UniqueName value = def.getDefinedValue();
                                     newdefs.add(Definition.getDefinition(value, node));
                                 }
-                                out.putDefinition(cvrop, newdefs);
+                                out.putDefinition(cvlop, newdefs);
                             }
+                            // if(cvlop)
                         } else if (lop instanceof JInstanceFieldRef) {
                             Set<UniqueName> unames = out.getUniqueNamesForRef(cvlop);
                             Set<Definition> possibleDefinitions = out.getDefinitionsByCV(cvrop);
@@ -191,6 +200,7 @@ public class ForwardIPAnalysis {
                                     out.getCurrMapping().get(uname).addAll(currDefs);
                                 }
                             }
+
                             // Set<UniqueName> runames = out.getUnamesByCV(cvrop);
 
                             // if (runames == null) {
@@ -199,7 +209,9 @@ public class ForwardIPAnalysis {
                             // Set<UniqueName> lunames = out.getUnamesByCV(cvlop);
 
                             // out.currMapping.put()
-                        } else {
+                        }
+
+                        else {
                             App.panicni();
                         }
                     }

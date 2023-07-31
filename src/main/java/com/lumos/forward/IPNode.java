@@ -2,6 +2,8 @@ package com.lumos.forward;
 
 import java.util.List;
 
+import com.lumos.analysis.MethodInfo;
+
 import soot.jimple.Stmt;
 
 public abstract class IPNode {
@@ -11,6 +13,10 @@ public abstract class IPNode {
     public Stmt stmt;
     public Context context;
     public String type;
+
+    public MethodInfo getMethodInfo() {
+        return context.getStackLast();
+    }
 
     public String getType() {
         return type;

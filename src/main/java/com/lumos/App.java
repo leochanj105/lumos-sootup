@@ -137,29 +137,116 @@ public class App {
                 "$stack29 = virtualinvoke $stack28.<java.lang.Boolean: boolean booleanValue()>()",
                 "noop");
         // p(ipnode);
+        // p(ipnode.getContext().getStackLast().cfDependency.get(ipnode.getStmt()));
         IPFlowInfo cmap = fia.getBefore(ipnode);
         ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(),
                 ((JAssignStmt) ipnode.getStmt()).getLeftOp());
 
-        Set<Definition> satisfiedDefs = new HashSet<>();
+        Set<IPNode> unresolvedNodes = new HashSet<>();
+        Set<ContextSensitiveValue> visitedCVs = new HashSet<>();
+        Set<IPNode> visitedNodes = new HashSet<>();
+
+        // Set<Definition> satisfiedDefs = new HashSet<>();
         for (Definition def : cmap.getDefinitionsByCV(cvalue)) {
             App.p(def.d());
-            if (def.getDefinedLocation().getStmt().getJavaSourceStartLineNumber() == 59) {
-                satisfiedDefs.add(def);
+            Stmt defstmt = def.getDefinedLocation().getStmt();
+            if ((defstmt.toString().contains("return 1")) ||
+                    (defstmt.toString().contains("return 0") && defstmt.getJavaSourceStartLineNumber() != 59)) {
+                continue;
             }
+            unresolvedNodes.add(def.getDefinedLocation());
         }
 
-        for (Definition def : satisfiedDefs) {
-            MethodInfo minfo = def.getDefinedLocation().getContext().getStackLast();
-            Stmt stmt = def.getDefinedLocation().getStmt();
-            minfo.buildPostDominanceFrontier();
-            // App.p(minfo.sm);
-            // for (Unit u : minfo.sm.getActiveBody().getUnits()) {
-            // App.p(u);
-            // App.p(minfo.getCF(u) + "\n");
+        // unresolvedCVs.add(cvalue);
+
+        while (!unresolvedNodes.isEmpty()) {
+            IPNode node = unresolvedNodes.iterator().next();
+
+            unresolvedNodes.remove(node);
+            if (visitedNodes.contains(node)) {
+                continue;
+            }
+            visitedNodes.add(node);
+            Stmt stmt = node.getStmt();
+            App.p(node);
+            MethodInfo minfo = node.getContext().getStackLast();
+            for (Stmt cfstmt : minfo.cfDependency.get(stmt)) {
+                IPNode cfnode = igraph.getIPNode(node.getContext(), cfstmt);
+                unresolvedNodes.add(cfnode);
+            }
+
+            // Definition def = satisfiedDefs.iterator().next();
+            // satisfiedDefs.remove(def);
+            // if (stmt.toString().contains("return $stack1")) {
+            // App.p(fia.getBefore(node));
             // }
-            // App.p(minfo.cfAnalysis.getBeforeUnit(minfo.sm.getActiveBody()));
-            // App.p(minfo.reachingAnalysis.getBeforeUnit(stmt));
+
+            Set<ContextSensitiveValue> cvused = new HashSet<>();
+            if (stmt instanceof JReturnStmt) {
+                Value ret = ((JReturnStmt) stmt).getOp();
+                cvused.add(ContextSensitiveValue.getCValue(node.getContext(), ret));
+            } else {
+                // JAssignStmt astmt = (JAssignStmt) stmt;
+                Set<Value> banned = new HashSet<>();
+                for (ValueBox vbox : stmt.getUseBoxes()) {
+                    Value use = vbox.getValue();
+
+                    if (banned.contains(use)) {
+                        continue;
+                    }
+                    if ((stmt instanceof JAssignStmt)
+                            && ((JAssignStmt) stmt).getLeftOp().getUseBoxes().contains(vbox)) {
+                        continue;
+                    }
+
+                    if ((use instanceof Local) || (use instanceof JInstanceFieldRef)) {
+                        ContextSensitiveValue cvuse = ContextSensitiveValue.getCValue(node.getContext(), use);
+                        cvused.add(cvuse);
+                        if (use instanceof JInstanceFieldRef) {
+                            banned.add(((JInstanceFieldRef) use).getBase());
+                        }
+                    }
+                }
+
+            }
+            for (ContextSensitiveValue cv : cvused) {
+
+                Set<Definition> satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
+
+                // if (cv.toString().contains("sendInsidePayment,pay,getStatus ==> $stack1")) {
+                // App.p("------------------- \n" + node);
+                // App.p(fia.getBefore(node));
+                // IPNode nodex = node.getPredecesors().get(0);
+                // App.p("------------------- \n" + nodex);
+                // App.p(fia.getAfter(nodex));
+                // }
+
+                App.p(cv);
+
+                if (cv.toString().contains("this.<inside_payment.domain.Order: int status>")) {
+                    // App.p("!!!!! " + cv);
+                    // for (Definition satdef : satisfiedDefs) {
+                    // App.p(satdef.getDefinedLocation() + ":: " + satdef.getDefinedValue());
+                    // }
+                }
+                boolean unresolved = true;
+                for (Definition satdef : satisfiedDefs) {
+
+                    if (satdef.getDefinedLocation() != null) {
+                        unresolved = false;
+                        unresolvedNodes.add(satdef.getDefinedLocation());
+                    }
+                }
+                if (unresolved) {
+                    App.p(">>>>>\nUnresolved " + cv + " with:");
+                    for (Definition satdef : satisfiedDefs) {
+                        App.p(satdef.getDefinedValue());
+                    }
+                    App.p("<<<<<\n");
+                }
+
+            }
+
         }
 
         // p(fia.getAfter(ipnode));
@@ -292,7 +379,9 @@ public class App {
 
                 MethodInfo minfo = new MethodInfo(sm);
                 Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
-                minfo.analyzeCF();
+                // minfo.analyzeCF();
+                minfo.buildPostDominanceFrontier();
+
                 // p(sm.getActiveBody());
                 // if (sm.toString().contains("Test$T: void <init>(Test,boolean)")) {
                 // p("--- " +
