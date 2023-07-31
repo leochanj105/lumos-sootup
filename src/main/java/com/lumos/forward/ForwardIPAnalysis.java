@@ -57,7 +57,9 @@ public class ForwardIPAnalysis {
         while (!workList.isEmpty()) {
             // fixed = true;
             round += 1;
-            App.p("Round " + round);
+            if (App.showRound) {
+                App.p("Round " + round);
+            }
             // fixed = true;
             // Deque<IPNode> queue = new ArrayDeque<>(startingNodes);
             // HashSet<IPNode> visitedNodes = new HashSet<>();
@@ -113,7 +115,8 @@ public class ForwardIPAnalysis {
                 ExitNode enode = (ExitNode) node;
                 ContextSensitiveValue cvcaller = enode.getRet();
                 if (cvcaller != null) {
-                    for (Stmt stmt : enode.getReturnStmts()) {
+                    for (IPNode retNode : enode.getReturnStmtNodes()) {
+                        Stmt stmt = retNode.getStmt();
                         if (stmt instanceof JReturnStmt) {
                             // Value vv = ((JReturnStmt) stmt).getOp();
                             ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(enode.getContext(),
@@ -122,7 +125,12 @@ public class ForwardIPAnalysis {
                                 // for (UniqueName un : out.getUniqueNames().get(cvcallee)) {
                                 // out.putUname(cvcaller, un);
                                 // }
-                                out.putDefinition(cvcaller, out.getDefinitionsByCV(cvcallee));
+                                Set<Definition> defs = out.getDefinitionsByCV(cvcallee);
+                                Set<Definition> retdefs = new HashSet<>();
+                                for (Definition def : defs) {
+                                    retdefs.add(Definition.getDefinition(def.definedValue, retNode));
+                                }
+                                out.putDefinition(cvcaller, retdefs);
                                 // App.p("!!! " + cvcaller + ", " + cvcallee);
                             }
                         }
@@ -196,6 +204,13 @@ public class ForwardIPAnalysis {
                         }
                     }
                 }
+                // else if (stmt instanceof JReturnStmt) {
+                // ContextSensitiveValue retcv =
+                // ContextSensitiveValue.getCValue(node.getContext(),
+                // ((JReturnStmt) stmt).getOp());
+                // out.putDefinition(Definition.getDefinition(out.getDefinitionsByCV(retcv),
+                // node));
+                // }
                 // if (stmt.toString()
                 // .contains("return $stack1")) {
                 // for (IPNode pred : node.getPredecesors()) {

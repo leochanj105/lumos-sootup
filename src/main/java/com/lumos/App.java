@@ -32,9 +32,12 @@ import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
 import com.lumos.forward.ContextSensitiveInfo;
+import com.lumos.forward.ContextSensitiveValue;
+import com.lumos.forward.Definition;
 import com.lumos.forward.EnterNode;
 import com.lumos.forward.ExitNode;
 import com.lumos.forward.ForwardIPAnalysis;
+import com.lumos.forward.IPFlowInfo;
 import com.lumos.forward.IPNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.StmtNode;
@@ -95,6 +98,9 @@ public class App {
     public static String outputFormat = "jimple";
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
+    public static boolean showRound = false;
+    public static boolean showLineNum = true;
+
     public static Map<String, MethodInfo> methodMap;
 
     public static void main(String[] args) {
@@ -120,18 +126,43 @@ public class App {
         ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
         // ContextSensitiveInfo cinfo = igraph.build("InsidePaymentServiceImpl",
         // "pay(");
-        p(cinfo.getFirstNode());
+        // p(cinfo.getFirstNode());
 
         // long start = System.currentTimeMillis();
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
-        IPNode ipnode = igraph.getLastNode();
-        p(((StmtNode) ipnode).getContext().getStackLast().sm + ", " + ipnode.getDescription());
-        // IPNode ipnode = igraph.searchNode("getOrderById", "getOrderId",
-        // "$stack1 = this.<order.domain.GetOrderByIdInfo: java.lang.String orderId>",
-        // "stmt");
+        // IPNode ipnode = igraph.getLastNode();
+        // p(((StmtNode) ipnode).getContext().getStackLast().sm + ", " +
+        // ipnode.getDescription());
+        IPNode ipnode = igraph.searchNode(
+                "$stack29 = virtualinvoke $stack28.<java.lang.Boolean: boolean booleanValue()>()",
+                "noop");
         // p(ipnode);
-        // p(fia.getBefore(ipnode));
-        p(fia.getAfter(ipnode));
+        IPFlowInfo cmap = fia.getBefore(ipnode);
+        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(),
+                ((JAssignStmt) ipnode.getStmt()).getLeftOp());
+
+        Set<Definition> satisfiedDefs = new HashSet<>();
+        for (Definition def : cmap.getDefinitionsByCV(cvalue)) {
+            App.p(def.d());
+            if (def.getDefinedLocation().getStmt().getJavaSourceStartLineNumber() == 59) {
+                satisfiedDefs.add(def);
+            }
+        }
+
+        for (Definition def : satisfiedDefs) {
+            MethodInfo minfo = def.getDefinedLocation().getContext().getStackLast();
+            Stmt stmt = def.getDefinedLocation().getStmt();
+            minfo.buildPostDominanceFrontier();
+            // App.p(minfo.sm);
+            // for (Unit u : minfo.sm.getActiveBody().getUnits()) {
+            // App.p(u);
+            // App.p(minfo.getCF(u) + "\n");
+            // }
+            // App.p(minfo.cfAnalysis.getBeforeUnit(minfo.sm.getActiveBody()));
+            // App.p(minfo.reachingAnalysis.getBeforeUnit(stmt));
+        }
+
+        // p(fia.getAfter(ipnode));
         // p("!!! " + ipnode.getSuccessors());
 
         // ipnode = igraph.searchNode("getOrderById", "getOrderId",
@@ -143,6 +174,8 @@ public class App {
         // App.p((stop - start) / 1000.0);
         // play();
     }
+
+    // public static void backtrack()
 
     public static void play() {
         MethodInfo minfo = searchMethod("doErrorQueue", "LauncherServiceImpl");

@@ -31,93 +31,94 @@ public class CFAnalysis {
 
     public CFAnalysis(DirectedGraph<Unit> graph, ReachingDefAnalysis rwa) {
         this.rwa = rwa;
-        List<Unit> startingUnits = new ArrayList<>();
+        // List<Unit> startingUnits = new ArrayList<>();
+        Set<Unit> workList = new HashSet<>();
         for (Iterator<Unit> it = graph.iterator(); it.hasNext();) {
             Unit unit = it.next();
             liveIn.put(unit, Collections.emptySet());
             liveOut.put(unit, Collections.emptySet());
-            if (graph.getPredsOf(unit).isEmpty()) {
-                startingUnits.add(unit);
-            }
+            workList.add(unit);
+            // if (graph.getPredsOf(unit).isEmpty()) {
+            // startingUnits.add(unit);
+
+            // }
         }
 
-        boolean fixed = false;
-        while (!fixed) {
-            fixed = true;
-            Deque<Unit> queue = new ArrayDeque<>(startingUnits);
-            HashSet<Unit> visitedUnits = new HashSet<>();
-            while (!queue.isEmpty()) {
-                Unit unit = queue.removeFirst();
-                visitedUnits.add(unit);
+        // boolean fixed = false;
+        while (!workList.isEmpty()) {
+            // fixed = true;
+            // Deque<Unit> queue = new ArrayDeque<>(startingUnits);
+            // HashSet<Unit> visitedUnits = new HashSet<>();
+            // while (!queue.isEmpty()) {
+            Unit unit = workList.iterator().next();
+            workList.remove(unit);
 
-                Set<Dependency> in = new HashSet<>(liveIn.get(unit));
-                for (Unit pred : graph.getPredsOf(unit)) {
-                    in = merge(in, liveOut.get(pred));
-                }
+            Set<Dependency> in = new HashSet<>();
+            for (Unit pred : graph.getPredsOf(unit)) {
+                in = merge(in, liveOut.get(pred));
+            }
 
-                if (isNotEqual(in, liveIn.get(unit))) {
-                    fixed = false;
-                    liveIn.put(unit, new HashSet<>(in));
-                }
+            if (isNotEqual(in, liveIn.get(unit))) {
+                // fixed = false;
+                liveIn.put(unit, new HashSet<>(in));
+            }
 
-                Set<Dependency> out = copy(in);
+            Set<Dependency> out = copy(in);
 
-                // Exclude any cf dependency when all values current used
-                // was defined before a CF block
-                List<Dependency> deptoremove = new ArrayList<>();
-                List<Value> valtoremove = new ArrayList<>();
-                for (Dependency dep : out) {
-                    boolean outofscope = true;
-                    for (ValueBox vmpbox : unit.getUseBoxes()) {
-                        Value vmp = vmpbox.getValue();
-                        Set<Dependency> rwadeps = rwa.getBeforeUnit(unit).get(vmp);
-                        if (rwadeps != null) {
-                            for (Dependency dpmp : rwa.getBeforeUnit(unit).get(vmp)) {
-                                int rwpos = dpmp.unit.getJavaSourceStartLineNumber();
-                                int cfpos = dep.unit.getJavaSourceStartLineNumber();
-                                if (rwpos >= cfpos) {
-                                    outofscope = false;
-                                    break;
-                                }
-                            }
-                            if (!outofscope)
+            // Exclude any cf dependency when all values current used
+            // was defined before a CF block
+            List<Dependency> deptoremove = new ArrayList<>();
+            List<Value> valtoremove = new ArrayList<>();
+            for (Dependency dep : out) {
+                boolean outofscope = true;
+                for (ValueBox vmpbox : unit.getUseBoxes()) {
+                    Value vmp = vmpbox.getValue();
+                    Set<Dependency> rwadeps = rwa.getBeforeUnit(unit).get(vmp);
+                    if (rwadeps != null) {
+                        for (Dependency dpmp : rwa.getBeforeUnit(unit).get(vmp)) {
+                            int rwpos = dpmp.unit.getJavaSourceStartLineNumber();
+                            int cfpos = dep.unit.getJavaSourceStartLineNumber();
+                            if (rwpos >= cfpos) {
+                                outofscope = false;
                                 break;
+                            }
                         }
-                    }
-                    if (outofscope) {
-                        // valtoremove.add(v);
-                        deptoremove.add(dep);
+                        if (!outofscope)
+                            break;
                     }
                 }
-
-                // for (int i = 0; i < valtoremove.size(); i++) {
-                // Value v = valtoremove.get(i);
-                // Dependency dep = deptoremove.get(i);
-                for (Dependency dep : deptoremove) {
-                    out.remove(dep);
+                if (outofscope) {
+                    // valtoremove.add(v);
+                    deptoremove.add(dep);
                 }
-                // }
-
-                if (graph.getSuccsOf(unit).size() > 1) {
-                    for (ValueBox vbox : unit.getUseBoxes()) {
-                        Value v = vbox.getValue();
-                        out.add(new Dependency(unit, Dependency.DepType.CF));
-                    }
-                }
-
-                if (isNotEqual(out, liveOut.get(unit))) {
-                    fixed = false;
-                    liveOut.put(unit, out);
-                }
-
-                for (Unit succ : graph.getSuccsOf(unit)) {
-                    if (!visitedUnits.contains(succ)) {
-                        queue.addLast(succ);
-                    }
-                }
-
             }
+
+            // for (int i = 0; i < valtoremove.size(); i++) {
+            // Value v = valtoremove.get(i);
+            // Dependency dep = deptoremove.get(i);
+            for (Dependency dep : deptoremove) {
+                // out.remove(dep);
+            }
+            // }
+
+            if (graph.getSuccsOf(unit).size() > 1) {
+                for (ValueBox vbox : unit.getUseBoxes()) {
+                    Value v = vbox.getValue();
+                    out.add(new Dependency(unit, Dependency.DepType.CF));
+                }
+            }
+
+            if (isNotEqual(out, liveOut.get(unit))) {
+                // fixed = false;
+                for (Unit succ : graph.getSuccsOf(unit)) {
+                    workList.add(succ);
+                }
+                liveOut.put(unit, out);
+            }
+
+            // }
         }
+
     }
 
     public Set<Dependency> copy(Set<Dependency> original) {
@@ -159,38 +160,7 @@ public class CFAnalysis {
         }
     }
 
-    // private Map<Value, Set<Dependency>> kill(@Nonnull Map<Value, Set<Dependency>>
-    // set1, Value v) {
-    // if (!set1.containsKey(v))
-    // return set1;
-    // Set<Dependency> dset = set1.get(v);
-    // dset.removeIf(d -> d.dtype != Dependency.DepType.CF);
-    // return set1;
-    // }
-
-    // private Map<Value, Set<Dependency>> generate(@Nonnull Map<Value,
-    // Set<Dependency>> set1, Value v,
-    // Dependency dep) {
-    // if (!set1.containsKey(v)) {
-    // Set<Dependency> sdep = new HashSet<>();
-    // sdep.add(dep);
-    // set1.put(v, sdep);
-    // } else {
-    // set1.get(v).add(dep);
-    // }
-    // return set1;
-    // }
-
     private boolean isNotEqual(@Nonnull Set<Dependency> set1, @Nonnull Set<Dependency> set2) {
-        // if (!set1.keySet().equals(set2.keySet())) {
-        // return true;
-        // } else {
-        // for (Value v : set1.keySet()) {
-        // if (!set1.get(v).equals(set2.get(v))) {
-        // return true;
-        // }
-        // }
-        // }
         return !(set1.equals(set2));
     }
 

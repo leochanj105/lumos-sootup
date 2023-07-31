@@ -275,7 +275,12 @@ public class InterProcedureGraph {
 
                     enter.setSuccessors(Collections.singletonList(newcinfo.getFirstNode()));
                     newcinfo.getFirstNode().setPredecesors(Collections.singletonList(enter));
-                    exit.setReturnStmts(calleeinfo.getReturnStmts());
+
+                    List<IPNode> retStmtNodes = new ArrayList<>();
+                    for (Stmt retStmt : calleeinfo.getReturnStmts()) {
+                        retStmtNodes.add(getIPNode(nctx, retStmt));
+                    }
+                    exit.setReturnStmtNodes(retStmtNodes);
                     exit.setPredecesors(newcinfo.getRetNodes());
                     for (IPNode n : newcinfo.getRetNodes()) {
                         n.setSuccessors(Collections.singletonList(exit));

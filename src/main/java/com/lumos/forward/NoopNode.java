@@ -1,5 +1,7 @@
 package com.lumos.forward;
 
+import com.lumos.App;
+
 import soot.jimple.Stmt;
 
 public class NoopNode extends IPNode {
@@ -11,7 +13,7 @@ public class NoopNode extends IPNode {
 
     @Override
     public String toString() {
-        return "NoopNode [" + this.stmt + "]";
+        return "NoopNode [" + this.stmt + (App.showLineNum ? ", " + stmt.getJavaSourceStartLineNumber() : "") + "]";
     }
 
 }

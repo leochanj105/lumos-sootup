@@ -21,6 +21,13 @@ public class Definition {
         return definedValue + "";
     }
 
+    public String d() {
+        String result = "";
+        result += this.definedLocation + ", ";
+        result += this.definedValue;
+        return result;
+    }
+
     public static Definition getDefinition(UniqueName un, IPNode node) {
         Map<IPNode, Definition> map1 = cache.get(un);
         if (map1 == null) {

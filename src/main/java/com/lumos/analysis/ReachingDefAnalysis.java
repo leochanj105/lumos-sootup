@@ -36,92 +36,85 @@ public class ReachingDefAnalysis {
     public final Map<Unit, Map<Value, Set<Dependency>>> liveOut = new HashMap<>();
 
     public ReachingDefAnalysis(DirectedGraph<Unit> cfg) {
-        List<Unit> startingUnits = new ArrayList<>();
+        // List<Unit> startingUnits = new ArrayList<>();
+        Set<Unit> workList = new HashSet<>();
         for (Iterator<Unit> it = cfg.iterator(); it.hasNext();) {
             Unit unit = it.next();
             liveIn.put(unit, Collections.emptyMap());
             liveOut.put(unit, Collections.emptyMap());
-            if (cfg.getPredsOf(unit).isEmpty()) {
-                startingUnits.add(unit);
-            }
+            workList.add(unit);
+            // if (cfg.getPredsOf(unit).isEmpty()) {
+            // startingUnits.add(unit);
+            // }
         }
 
-        boolean fixed = false;
-        while (!fixed) {
-            fixed = true;
-            Deque<Unit> queue = new ArrayDeque<>(startingUnits);
-            HashSet<Unit> visitedUnits = new HashSet<>();
-            while (!queue.isEmpty()) {
-                Unit unit = queue.removeFirst();
-                visitedUnits.add(unit);
-                // System.out.println(unit);
-                // if (!(unit instanceof Unit)) {
-                // continue;
-                // }
+        // boolean fixed = false;
+        while (!workList.isEmpty()) {
+            // fixed = true;
+            // Deque<Unit> queue = new ArrayDeque<>(startingUnits);
+            // HashSet<Unit> visitedUnits = new HashSet<>();
+            // while (!queue.isEmpty()) {
+            Unit unit = workList.iterator().next();
+            workList.remove(unit);
+            // visitedUnits.add(unit);
+            // System.out.println(unit);
+            // if (!(unit instanceof Unit)) {
+            // continue;
+            // }
 
-                Map<Value, Set<Dependency>> in = new HashMap<>(liveIn.get(unit));
-                for (Unit pred : cfg.getPredsOf(unit)) {
-                    in = merge(in, liveOut.get(pred));
-                }
-                // for (Unit epred : graph.exceptionalPredecessors(unit)) {
-                // in = merge(in, liveOut.get(epred));
-                // // System.out.println(unit + " ---> " + epred);
-                // }
+            Map<Value, Set<Dependency>> in = new HashMap<>();
+            for (Unit pred : cfg.getPredsOf(unit)) {
+                in = merge(in, liveOut.get(pred));
+            }
+            // for (Unit epred : graph.exceptionalPredecessors(unit)) {
+            // in = merge(in, liveOut.get(epred));
+            // // System.out.println(unit + " ---> " + epred);
+            // }
 
-                if (isNotEqual(in, liveIn.get(unit))) {
-                    fixed = false;
-                    liveIn.put(unit, new HashMap<>(in));
-                }
+            if (isNotEqual(in, liveIn.get(unit))) {
+                // fixed = false;
+                liveIn.put(unit, new HashMap<>(in));
+            }
 
-                // if (unit instanceof JReturnVoidStmt) {
-                // System.out.println("--- " + liveIn.get(unit));
-                // }
+            // if (unit instanceof JReturnVoidStmt) {
+            // System.out.println("--- " + liveIn.get(unit));
+            // }
 
-                Map<Value, Set<Dependency>> out = copy(in);
-                for (ValueBox vbox : unit.getDefBoxes()) {
-                    Value v = vbox.getValue();
-                    out = kill(out, v);
-                    out = generate(out, v, new Dependency(unit, Dependency.DepType.RW));
-                }
+            Map<Value, Set<Dependency>> out = copy(in);
+            for (ValueBox vbox : unit.getDefBoxes()) {
+                Value v = vbox.getValue();
+                out = kill(out, v);
+                out = generate(out, v, new Dependency(unit, Dependency.DepType.RW));
+            }
 
-                // This conservatively assume a function call changes all parameters
-                // This is the "safe" data-flow function approach
-                if (unit instanceof Stmt) {
-                    Stmt stmt = (Stmt) unit;
+            // This conservatively assume a function call changes all parameters
+            // This is the "safe" data-flow function approach
+            if (unit instanceof Stmt) {
+                Stmt stmt = (Stmt) unit;
 
-                    if (stmt.containsInvokeExpr()) {
-                        // System.out.println(unit + " === " + in);
-                        InvokeExpr iexpr = stmt.getInvokeExpr();
-                        if (iexpr instanceof AbstractInstanceInvokeExpr) {
-                            Value caller = ((AbstractInstanceInvokeExpr) iexpr).getBase();
-                            out = generate(out, caller, new Dependency(unit, Dependency.DepType.CALL));
-                        }
-                        for (int i = 0; i < iexpr.getArgCount(); i++) {
-                            Value arg = iexpr.getArg(i);
-                            out = generate(out, arg, new Dependency(unit, Dependency.DepType.CALL));
-                        }
+                if (stmt.containsInvokeExpr()) {
+                    // System.out.println(unit + " === " + in);
+                    InvokeExpr iexpr = stmt.getInvokeExpr();
+                    if (iexpr instanceof AbstractInstanceInvokeExpr) {
+                        Value caller = ((AbstractInstanceInvokeExpr) iexpr).getBase();
+                        out = generate(out, caller, new Dependency(unit, Dependency.DepType.CALL));
+                    }
+                    for (int i = 0; i < iexpr.getArgCount(); i++) {
+                        Value arg = iexpr.getArg(i);
+                        out = generate(out, arg, new Dependency(unit, Dependency.DepType.CALL));
                     }
                 }
+            }
 
-                if (isNotEqual(out, liveOut.get(unit))) {
-                    fixed = false;
-                    liveOut.put(unit, out);
-                }
-
+            if (isNotEqual(out, liveOut.get(unit))) {
+                // fixed = false;
                 for (Unit succ : cfg.getSuccsOf(unit)) {
-                    if (!visitedUnits.contains(succ)) {
-                        queue.addLast(succ);
-                    }
+                    workList.add(succ);
                 }
-                // for (Unit esucc : graph.exceptionalSuccessors(unit).values()) {
-                // if (!visitedUnits.contains(esucc)) {
-                // queue.addLast(esucc);
-                // }
-                // }
-
+                liveOut.put(unit, out);
             }
+
         }
-        // System.out.println(liveIn.get(cfg.getTails().get(0)));
 
     }
 

@@ -21,15 +21,15 @@ public class ExitNode extends IPNode {
     // public List<Value> arguments;
     // public List<Local> parameters;
     public CallSite lastCall;
-    public List<Stmt> returnStmts;
+    public List<IPNode> returnStmtNodes;
     public ContextSensitiveValue ret;
 
-    public List<Stmt> getReturnStmts() {
-        return returnStmts;
+    public List<IPNode> getReturnStmtNodes() {
+        return returnStmtNodes;
     }
 
-    public void setReturnStmts(List<Stmt> returnStmts) {
-        this.returnStmts = returnStmts;
+    public void setReturnStmtNodes(List<IPNode> returnStmtNodes) {
+        this.returnStmtNodes = returnStmtNodes;
     }
 
     public SootMethod getSm() {
