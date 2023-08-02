@@ -9,13 +9,13 @@ public class UniqueName {
 
     public ContextSensitiveValue base;
     // public List<SootFieldRef> suffix;
-    public List<String> suffix;
+    public List<SootFieldRef> suffix;
 
-    public List<String> getSuffix() {
+    public List<SootFieldRef> getSuffix() {
         return suffix;
     }
 
-    public void setSuffix(List<String> suffix) {
+    public void setSuffix(List<SootFieldRef> suffix) {
         this.suffix = suffix;
     }
 
@@ -27,7 +27,7 @@ public class UniqueName {
         this.base = base;
     }
 
-    public UniqueName(ContextSensitiveValue base, List<String> suffix) {
+    public UniqueName(ContextSensitiveValue base, List<SootFieldRef> suffix) {
         this.base = base;
         this.suffix = new ArrayList<>();
         if (suffix != null) {
@@ -35,7 +35,7 @@ public class UniqueName {
         }
     }
 
-    public UniqueName(UniqueName un, String ref) {
+    public UniqueName(UniqueName un, SootFieldRef ref) {
         this(un.getBase(), un.getSuffix());
         this.append(ref);
     }
@@ -44,7 +44,7 @@ public class UniqueName {
         this(cv, null);
     }
 
-    public void append(String fref) {
+    public void append(SootFieldRef fref) {
         suffix.add(fref);
     }
 
@@ -53,7 +53,11 @@ public class UniqueName {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((base == null) ? 0 : base.hashCode());
-        result = prime * result + ((suffix == null) ? 0 : suffix.hashCode());
+        List<String> names = new ArrayList<>();
+        for (SootFieldRef ref : suffix) {
+            names.add(ref.name());
+        }
+        result = prime * result + ((names == null) ? 0 : names.hashCode());
         return result;
     }
 
@@ -74,8 +78,12 @@ public class UniqueName {
         if (suffix == null) {
             if (other.suffix != null)
                 return false;
-        } else if (!suffix.equals(other.suffix))
-            return false;
+        } else {
+            for (int i = 0; i < suffix.size(); i++) {
+                if (!suffix.get(i).name().equals(other.suffix.get(i).name()))
+                    return false;
+            }
+        }
         return true;
     }
 
@@ -83,8 +91,8 @@ public class UniqueName {
     public String toString() {
         String result = "";
         result += base;
-        for (String s : suffix) {
-            result += "." + s;
+        for (SootFieldRef sref : suffix) {
+            result += "." + sref.name();
         }
         return result;
     }

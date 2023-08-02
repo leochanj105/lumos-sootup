@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+
+import org.glassfish.jaxb.runtime.v2.runtime.reflect.Lister.Pack;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +17,8 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+
+// import com.google.protobuf.Option;
 
 // import org.checkerframework.checker.units.qual.min;
 // import org.eclipse.jdt.core.dom.CastExpression;
@@ -41,6 +46,7 @@ import com.lumos.forward.IPFlowInfo;
 import com.lumos.forward.IPNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.StmtNode;
+import com.lumos.forward.UniqueName;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.WireForAllParams;
 import com.lumos.wire.WireHTTP;
@@ -52,7 +58,11 @@ import soot.Body;
 // import sootup.java.sourcecode.frontend.WalaSootMethod;
 // import sootup.java.sourcecode.inputlocation.JavaSourcePathAnalysisInputLocation;
 import soot.G;
+import soot.IntType;
 import soot.Local;
+import soot.PackManager;
+import soot.PatchingChain;
+import soot.RefType;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootFieldRef;
@@ -63,9 +73,14 @@ import soot.ValueBox;
 import soot.JastAddJ.Signatures.FieldSignature;
 import soot.JastAddJ.Signatures.MethodSignature;
 import soot.jbco.util.BodyBuilder;
+import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.InvokeExpr;
+import soot.jimple.InvokeStmt;
+import soot.jimple.Jimple;
+import soot.jimple.JimpleBody;
 import soot.jimple.Stmt;
+import soot.jimple.StringConstant;
 import soot.jimple.internal.AbstractInstanceInvokeExpr;
 import soot.jimple.internal.AbstractInvokeExpr;
 import soot.jimple.internal.JAssignStmt;
@@ -74,6 +89,7 @@ import soot.jimple.internal.JIdentityStmt;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JInvokeStmt;
 import soot.jimple.internal.JReturnStmt;
+import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.options.Options;
 
 import java.lang.reflect.Field;
@@ -91,11 +107,11 @@ public class App {
     public static List<String> processList;
 
     public static String sourceDirectory;
-    public static String outputDirectory;
+    public static String outputDirectory = "WFF";
     public static String analyzeResultDirectory;
     public static boolean showMethod = true;
     public static boolean showUnit = false;
-    public static String outputFormat = "jimple";
+    public static String outputFormat = "class";
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
     public static boolean showRound = false;
@@ -103,11 +119,14 @@ public class App {
 
     public static Map<String, MethodInfo> methodMap;
 
+    public static Map<String, SootClass> classMap = new HashMap<>();
+
     public static void main(String[] args) {
-        readParams();
+        // readParams();
         String[] services = new String[] {
                 "ts-launcher",
                 "ts-inside-payment-service",
+                "ts-order-other-service",
                 "ts-order-service"
         };
         methodMap = new HashMap<>();
@@ -119,29 +138,53 @@ public class App {
             String complete = base + str + suffix;
             analyzePath(complete);
         }
+        //
+
+        // if (true)
+        // return;
 
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
         // // igraph.build(services);
         // MethodInfo minfo = searchMethod("sendInsidePayment");
-        ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
+        // ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
+        ContextSensitiveInfo cinfo = igraph.build("doErrorQueue(");
         // ContextSensitiveInfo cinfo = igraph.build("InsidePaymentServiceImpl",
         // "pay(");
         // p(cinfo.getFirstNode());
 
         // long start = System.currentTimeMillis();
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
-        // IPNode ipnode = igraph.getLastNode();
-        // p(((StmtNode) ipnode).getContext().getStackLast().sm + ", " +
-        // ipnode.getDescription());
+        // p(igraph.getLastNode());
+        // IPNode ipnode = igraph
+        // .searchNode("$stack29 = virtualinvoke $stack28.<java.lang.Boolean:
+        // booleanbooleanValue()>()", "noop");
+
         IPNode ipnode = igraph.searchNode(
-                "$stack29 = virtualinvoke $stack28.<java.lang.Boolean: boolean booleanValue()>()",
-                "noop");
-        // p(ipnode);
+                "$stack66 = $stack62 & $stack68",
+                "stmt");
+
+        p(ipnode);
+        // p(igraph.initialNode);
+        // if (true)
+        // return;
         // p(ipnode.getContext().getStackLast().cfDependency.get(ipnode.getStmt()));
-        IPFlowInfo cmap = fia.getBefore(ipnode);
+        IPFlowInfo cmap = fia.getAfter(ipnode);
         ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(),
                 ((JAssignStmt) ipnode.getStmt()).getLeftOp());
+        // App.p("Starting to query provenance for " + cvalue);
+        // ipnode.getContext().getStackLast().sm.getActiveBody().validate();
+        // App.p("!!! " +
+        // cmap.getDefinitionsByCV(cvalue).iterator().next().getDefinedValue());
+        // App.p();
 
+        // Body by = ipnode.getContext().getStackLast().sm.getActiveBody();
+        // List<Stmt> toinsert = play(by, cvalue.getValue());
+        // CompileUtils.insertAt(by, ipnode.getStmt(), toinsert, false);
+
+        // CompileUtils.outputJimple(classMap.get(ipnode.getMethodInfo().sm.getDeclaringClass().toString()),
+        // "ZZZ");
+        // if (true)
+        // return;
         Set<IPNode> unresolvedNodes = new HashSet<>();
         Set<ContextSensitiveValue> visitedCVs = new HashSet<>();
         Set<IPNode> visitedNodes = new HashSet<>();
@@ -150,10 +193,11 @@ public class App {
         for (Definition def : cmap.getDefinitionsByCV(cvalue)) {
             App.p(def.d());
             Stmt defstmt = def.getDefinedLocation().getStmt();
-            if ((defstmt.toString().contains("return 1")) ||
-                    (defstmt.toString().contains("return 0") && defstmt.getJavaSourceStartLineNumber() != 59)) {
-                continue;
-            }
+            // if ((defstmt.toString().contains("return 1")) ||
+            // (defstmt.toString().contains("return 0") &&
+            // defstmt.getJavaSourceStartLineNumber() != 59)) {
+            // continue;
+            // }
             unresolvedNodes.add(def.getDefinedLocation());
         }
 
@@ -168,7 +212,7 @@ public class App {
             }
             visitedNodes.add(node);
             Stmt stmt = node.getStmt();
-            App.p(node);
+            App.p("\nBacktracking at " + node);
             MethodInfo minfo = node.getContext().getStackLast();
             for (Stmt cfstmt : minfo.cfDependency.get(stmt)) {
                 IPNode cfnode = igraph.getIPNode(node.getContext(), cfstmt);
@@ -221,13 +265,17 @@ public class App {
                 // App.p(fia.getAfter(nodex));
                 // }
 
-                App.p(cv);
+                App.p("Potential Provenance value: " + cv);
 
                 if (cv.toString().contains("this.<inside_payment.domain.Order: int status>")) {
                     // App.p("!!!!! " + cv);
                     // for (Definition satdef : satisfiedDefs) {
-                    // App.p(satdef.getDefinedLocation() + ":: " + satdef.getDefinedValue());
+                    // for (SootFieldRef ref : satdef.getDefinedValue().suffix) {
+                    // App.p("!!!" + ref.declaringClass().toString());
                     // }
+
+                    // }
+                    // for()
                 }
                 boolean unresolved = true;
                 for (Definition satdef : satisfiedDefs) {
@@ -241,28 +289,21 @@ public class App {
                     App.p(">>>>>\nUnresolved " + cv + " with:");
                     for (Definition satdef : satisfiedDefs) {
                         App.p(satdef.getDefinedValue());
+                        UniqueName cvun = satdef.getDefinedValue();
+                        if (!cvun.getSuffix().isEmpty() && !cvun.getBase().toString().contains("null")) {
+                            App.p("Try resolving base:");
+                            ContextSensitiveValue cvbase = cvun.getBase();
+                            App.p(fia.getBefore(node).getDefinitionsByCV(cvbase));
+                        }
                     }
                     App.p("<<<<<\n");
+
                 }
 
             }
 
         }
-
-        // p(fia.getAfter(ipnode));
-        // p("!!! " + ipnode.getSuccessors());
-
-        // ipnode = igraph.searchNode("getOrderById", "getOrderId",
-        // "return $stack1",
-        // "stmt");
-        // p(fia.getBefore(ipnode));
-        // p(fia.getBefore(ipnode).getCurrMapping());
-        // long stop = System.currentTimeMillis();
-        // App.p((stop - start) / 1000.0);
-        // play();
     }
-
-    // public static void backtrack()
 
     public static void play() {
         MethodInfo minfo = searchMethod("doErrorQueue", "LauncherServiceImpl");
@@ -297,6 +338,7 @@ public class App {
         Options.v().set_write_local_annotations(true);
 
         Options.v().set_soot_classpath(path);
+        Options.v().set_java_version(8);
         // Options.v().set_process_dir(Collections.singletonList(sourceDirectory));
         processList = new ArrayList<String>();
         // try {
@@ -338,9 +380,8 @@ public class App {
         // Use original names
         Options.v().setPhaseOption("jb", "optimize:false");
         Options.v().setPhaseOption("jb", "use-original-names:true");
-        // Options.v().setPhaseOption("jj", "use-original-names:true");
         Options.v().setPhaseOption("jb", "preserve-source-annotations:true");
-
+        // Options.v().setPhaseOption("jb.ls", "enabled:false");
         // Need this to avoid the need to provide an entry point
         Options.v().setPhaseOption("cg", "all-reachable:true");
 
@@ -356,16 +397,11 @@ public class App {
     }
 
     public static void analyzePath(String path) {
-        // path =
-        // "C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code\\";
+        // Options.v().set
         p("Analyzing " + path);
         setupSoot(path);
-        // String cname = "launcher.service.LauncherServiceImpl";
-        // String cname = "Test";
-
-        // SootMethod sm;
         for (SootClass cls : Scene.v().getApplicationClasses()) {
-            Scene.v().forceResolve(cls.getName(), SootClass.BODIES);
+            // Scene.v().forceResolve(cls.getName(), SootClass.BODIES);
             if (cls.toString().contains("conf.HttpAspect")) {
                 continue;
             }
@@ -379,24 +415,31 @@ public class App {
 
                 MethodInfo minfo = new MethodInfo(sm);
                 Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
-                // minfo.analyzeCF();
                 minfo.buildPostDominanceFrontier();
-
-                // p(sm.getActiveBody());
-                // if (sm.toString().contains("Test$T: void <init>(Test,boolean)")) {
-                // p("--- " +
-                // minfo.reachingAnalysis.getBeforeUnit(minfo.getReturnStmts().get(0)));
-                // }
-                // if (sm.getSignature().contains("getOrderById")) {
-                // p("!! " + sm.getSignature());
-                // }
                 methodMap.put(sm.getSignature(), minfo);
+                CompileUtils.bodyMap.put(sm.getSignature(), ((Body) sm.getActiveBody().clone()));
             }
-            // CompileUtils.outputJimple(cls, path);
+            classMap.put(cls.toString(), cls);
+
+            // CompileUtils.outputJimple(cls, "AAA");
+            // PackManager.v().
+            // PackManager.v().runPacks();
+
+            // CompileUtils.outputJimple(cls, "WFH");
+            // App.p("!!!!!!!!!!!!");
+            // if (searchMethod("sendInsidePayment") != null) {
+
+            //
+            // CompileUtils.outputJimple(searchMethod("sendInsidePayment").sm.getDeclaringClass(),
+            // path);
+            // }
         }
 
+        // CompileUtils.outputJimple(searchMethod("sendInsidePayment").sm.getDeclaringClass(),
+        // path);
+        // PackManager.v().runPacks();
+        // PackManager.v().writeOutput();
         p("----------");
-        // panicni();
 
     }
 

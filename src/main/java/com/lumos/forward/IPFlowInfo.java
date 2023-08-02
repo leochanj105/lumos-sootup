@@ -102,9 +102,9 @@ public class IPFlowInfo {
         for (Definition def : baseDefs) {
             UniqueName unref = null;
             if (def.getDefinedValue().getBase().toString().equals("null")) {
-                unref = new UniqueName(def.getDefinedValue(), "null");
+                unref = new UniqueName(def.getDefinedValue(), null);
             } else {
-                unref = new UniqueName(def.getDefinedValue(), ref.getField().getName());
+                unref = new UniqueName(def.getDefinedValue(), ref.getFieldRef());
             }
             unames.add(unref);
         }

@@ -19,6 +19,9 @@ public class WireHTTP {
             add("java.util.concurrent.Future sendInsidePayment", 99,
                     "inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)",
                     new String[] { "$u0" }, new String[] { "info" }, "$stack29");
+            add("boolean pay", 50,
+                    "other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById",
+                    new String[] { "$stack17" }, new String[] { "info" }, "$stack84");
             add("boolean pay", 46, "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById",
                     new String[] { "$stack17" }, new String[] { "info" }, "$stack23");
         }

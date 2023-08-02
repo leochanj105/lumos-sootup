@@ -83,6 +83,22 @@ public class EnterNode extends IPNode {
     }
 
     @Override
+    public void flow(IPFlowInfo out) {
+        // EnterNode enode = (EnterNode) node;
+
+        for (List<ContextSensitiveValue> aliasp : getAliasPairs()) {
+            ContextSensitiveValue cv1 = aliasp.get(0);
+            ContextSensitiveValue cv2 = aliasp.get(1);
+            if (!isRemote()) {
+                Set<Definition> defs = out.getDefinitionsByCV(cv1);
+                out.putDefinition(cv2, defs);
+            } else {
+                out.putDefinition(cv2);
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         return "EnterNode [" + sm.getName() + ", " + lastCall + "]";
     }

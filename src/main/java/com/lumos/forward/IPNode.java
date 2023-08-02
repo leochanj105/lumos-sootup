@@ -62,6 +62,10 @@ public abstract class IPNode {
         return this.context.toString() + ", " + this.stmt.toString() + ", " + this.type;
     }
 
+    public void flow(IPFlowInfo out) {
+
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

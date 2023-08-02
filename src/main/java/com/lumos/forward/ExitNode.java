@@ -1,8 +1,10 @@
 package com.lumos.forward;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import soot.Local;
 import soot.SootMethod;
@@ -62,5 +64,33 @@ public class ExitNode extends IPNode {
     @Override
     public String toString() {
         return "ExitNode [" + sm.getName() + ", " + lastCall + "]";
+    }
+
+    @Override
+    public void flow(IPFlowInfo out) {
+        // ExitNode enode = (ExitNode) node;
+        ContextSensitiveValue cvcaller = getRet();
+        if (cvcaller != null) {
+            for (IPNode retNode : getReturnStmtNodes()) {
+                Stmt stmt = retNode.getStmt();
+                if (stmt instanceof JReturnStmt) {
+                    // Value vv = ((JReturnStmt) stmt).getOp();
+                    ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(getContext(),
+                            ((JReturnStmt) stmt).getOp());
+                    if (!cvcallee.getValue().toString().contains("null")) {
+                        // for (UniqueName un : out.getUniqueNames().get(cvcallee)) {
+                        // out.putUname(cvcaller, un);
+                        // }
+                        Set<Definition> defs = out.getDefinitionsByCV(cvcallee);
+                        Set<Definition> retdefs = new HashSet<>();
+                        for (Definition def : defs) {
+                            retdefs.add(Definition.getDefinition(def.definedValue, retNode));
+                        }
+                        out.putDefinition(cvcaller, retdefs);
+                        // App.p("!!! " + cvcaller + ", " + cvcallee);
+                    }
+                }
+            }
+        }
     }
 }

@@ -306,6 +306,7 @@ public class MethodInfo {
                 tps.add(tpMap.get(stmt).get(((JReturnStmt) stmt).getUseBoxes().get(0).getValue()));
             }
         }
+
         return tps;
     }
 
