@@ -1,0 +1,877 @@
+public class order.domain.Order extends java.lang.Object
+{
+/*Order.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/data/mongodb/core/mapping/Document; num elems: 1 elems: 
+Annotation Element: kind: s name: collection value: orders
+
+Annotation: type: Lcom/fasterxml/jackson/annotation/JsonIgnoreProperties; num elems: 1 elems: 
+Annotation Element: kind: Z name: ignoreUnknown value: 1
+
+*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/data/annotation/Id; without elements
+*/
+    private java.util.UUID id;
+    private java.util.Date boughtDate;
+    private java.util.Date travelDate;
+    private java.util.Date travelTime;
+    private java.util.UUID accountId;
+    private java.lang.String contactsName;
+    private int documentType;
+    private java.lang.String contactsDocumentNumber;
+    private java.lang.String trainNumber;
+    private int coachNumber;
+    private int seatClass;
+    private java.lang.String seatNumber;
+    private java.lang.String 'from';
+    private java.lang.String 'to';
+    private int status;
+    private java.lang.String price;
+
+    public void <init>()
+    {
+        java.util.Date $stack1, $stack3;
+        long $stack2;
+        order.domain.SeatClass $stack4;
+        int $stack5, $stack7;
+        order.domain.OrderStatus $stack6;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*50*/
+
+        $stack1 = new java.util.Date;
+/*51*/
+
+        $stack2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+/*51*/
+
+        specialinvoke $stack1.<java.util.Date: void <init>(long)>($stack2);
+/*51*/
+
+        this.<order.domain.Order: java.util.Date boughtDate> = $stack1;
+/*51*/
+
+        $stack3 = new java.util.Date;
+/*52*/
+
+        specialinvoke $stack3.<java.util.Date: void <init>(long)>(123456789L);
+/*52*/
+
+        this.<order.domain.Order: java.util.Date travelDate> = $stack3;
+/*52*/
+
+        this.<order.domain.Order: java.lang.String trainNumber> = "G1235";
+/*53*/
+
+        this.<order.domain.Order: int coachNumber> = 5;
+/*54*/
+
+        $stack4 = <order.domain.SeatClass: order.domain.SeatClass FIRSTCLASS>;
+/*55*/
+
+        $stack5 = virtualinvoke $stack4.<order.domain.SeatClass: int getCode()>();
+/*55*/
+
+        this.<order.domain.Order: int seatClass> = $stack5;
+/*55*/
+
+        this.<order.domain.Order: java.lang.String seatNumber> = "5A";
+/*56*/
+
+        this.<order.domain.Order: java.lang.String 'from'> = "\u4e0a\u6d77";
+/*57*/
+
+        this.<order.domain.Order: java.lang.String 'to'> = "\u592a\u539f";
+/*58*/
+
+        $stack6 = <order.domain.OrderStatus: order.domain.OrderStatus PAID>;
+/*59*/
+
+        $stack7 = virtualinvoke $stack6.<order.domain.OrderStatus: int getCode()>();
+/*59*/
+
+        this.<order.domain.Order: int status> = $stack7;
+/*59*/
+
+        this.<order.domain.Order: java.lang.String price> = "0.0";
+/*60*/
+
+        return;
+/*61*/
+    }
+
+/*[obj]*/
+    public boolean equals(java.lang.Object)
+    {
+        java.util.Date $stack5, $stack6, $stack8, $stack9, $stack12, $stack13;
+        boolean $stack7, $stack10, $stack14, $stack17, $stack20, $stack23, $stack28, $stack35, $stack38, $stack41, $stack46;
+        java.util.UUID $stack15, $stack16;
+        int $stack24, $stack25, $stack29, $stack30, $stack31, $stack32, $stack42, $stack43;
+        java.lang.String $stack18, $stack19, $stack21, $stack22, $stack26, $stack27, $stack33, $stack34, $stack36, $stack37, $stack39, $stack40, $stack44, $stack45;
+        java.lang.Object obj;
+        java.lang.Class $stack3, $stack4;
+        order.domain.Order this, other;
+
+        this := @this: order.domain.Order;
+
+        obj := @parameter0: java.lang.Object;
+
+        if this != obj goto label1;
+/*65*/
+
+        return 1;
+/*66*/
+
+     label1:
+        if obj != null goto label2;
+/*68*/
+
+        return 0;
+/*69*/
+
+     label2:
+        $stack3 = virtualinvoke this.<java.lang.Object: java.lang.Class getClass()>();
+/*71*/
+
+        $stack4 = virtualinvoke obj.<java.lang.Object: java.lang.Class getClass()>();
+/*71*/
+
+        if $stack3 == $stack4 goto label3;
+/*71*/
+
+        return 0;
+/*72*/
+
+     label3:
+        other = (order.domain.Order) obj;
+/*74*/
+
+        $stack5 = this.<order.domain.Order: java.util.Date boughtDate>;
+/*75*/
+
+        $stack6 = virtualinvoke other.<order.domain.Order: java.util.Date getBoughtDate()>();
+/*75*/
+
+        $stack7 = virtualinvoke $stack5.<java.util.Date: boolean equals(java.lang.Object)>($stack6);
+/*75*/
+
+        if $stack7 == 0 goto label4;
+/*75*/
+
+        $stack8 = this.<order.domain.Order: java.util.Date travelDate>;
+/*76*/
+
+        $stack9 = virtualinvoke other.<order.domain.Order: java.util.Date getTravelDate()>();
+/*76*/
+
+        $stack10 = virtualinvoke $stack8.<java.util.Date: boolean equals(java.lang.Object)>($stack9);
+/*76*/
+
+        if $stack10 == 0 goto label4;
+/*76*/
+
+        $stack12 = this.<order.domain.Order: java.util.Date travelTime>;
+/*77*/
+
+        $stack13 = virtualinvoke other.<order.domain.Order: java.util.Date getTravelTime()>();
+/*77*/
+
+        $stack14 = virtualinvoke $stack12.<java.util.Date: boolean equals(java.lang.Object)>($stack13);
+/*77*/
+
+        if $stack14 == 0 goto label4;
+/*77*/
+
+        $stack15 = this.<order.domain.Order: java.util.UUID accountId>;
+/*78*/
+
+        $stack16 = virtualinvoke other.<order.domain.Order: java.util.UUID getAccountId()>();
+/*78*/
+
+        $stack17 = virtualinvoke $stack15.<java.util.UUID: boolean equals(java.lang.Object)>($stack16);
+/*78*/
+
+        if $stack17 == 0 goto label4;
+/*78*/
+
+        $stack18 = this.<order.domain.Order: java.lang.String contactsName>;
+/*79*/
+
+        $stack19 = virtualinvoke other.<order.domain.Order: java.lang.String getContactsName()>();
+/*79*/
+
+        $stack20 = virtualinvoke $stack18.<java.lang.String: boolean equals(java.lang.Object)>($stack19);
+/*79*/
+
+        if $stack20 == 0 goto label4;
+/*79*/
+
+        $stack21 = this.<order.domain.Order: java.lang.String contactsDocumentNumber>;
+/*80*/
+
+        $stack22 = virtualinvoke other.<order.domain.Order: java.lang.String getContactsDocumentNumber()>();
+/*80*/
+
+        $stack23 = virtualinvoke $stack21.<java.lang.String: boolean equals(java.lang.Object)>($stack22);
+/*80*/
+
+        if $stack23 == 0 goto label4;
+/*80*/
+
+        $stack24 = this.<order.domain.Order: int documentType>;
+/*81*/
+
+        $stack25 = virtualinvoke other.<order.domain.Order: int getDocumentType()>();
+/*81*/
+
+        if $stack24 != $stack25 goto label4;
+/*81*/
+
+        $stack26 = this.<order.domain.Order: java.lang.String trainNumber>;
+/*82*/
+
+        $stack27 = virtualinvoke other.<order.domain.Order: java.lang.String getTrainNumber()>();
+/*82*/
+
+        $stack28 = virtualinvoke $stack26.<java.lang.String: boolean equals(java.lang.Object)>($stack27);
+/*82*/
+
+        if $stack28 == 0 goto label4;
+/*82*/
+
+        $stack29 = this.<order.domain.Order: int coachNumber>;
+/*83*/
+
+        $stack30 = virtualinvoke other.<order.domain.Order: int getCoachNumber()>();
+/*83*/
+
+        if $stack29 != $stack30 goto label4;
+/*83*/
+
+        $stack31 = this.<order.domain.Order: int seatClass>;
+/*84*/
+
+        $stack32 = virtualinvoke other.<order.domain.Order: int getSeatClass()>();
+/*84*/
+
+        if $stack31 != $stack32 goto label4;
+/*84*/
+
+        $stack33 = this.<order.domain.Order: java.lang.String seatNumber>;
+/*85*/
+
+        $stack34 = virtualinvoke other.<order.domain.Order: java.lang.String getSeatNumber()>();
+/*85*/
+
+        $stack35 = virtualinvoke $stack33.<java.lang.String: boolean equals(java.lang.Object)>($stack34);
+/*85*/
+
+        if $stack35 == 0 goto label4;
+/*85*/
+
+        $stack36 = this.<order.domain.Order: java.lang.String 'from'>;
+/*86*/
+
+        $stack37 = virtualinvoke other.<order.domain.Order: java.lang.String getFrom()>();
+/*86*/
+
+        $stack38 = virtualinvoke $stack36.<java.lang.String: boolean equals(java.lang.Object)>($stack37);
+/*86*/
+
+        if $stack38 == 0 goto label4;
+/*86*/
+
+        $stack39 = this.<order.domain.Order: java.lang.String 'to'>;
+/*87*/
+
+        $stack40 = virtualinvoke other.<order.domain.Order: java.lang.String getTo()>();
+/*87*/
+
+        $stack41 = virtualinvoke $stack39.<java.lang.String: boolean equals(java.lang.Object)>($stack40);
+/*87*/
+
+        if $stack41 == 0 goto label4;
+/*87*/
+
+        $stack42 = this.<order.domain.Order: int status>;
+/*88*/
+
+        $stack43 = virtualinvoke other.<order.domain.Order: int getStatus()>();
+/*88*/
+
+        if $stack42 != $stack43 goto label4;
+/*88*/
+
+        $stack45 = this.<order.domain.Order: java.lang.String price>;
+/*89*/
+
+        $stack44 = other.<order.domain.Order: java.lang.String price>;
+/*89*/
+
+        $stack46 = virtualinvoke $stack45.<java.lang.String: boolean equals(java.lang.Object)>($stack44);
+/*89*/
+
+        if $stack46 == 0 goto label4;
+/*89*/
+
+        return 1;
+/*75*/
+
+     label4:
+        return 0;
+/*75*/
+    }
+
+    public java.util.UUID getId()
+    {
+        java.util.UUID $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.util.UUID id>;
+/*93*/
+
+        return $stack1;
+/*93*/
+    }
+
+/*[id]*/
+    public void setId(java.util.UUID)
+    {
+        java.util.UUID id;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        id := @parameter0: java.util.UUID;
+
+        this.<order.domain.Order: java.util.UUID id> = id;
+/*97*/
+
+        return;
+/*98*/
+    }
+
+    public java.util.UUID getAccountId()
+    {
+        java.util.UUID $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.util.UUID accountId>;
+/*101*/
+
+        return $stack1;
+/*101*/
+    }
+
+/*[accountId]*/
+    public void setAccountId(java.util.UUID)
+    {
+        java.util.UUID accountId;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        accountId := @parameter0: java.util.UUID;
+
+        this.<order.domain.Order: java.util.UUID accountId> = accountId;
+/*105*/
+
+        return;
+/*106*/
+    }
+
+    public java.util.Date getBoughtDate()
+    {
+        order.domain.Order this;
+        java.util.Date $stack1;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.util.Date boughtDate>;
+/*109*/
+
+        return $stack1;
+/*109*/
+    }
+
+/*[boughtDate]*/
+    public void setBoughtDate(java.util.Date)
+    {
+        order.domain.Order this;
+        java.util.Date boughtDate;
+
+        this := @this: order.domain.Order;
+
+        boughtDate := @parameter0: java.util.Date;
+
+        this.<order.domain.Order: java.util.Date boughtDate> = boughtDate;
+/*113*/
+
+        return;
+/*114*/
+    }
+
+    public java.util.Date getTravelDate()
+    {
+        order.domain.Order this;
+        java.util.Date $stack1;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.util.Date travelDate>;
+/*117*/
+
+        return $stack1;
+/*117*/
+    }
+
+/*[travelDate]*/
+    public void setTravelDate(java.util.Date)
+    {
+        order.domain.Order this;
+        java.util.Date travelDate;
+
+        this := @this: order.domain.Order;
+
+        travelDate := @parameter0: java.util.Date;
+
+        this.<order.domain.Order: java.util.Date travelDate> = travelDate;
+/*121*/
+
+        return;
+/*122*/
+    }
+
+/*[year, month, day]*/
+    public void setTravelDate(int, int, int)
+    {
+        java.util.Date $stack5;
+        int year, month, day;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        year := @parameter0: int;
+
+        month := @parameter1: int;
+
+        day := @parameter2: int;
+
+        $stack5 = new java.util.Date;
+/*125*/
+
+        specialinvoke $stack5.<java.util.Date: void <init>(int,int,int,int,int,int)>(year, month, day, 0, 0, 0);
+/*125*/
+
+        this.<order.domain.Order: java.util.Date travelDate> = $stack5;
+/*126*/
+
+        return;
+/*127*/
+    }
+
+    public java.util.Date getTravelTime()
+    {
+        order.domain.Order this;
+        java.util.Date $stack1;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.util.Date travelTime>;
+/*130*/
+
+        return $stack1;
+/*130*/
+    }
+
+/*[travelTime]*/
+    public void setTravelTime(java.util.Date)
+    {
+        order.domain.Order this;
+        java.util.Date travelTime;
+
+        this := @this: order.domain.Order;
+
+        travelTime := @parameter0: java.util.Date;
+
+        this.<order.domain.Order: java.util.Date travelTime> = travelTime;
+/*134*/
+
+        return;
+/*135*/
+    }
+
+/*[hour, minute]*/
+    public void setTravelTime(int, int)
+    {
+        java.util.Date $stack4;
+        int hour, minute;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        hour := @parameter0: int;
+
+        minute := @parameter1: int;
+
+        $stack4 = new java.util.Date;
+/*138*/
+
+        specialinvoke $stack4.<java.util.Date: void <init>(int,int,int,int,int,int)>(1970, 1, 1, hour, minute, 0);
+/*138*/
+
+        return;
+/*139*/
+    }
+
+    public java.lang.String getTrainNumber()
+    {
+        java.lang.String $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.lang.String trainNumber>;
+/*142*/
+
+        return $stack1;
+/*142*/
+    }
+
+/*[trainNumber]*/
+    public void setTrainNumber(java.lang.String)
+    {
+        java.lang.String trainNumber;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        trainNumber := @parameter0: java.lang.String;
+
+        this.<order.domain.Order: java.lang.String trainNumber> = trainNumber;
+/*146*/
+
+        return;
+/*147*/
+    }
+
+    public int getCoachNumber()
+    {
+        int $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: int coachNumber>;
+/*150*/
+
+        return $stack1;
+/*150*/
+    }
+
+/*[coachNumber]*/
+    public void setCoachNumber(int)
+    {
+        int coachNumber;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        coachNumber := @parameter0: int;
+
+        this.<order.domain.Order: int coachNumber> = coachNumber;
+/*154*/
+
+        return;
+/*155*/
+    }
+
+    public int getSeatClass()
+    {
+        int $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: int seatClass>;
+/*158*/
+
+        return $stack1;
+/*158*/
+    }
+
+/*[seatClass]*/
+    public void setSeatClass(int)
+    {
+        int seatClass;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        seatClass := @parameter0: int;
+
+        this.<order.domain.Order: int seatClass> = seatClass;
+/*162*/
+
+        return;
+/*163*/
+    }
+
+    public java.lang.String getSeatNumber()
+    {
+        java.lang.String $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.lang.String seatNumber>;
+/*166*/
+
+        return $stack1;
+/*166*/
+    }
+
+/*[seatNumber]*/
+    public void setSeatNumber(java.lang.String)
+    {
+        java.lang.String seatNumber;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        seatNumber := @parameter0: java.lang.String;
+
+        this.<order.domain.Order: java.lang.String seatNumber> = seatNumber;
+/*170*/
+
+        return;
+/*171*/
+    }
+
+    public java.lang.String getFrom()
+    {
+        java.lang.String $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.lang.String 'from'>;
+/*174*/
+
+        return $stack1;
+/*174*/
+    }
+
+/*[from]*/
+    public void setFrom(java.lang.String)
+    {
+        java.lang.String 'from';
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        'from' := @parameter0: java.lang.String;
+
+        this.<order.domain.Order: java.lang.String 'from'> = 'from';
+/*178*/
+
+        return;
+/*179*/
+    }
+
+    public java.lang.String getTo()
+    {
+        java.lang.String $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.lang.String 'to'>;
+/*182*/
+
+        return $stack1;
+/*182*/
+    }
+
+/*[to]*/
+    public void setTo(java.lang.String)
+    {
+        java.lang.String 'to';
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        'to' := @parameter0: java.lang.String;
+
+        this.<order.domain.Order: java.lang.String 'to'> = 'to';
+/*186*/
+
+        return;
+/*187*/
+    }
+
+    public int getStatus()
+    {
+        int $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: int status>;
+/*190*/
+
+        return $stack1;
+/*190*/
+    }
+
+/*[status]*/
+    public void setStatus(int)
+    {
+        int status;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        status := @parameter0: int;
+
+        this.<order.domain.Order: int status> = status;
+/*194*/
+
+        return;
+/*195*/
+    }
+
+    public java.lang.String getPrice()
+    {
+        java.lang.String $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.lang.String price>;
+/*198*/
+
+        return $stack1;
+/*198*/
+    }
+
+/*[price]*/
+    public void setPrice(java.lang.String)
+    {
+        java.lang.String price;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        price := @parameter0: java.lang.String;
+
+        this.<order.domain.Order: java.lang.String price> = price;
+/*202*/
+
+        return;
+/*203*/
+    }
+
+    public java.lang.String getContactsName()
+    {
+        java.lang.String $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.lang.String contactsName>;
+/*206*/
+
+        return $stack1;
+/*206*/
+    }
+
+/*[contactsName]*/
+    public void setContactsName(java.lang.String)
+    {
+        java.lang.String contactsName;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        contactsName := @parameter0: java.lang.String;
+
+        this.<order.domain.Order: java.lang.String contactsName> = contactsName;
+/*210*/
+
+        return;
+/*211*/
+    }
+
+    public int getDocumentType()
+    {
+        int $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: int documentType>;
+/*214*/
+
+        return $stack1;
+/*214*/
+    }
+
+/*[documentType]*/
+    public void setDocumentType(int)
+    {
+        int documentType;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        documentType := @parameter0: int;
+
+        this.<order.domain.Order: int documentType> = documentType;
+/*218*/
+
+        return;
+/*219*/
+    }
+
+    public java.lang.String getContactsDocumentNumber()
+    {
+        java.lang.String $stack1;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        $stack1 = this.<order.domain.Order: java.lang.String contactsDocumentNumber>;
+/*222*/
+
+        return $stack1;
+/*222*/
+    }
+
+/*[contactsDocumentNumber]*/
+    public void setContactsDocumentNumber(java.lang.String)
+    {
+        java.lang.String contactsDocumentNumber;
+        order.domain.Order this;
+
+        this := @this: order.domain.Order;
+
+        contactsDocumentNumber := @parameter0: java.lang.String;
+
+        this.<order.domain.Order: java.lang.String contactsDocumentNumber> = contactsDocumentNumber;
+/*226*/
+
+        return;
+/*227*/
+    }
+}

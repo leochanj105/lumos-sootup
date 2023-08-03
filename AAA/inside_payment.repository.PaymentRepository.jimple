@@ -1,0 +1,30 @@
+public interface  inside_payment.repository.PaymentRepository extends java.lang.Object implements org.springframework.data.repository.CrudRepository
+{
+/*Signature: Ljava/lang/Object;Lorg/springframework/data/repository/CrudRepository<Linside_payment/domain/Payment;Ljava/lang/String;>;*/
+/*PaymentRepository.java*/
+
+    public abstract inside_payment.domain.Payment findById(java.lang.String);
+
+/*Signature: (Ljava/lang/String;)Ljava/util/List<Linside_payment/domain/Payment;>;*/
+    public abstract java.util.List findByOrderId(java.lang.String);
+
+/*Signature: ()Ljava/util/List<Linside_payment/domain/Payment;>;*/
+    public abstract java.util.List findAll();
+
+/*Signature: (Ljava/lang/String;)Ljava/util/List<Linside_payment/domain/Payment;>;*/
+    public abstract java.util.List findByUserId(java.lang.String);
+
+    public volatile java.lang.Iterable findAll()
+    {
+        java.util.List $stack1;
+        inside_payment.repository.PaymentRepository l0;
+
+        l0 := @this: inside_payment.repository.PaymentRepository;
+
+        $stack1 = interfaceinvoke l0.<inside_payment.repository.PaymentRepository: java.util.List findAll()>();
+/*1*/
+
+        return $stack1;
+/*1*/
+    }
+}

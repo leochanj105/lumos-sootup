@@ -1,0 +1,81 @@
+public class inside_payment.domain.AddMoneyInfo extends java.lang.Object
+{
+/*AddMoneyInfo.java*/
+    private java.lang.String userId;
+    private java.lang.String money;
+
+    public void <init>()
+    {
+        inside_payment.domain.AddMoneyInfo this;
+
+        this := @this: inside_payment.domain.AddMoneyInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*13*/
+
+        return;
+/*13*/
+    }
+
+    public java.lang.String getUserId()
+    {
+        inside_payment.domain.AddMoneyInfo this;
+        java.lang.String $stack1;
+
+        this := @this: inside_payment.domain.AddMoneyInfo;
+
+        $stack1 = this.<inside_payment.domain.AddMoneyInfo: java.lang.String userId>;
+/*16*/
+
+        return $stack1;
+/*16*/
+    }
+
+/*[userId]*/
+    public void setUserId(java.lang.String)
+    {
+        inside_payment.domain.AddMoneyInfo this;
+        java.lang.String userId;
+
+        this := @this: inside_payment.domain.AddMoneyInfo;
+
+        userId := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.AddMoneyInfo: java.lang.String userId> = userId;
+/*20*/
+
+        return;
+/*21*/
+    }
+
+    public java.lang.String getMoney()
+    {
+        inside_payment.domain.AddMoneyInfo this;
+        java.lang.String $stack1;
+
+        this := @this: inside_payment.domain.AddMoneyInfo;
+
+        $stack1 = this.<inside_payment.domain.AddMoneyInfo: java.lang.String money>;
+/*24*/
+
+        return $stack1;
+/*24*/
+    }
+
+/*[money]*/
+    public void setMoney(java.lang.String)
+    {
+        inside_payment.domain.AddMoneyInfo this;
+        java.lang.String money;
+
+        this := @this: inside_payment.domain.AddMoneyInfo;
+
+        money := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.AddMoneyInfo: java.lang.String money> = money;
+/*28*/
+
+        return;
+/*29*/
+    }
+}

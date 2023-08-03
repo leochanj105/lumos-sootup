@@ -148,6 +148,18 @@ public class IPFlowInfo {
         return resultDefs;
     }
 
+    public void clearDefinition(UniqueName un) {
+        if (!currMapping.containsKey(un)) {
+            currMapping.put(un, new HashSet<>());
+        } else {
+            currMapping.get(un).clear();
+        }
+    }
+
+    public void clearDefinition(ContextSensitiveValue cv) {
+        clearDefinition(new UniqueName(cv));
+    }
+
     public void putDefinition(UniqueName un, Definition def) {
         if (!currMapping.containsKey(un)) {
             currMapping.put(un, new HashSet<>());

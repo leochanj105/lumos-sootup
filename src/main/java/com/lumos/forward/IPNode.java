@@ -1,9 +1,12 @@
 package com.lumos.forward;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import com.lumos.analysis.MethodInfo;
 
+// import fj.data.Set;
 import soot.jimple.Stmt;
 
 public abstract class IPNode {
@@ -62,9 +65,9 @@ public abstract class IPNode {
         return this.context.toString() + ", " + this.stmt.toString() + ", " + this.type;
     }
 
-    public void flow(IPFlowInfo out) {
+    public abstract void flow(IPFlowInfo out);
 
-    }
+    public abstract Set<ContextSensitiveValue> getUsed();
 
     @Override
     public int hashCode() {

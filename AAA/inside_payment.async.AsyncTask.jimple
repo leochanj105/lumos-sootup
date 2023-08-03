@@ -1,0 +1,112 @@
+public class inside_payment.async.AsyncTask extends java.lang.Object
+{
+/*AsyncTask.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/stereotype/Component; without elements
+*/
+    protected final org.slf4j.Logger logger;
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+    private org.springframework.web.client.RestTemplate restTemplate;
+
+    public void <init>()
+    {
+        java.lang.Class $stack1;
+        org.slf4j.Logger $stack2;
+        inside_payment.async.AsyncTask this;
+
+        this := @this: inside_payment.async.AsyncTask;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*15*/
+
+        $stack1 = virtualinvoke this.<java.lang.Object: java.lang.Class getClass()>();
+/*16*/
+
+        $stack2 = staticinvoke <org.slf4j.LoggerFactory: org.slf4j.Logger getLogger(java.lang.Class)>($stack1);
+/*16*/
+
+        this.<inside_payment.async.AsyncTask: org.slf4j.Logger logger> = $stack2;
+/*16*/
+
+        return;
+/*15*/
+    }
+
+/*Signature: (Linside_payment/domain/OutsidePaymentInfo;)Ljava/util/concurrent/Future<Ljava/lang/Boolean;>;*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/scheduling/annotation/Async; num elems: 1 elems: 
+Annotation Element: kind: s name: value value: mySimpleAsync
+
+*/
+/*[outsidePaymentInfo]*/
+    public java.util.concurrent.Future sendAsyncCallToPaymentService(inside_payment.domain.OutsidePaymentInfo) throws java.lang.InterruptedException
+    {
+        java.io.PrintStream $stack3, $stack8;
+        java.lang.Object[] $stack4;
+        java.util.concurrent.Future $r0;
+        inside_payment.async.AsyncTask this;
+        java.lang.Boolean value;
+        java.lang.Object $stack6;
+        java.lang.StringBuilder $stack9, $u0;
+        java.lang.String $stack10;
+        inside_payment.domain.OutsidePaymentInfo outsidePaymentInfo;
+        org.springframework.scheduling.'annotation'.AsyncResult $u1;
+        org.springframework.web.client.RestTemplate $stack5;
+
+        this := @this: inside_payment.async.AsyncTask;
+
+        outsidePaymentInfo := @parameter0: inside_payment.domain.OutsidePaymentInfo;
+
+        $stack3 = <java.lang.System: java.io.PrintStream out>;
+/*23*/
+
+        virtualinvoke $stack3.<java.io.PrintStream: void println(java.lang.String)>("[Inside Payment Service][Async Task] Begin.");
+/*23*/
+
+        $stack5 = this.<inside_payment.async.AsyncTask: org.springframework.web.client.RestTemplate restTemplate>;
+/*24*/
+
+        $stack4 = newarray (java.lang.Object)[0];
+/*24*/
+
+        $stack6 = virtualinvoke $stack5.<org.springframework.web.client.RestTemplate: java.lang.Object getForObject(java.lang.String,java.lang.Class,java.lang.Object[])>("http://rest-service-external:16100/greet", class "Ljava/lang/Boolean;", $stack4);
+/*24*/
+
+        value = (java.lang.Boolean) $stack6;
+/*24*/
+
+        $stack8 = <java.lang.System: java.io.PrintStream out>;
+/*25*/
+
+        $u0 = new java.lang.StringBuilder;
+/*25*/
+
+        specialinvoke $u0.<java.lang.StringBuilder: void <init>(java.lang.String)>("[Inside Payment Service][Async Task] \u6536\u5230\u76f4\u63a5\u8fd4\u56de\u8c03\u7528Value:");
+/*25*/
+
+        $stack9 = virtualinvoke $u0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(value);
+/*25*/
+
+        $stack10 = virtualinvoke $stack9.<java.lang.StringBuilder: java.lang.String toString()>();
+/*25*/
+
+        virtualinvoke $stack8.<java.io.PrintStream: void println(java.lang.String)>($stack10);
+/*25*/
+
+        $u1 = new org.springframework.scheduling.'annotation'.AsyncResult;
+/*26*/
+
+        specialinvoke $u1.<org.springframework.scheduling.'annotation'.AsyncResult: void <init>(java.lang.Object)>(value);
+/*26*/
+
+        $r0 = (java.util.concurrent.Future) $u1;
+
+        return $r0;
+/*26*/
+    }
+}

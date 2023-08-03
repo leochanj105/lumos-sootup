@@ -1,10 +1,13 @@
 package com.lumos.forward;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import com.lumos.App;
 
 import soot.Local;
 import soot.SootMethod;
@@ -63,7 +66,12 @@ public class ExitNode extends IPNode {
 
     @Override
     public String toString() {
-        return "ExitNode [" + sm.getName() + ", " + lastCall + "]";
+        return "ExitNode [" + sm.getName() + ", " + context + ": " + stmt + "]";
+    }
+
+    @Override
+    public Set<ContextSensitiveValue> getUsed() {
+        return Collections.emptySet();
     }
 
     @Override
@@ -75,7 +83,7 @@ public class ExitNode extends IPNode {
                 Stmt stmt = retNode.getStmt();
                 if (stmt instanceof JReturnStmt) {
                     // Value vv = ((JReturnStmt) stmt).getOp();
-                    ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(getContext(),
+                    ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(retNode.getContext(),
                             ((JReturnStmt) stmt).getOp());
                     if (!cvcallee.getValue().toString().contains("null")) {
                         // for (UniqueName un : out.getUniqueNames().get(cvcallee)) {
@@ -83,10 +91,15 @@ public class ExitNode extends IPNode {
                         // }
                         Set<Definition> defs = out.getDefinitionsByCV(cvcallee);
                         Set<Definition> retdefs = new HashSet<>();
+                        // if (cvcallee.getValue().toString().contains("$r1")) {
+                        // App.p("!!!!!!!! " + defs);
+                        // }
                         for (Definition def : defs) {
                             retdefs.add(Definition.getDefinition(def.definedValue, retNode));
+                            // retdefs.add(Definition.getDefinition(def.definedValue, this));
                         }
                         out.putDefinition(cvcaller, retdefs);
+                        // out.putDefinition(cvcaller, retdefs);
                         // App.p("!!! " + cvcaller + ", " + cvcallee);
                     }
                 }

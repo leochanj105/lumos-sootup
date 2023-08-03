@@ -1,0 +1,399 @@
+public class inside_payment.controller.InsidePaymentController extends java.lang.Object
+{
+/*InsidePaymentController.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/RestController; without elements
+*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+    public inside_payment.service.InsidePaymentService service;
+
+    public void <init>()
+    {
+        inside_payment.controller.InsidePaymentController this;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*15*/
+
+        return;
+/*15*/
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /inside_payment/pay]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: POST]
+
+*/
+/*Visibility Param Annotation: num params: 2 kind: 0
+Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/RequestBody; without elements
+
+
+*/
+/*[info, request]*/
+    public boolean pay(inside_payment.domain.PaymentInfo, javax.servlet.http.HttpServletRequest)
+    {
+        java.io.PrintStream $stack7;
+        inside_payment.domain.PaymentInfo info;
+        inside_payment.service.InsidePaymentService $stack11;
+        inside_payment.controller.InsidePaymentController this;
+        java.lang.Exception $stack18;
+        javax.servlet.http.HttpServletRequest request;
+        byte $stack5;
+        int $i0;
+        java.lang.StringBuilder $stack9, $u0;
+        java.lang.String $stack8, $stack10;
+        double $stack4;
+        boolean $stack12;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        info := @parameter0: inside_payment.domain.PaymentInfo;
+
+        request := @parameter1: javax.servlet.http.HttpServletRequest;
+
+        $stack4 = staticinvoke <java.lang.Math: double random()>();
+/*22*/
+
+        $stack5 = $stack4 cmpg 0.5;
+/*22*/
+
+        $i0 = (int) $stack5;
+
+        if $i0 >= 0 goto label4;
+/*22*/
+
+     label1:
+        staticinvoke <java.lang.Thread: void sleep(long)>(5000L);
+/*25*/
+
+     label2:
+        goto label4;
+/*26*/
+
+     label3:
+        $stack18 := @caughtexception;
+/*31*/
+
+        virtualinvoke $stack18.<java.lang.Exception: void printStackTrace()>();
+/*27*/
+
+     label4:
+        $stack7 = <java.lang.System: java.io.PrintStream out>;
+/*30*/
+
+        $u0 = new java.lang.StringBuilder;
+/*30*/
+
+        specialinvoke $u0.<java.lang.StringBuilder: void <init>(java.lang.String)>("[Inside Payment Service][Pay] Pay for:");
+/*30*/
+
+        $stack8 = virtualinvoke info.<inside_payment.domain.PaymentInfo: java.lang.String getOrderId()>();
+/*30*/
+
+        $stack9 = virtualinvoke $u0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($stack8);
+/*30*/
+
+        $stack10 = virtualinvoke $stack9.<java.lang.StringBuilder: java.lang.String toString()>();
+/*30*/
+
+        virtualinvoke $stack7.<java.io.PrintStream: void println(java.lang.String)>($stack10);
+/*30*/
+
+        $stack11 = this.<inside_payment.controller.InsidePaymentController: inside_payment.service.InsidePaymentService service>;
+/*31*/
+
+        $stack12 = interfaceinvoke $stack11.<inside_payment.service.InsidePaymentService: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)>(info, request);
+/*31*/
+
+        return $stack12;
+/*31*/
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /inside_payment/createAccount]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: POST]
+
+*/
+/*Visibility Param Annotation: num params: 1 kind: 0
+Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/RequestBody; without elements
+
+*/
+/*[info]*/
+    public boolean createAccount(inside_payment.domain.CreateAccountInfo)
+    {
+        inside_payment.service.InsidePaymentService $stack2;
+        inside_payment.controller.InsidePaymentController this;
+        inside_payment.domain.CreateAccountInfo info;
+        boolean $stack3;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        info := @parameter0: inside_payment.domain.CreateAccountInfo;
+
+        $stack2 = this.<inside_payment.controller.InsidePaymentController: inside_payment.service.InsidePaymentService service>;
+/*36*/
+
+        $stack3 = interfaceinvoke $stack2.<inside_payment.service.InsidePaymentService: boolean createAccount(inside_payment.domain.CreateAccountInfo)>(info);
+/*36*/
+
+        return $stack3;
+/*36*/
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /inside_payment/addMoney]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: POST]
+
+*/
+/*Visibility Param Annotation: num params: 1 kind: 0
+Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/RequestBody; without elements
+
+*/
+/*[info]*/
+    public boolean addMoney(inside_payment.domain.AddMoneyInfo)
+    {
+        inside_payment.domain.AddMoneyInfo info;
+        inside_payment.service.InsidePaymentService $stack2;
+        inside_payment.controller.InsidePaymentController this;
+        boolean $stack3;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        info := @parameter0: inside_payment.domain.AddMoneyInfo;
+
+        $stack2 = this.<inside_payment.controller.InsidePaymentController: inside_payment.service.InsidePaymentService service>;
+/*41*/
+
+        $stack3 = interfaceinvoke $stack2.<inside_payment.service.InsidePaymentService: boolean addMoney(inside_payment.domain.AddMoneyInfo)>(info);
+/*41*/
+
+        return $stack3;
+/*41*/
+    }
+
+/*Signature: ()Ljava/util/List<Linside_payment/domain/Payment;>;*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /inside_payment/queryPayment]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: GET]
+
+*/
+    public java.util.List queryPayment()
+    {
+        java.util.List $stack2;
+        inside_payment.service.InsidePaymentService $stack1;
+        inside_payment.controller.InsidePaymentController this;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        $stack1 = this.<inside_payment.controller.InsidePaymentController: inside_payment.service.InsidePaymentService service>;
+/*46*/
+
+        $stack2 = interfaceinvoke $stack1.<inside_payment.service.InsidePaymentService: java.util.List queryPayment()>();
+/*46*/
+
+        return $stack2;
+/*46*/
+    }
+
+/*Signature: ()Ljava/util/List<Linside_payment/domain/Balance;>;*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /inside_payment/queryAccount]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: GET]
+
+*/
+    public java.util.List queryAccount()
+    {
+        java.util.List $stack2;
+        inside_payment.service.InsidePaymentService $stack1;
+        inside_payment.controller.InsidePaymentController this;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        $stack1 = this.<inside_payment.controller.InsidePaymentController: inside_payment.service.InsidePaymentService service>;
+/*51*/
+
+        $stack2 = interfaceinvoke $stack1.<inside_payment.service.InsidePaymentService: java.util.List queryAccount()>();
+/*51*/
+
+        return $stack2;
+/*51*/
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /inside_payment/drawBack]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: POST]
+
+*/
+/*Visibility Param Annotation: num params: 1 kind: 0
+Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/RequestBody; without elements
+
+*/
+/*[info]*/
+    public boolean drawBack(inside_payment.domain.DrawBackInfo)
+    {
+        inside_payment.domain.DrawBackInfo info;
+        inside_payment.service.InsidePaymentService $stack2;
+        inside_payment.controller.InsidePaymentController this;
+        boolean $stack3;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        info := @parameter0: inside_payment.domain.DrawBackInfo;
+
+        $stack2 = this.<inside_payment.controller.InsidePaymentController: inside_payment.service.InsidePaymentService service>;
+/*56*/
+
+        $stack3 = interfaceinvoke $stack2.<inside_payment.service.InsidePaymentService: boolean drawBack(inside_payment.domain.DrawBackInfo)>(info);
+/*56*/
+
+        return $stack3;
+/*56*/
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /inside_payment/payDifference]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: POST]
+
+*/
+/*Visibility Param Annotation: num params: 2 kind: 0
+Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/RequestBody; without elements
+
+
+*/
+/*[info, request]*/
+    public boolean payDifference(inside_payment.domain.PaymentDifferenceInfo, javax.servlet.http.HttpServletRequest)
+    {
+        javax.servlet.http.HttpServletRequest request;
+        inside_payment.domain.PaymentDifferenceInfo info;
+        inside_payment.service.InsidePaymentService $stack3;
+        inside_payment.controller.InsidePaymentController this;
+        boolean $stack4;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        info := @parameter0: inside_payment.domain.PaymentDifferenceInfo;
+
+        request := @parameter1: javax.servlet.http.HttpServletRequest;
+
+        $stack3 = this.<inside_payment.controller.InsidePaymentController: inside_payment.service.InsidePaymentService service>;
+/*61*/
+
+        $stack4 = interfaceinvoke $stack3.<inside_payment.service.InsidePaymentService: boolean payDifference(inside_payment.domain.PaymentDifferenceInfo,javax.servlet.http.HttpServletRequest)>(info, request);
+/*61*/
+
+        return $stack4;
+/*61*/
+    }
+
+/*Signature: ()Ljava/util/List<Linside_payment/domain/AddMoney;>;*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /inside_payment/queryAddMoney]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: GET]
+
+*/
+    public java.util.List queryAddMoney()
+    {
+        java.util.List $stack2;
+        inside_payment.service.InsidePaymentService $stack1;
+        inside_payment.controller.InsidePaymentController this;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        $stack1 = this.<inside_payment.controller.InsidePaymentController: inside_payment.service.InsidePaymentService service>;
+/*66*/
+
+        $stack2 = interfaceinvoke $stack1.<inside_payment.service.InsidePaymentService: java.util.List queryAddMoney()>();
+/*66*/
+
+        return $stack2;
+/*66*/
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 1 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: s name: null value: /hello1_callback]
+
+*/
+/*Visibility Param Annotation: num params: 1 kind: 0
+Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestParam; num elems: 2 elems: 
+Annotation Element: kind: s name: value value: result
+Annotation Element: kind: s name: defaultValue value: satan
+
+
+*/
+/*[cal_back]*/
+    public java.lang.String hello1_callback(java.lang.String)
+    {
+        java.io.PrintStream $stack3, $stack6;
+        inside_payment.controller.InsidePaymentController this;
+        java.lang.StringBuilder $stack2, $stack4;
+        java.lang.String cal_back, $stack5;
+
+        this := @this: inside_payment.controller.InsidePaymentController;
+
+        cal_back := @parameter0: java.lang.String;
+
+        $stack3 = <java.lang.System: java.io.PrintStream out>;
+/*72*/
+
+        $stack2 = new java.lang.StringBuilder;
+/*72*/
+
+        specialinvoke $stack2.<java.lang.StringBuilder: void <init>(java.lang.String)>("Call Back Result:");
+/*72*/
+
+        $stack4 = virtualinvoke $stack2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(cal_back);
+/*72*/
+
+        $stack5 = virtualinvoke $stack4.<java.lang.StringBuilder: java.lang.String toString()>();
+/*72*/
+
+        virtualinvoke $stack3.<java.io.PrintStream: void println(java.lang.String)>($stack5);
+/*72*/
+
+        $stack6 = <java.lang.System: java.io.PrintStream out>;
+/*73*/
+
+        virtualinvoke $stack6.<java.io.PrintStream: void println(java.lang.String)>("-------------external call back-------------");
+/*73*/
+
+        return "-------call back end-------";
+/*74*/
+    }
+}

@@ -1,0 +1,49 @@
+public class other.domain.PayOrderInfo extends java.lang.Object
+{
+/*PayOrderInfo.java*/
+    private java.lang.String orderId;
+
+    public void <init>()
+    {
+        other.domain.PayOrderInfo this;
+
+        this := @this: other.domain.PayOrderInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*8*/
+
+        return;
+/*10*/
+    }
+
+    public java.lang.String getOrderId()
+    {
+        java.lang.String $stack1;
+        other.domain.PayOrderInfo this;
+
+        this := @this: other.domain.PayOrderInfo;
+
+        $stack1 = this.<other.domain.PayOrderInfo: java.lang.String orderId>;
+/*13*/
+
+        return $stack1;
+/*13*/
+    }
+
+/*[orderId]*/
+    public void setOrderId(java.lang.String)
+    {
+        java.lang.String orderId;
+        other.domain.PayOrderInfo this;
+
+        this := @this: other.domain.PayOrderInfo;
+
+        orderId := @parameter0: java.lang.String;
+
+        this.<other.domain.PayOrderInfo: java.lang.String orderId> = orderId;
+/*17*/
+
+        return;
+/*18*/
+    }
+}

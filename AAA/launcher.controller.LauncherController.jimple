@@ -1,0 +1,83 @@
+public class launcher.controller.LauncherController extends java.lang.Object
+{
+/*LauncherController.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/RestController; without elements
+*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+    private launcher.service.LauncherService launcherService;
+
+    public void <init>()
+    {
+        launcher.controller.LauncherController this;
+
+        this := @this: launcher.controller.LauncherController;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*11*/
+
+        return;
+/*11*/
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: path values: [Annotation Element: kind: s name: null value: /welcome]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: GET]
+
+*/
+    public java.lang.String home()
+    {
+        launcher.controller.LauncherController this;
+
+        this := @this: launcher.controller.LauncherController;
+
+        return "Welcome to [ Ts Launcher ] !";
+/*18*/
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/web/bind/annotation/RequestMapping; num elems: 2 elems: 
+Annotation Element: kind: [ name: path values: [Annotation Element: kind: s name: null value: /doErrorQueue/useAccount/{userEmail}/{userPassword}]
+Annotation Element: kind: [ name: method values: [Annotation Element: kind: e name: null type name: Lorg/springframework/web/bind/annotation/RequestMethod; constant name: GET]
+
+*/
+/*Visibility Param Annotation: num params: 2 kind: 0
+Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/PathVariable; without elements
+
+Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/web/bind/annotation/PathVariable; without elements
+
+*/
+/*[userEmail, userPassword]*/
+    public java.lang.String doErrorQueueWithOneUser(java.lang.String, java.lang.String)
+    {
+        launcher.service.LauncherService $stack3;
+        java.lang.String userEmail, userPassword;
+        launcher.controller.LauncherController this;
+
+        this := @this: launcher.controller.LauncherController;
+
+        userEmail := @parameter0: java.lang.String;
+
+        userPassword := @parameter1: java.lang.String;
+
+        $stack3 = this.<launcher.controller.LauncherController: launcher.service.LauncherService launcherService>;
+/*23*/
+
+        interfaceinvoke $stack3.<launcher.service.LauncherService: void doErrorQueue(java.lang.String,java.lang.String)>(userEmail, userPassword);
+/*23*/
+
+        return "[Do Error Queue Complete No Exception]";
+/*24*/
+    }
+}

@@ -1,0 +1,329 @@
+public class launcher.domain.RegisterInfo extends java.lang.Object
+{
+/*RegisterInfo.java*/
+    private java.lang.String email;
+    private java.lang.String password;
+    private int gender;
+    private java.lang.String name;
+    private int documentType;
+    private java.lang.String documentNum;
+    private java.lang.String verificationCode;
+
+    public void <init>()
+    {
+        launcher.domain.RegisterInfo this;
+        launcher.domain.Gender $stack1;
+        int $stack2, $stack4;
+        launcher.domain.DocumentType $stack3;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*19*/
+
+        $stack1 = <launcher.domain.Gender: launcher.domain.Gender OTHER>;
+/*20*/
+
+        $stack2 = virtualinvoke $stack1.<launcher.domain.Gender: int getCode()>();
+/*20*/
+
+        this.<launcher.domain.RegisterInfo: int gender> = $stack2;
+/*20*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String name> = "None";
+/*21*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String password> = "defaultPassword";
+/*22*/
+
+        $stack3 = <launcher.domain.DocumentType: launcher.domain.DocumentType NONE>;
+/*23*/
+
+        $stack4 = virtualinvoke $stack3.<launcher.domain.DocumentType: int getCode()>();
+/*23*/
+
+        this.<launcher.domain.RegisterInfo: int documentType> = $stack4;
+/*23*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String documentNum> = "0123456789";
+/*24*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String email> = "352323";
+/*25*/
+
+        return;
+/*26*/
+    }
+
+/*[newEmail, newPassword]*/
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        launcher.domain.RegisterInfo this;
+        launcher.domain.Gender $stack3;
+        int $stack4, $stack6;
+        launcher.domain.DocumentType $stack5;
+        java.lang.String newEmail, newPassword;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        newEmail := @parameter0: java.lang.String;
+
+        newPassword := @parameter1: java.lang.String;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*28*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String email> = newEmail;
+/*29*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String password> = newPassword;
+/*30*/
+
+        $stack3 = <launcher.domain.Gender: launcher.domain.Gender MALE>;
+/*31*/
+
+        $stack4 = virtualinvoke $stack3.<launcher.domain.Gender: int getCode()>();
+/*31*/
+
+        this.<launcher.domain.RegisterInfo: int gender> = $stack4;
+/*31*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String name> = "None";
+/*32*/
+
+        $stack5 = <launcher.domain.DocumentType: launcher.domain.DocumentType ID_CARD>;
+/*33*/
+
+        $stack6 = virtualinvoke $stack5.<launcher.domain.DocumentType: int getCode()>();
+/*33*/
+
+        this.<launcher.domain.RegisterInfo: int documentType> = $stack6;
+/*33*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String documentNum> = "0123456789";
+/*34*/
+
+        this.<launcher.domain.RegisterInfo: java.lang.String verificationCode> = "abcd";
+/*35*/
+
+        return;
+/*36*/
+    }
+
+    public java.lang.String getPassword()
+    {
+        java.lang.String $stack1;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        $stack1 = this.<launcher.domain.RegisterInfo: java.lang.String password>;
+/*39*/
+
+        return $stack1;
+/*39*/
+    }
+
+/*[password]*/
+    public void setPassword(java.lang.String)
+    {
+        java.lang.String password;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        password := @parameter0: java.lang.String;
+
+        this.<launcher.domain.RegisterInfo: java.lang.String password> = password;
+/*43*/
+
+        return;
+/*44*/
+    }
+
+    public int getGender()
+    {
+        int $stack1;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        $stack1 = this.<launcher.domain.RegisterInfo: int gender>;
+/*47*/
+
+        return $stack1;
+/*47*/
+    }
+
+/*[gender]*/
+    public void setGender(int)
+    {
+        int gender;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        gender := @parameter0: int;
+
+        this.<launcher.domain.RegisterInfo: int gender> = gender;
+/*51*/
+
+        return;
+/*52*/
+    }
+
+    public java.lang.String getName()
+    {
+        java.lang.String $stack1;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        $stack1 = this.<launcher.domain.RegisterInfo: java.lang.String name>;
+/*55*/
+
+        return $stack1;
+/*55*/
+    }
+
+/*[name]*/
+    public void setName(java.lang.String)
+    {
+        java.lang.String name;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        name := @parameter0: java.lang.String;
+
+        this.<launcher.domain.RegisterInfo: java.lang.String name> = name;
+/*59*/
+
+        return;
+/*60*/
+    }
+
+    public int getDocumentType()
+    {
+        int $stack1;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        $stack1 = this.<launcher.domain.RegisterInfo: int documentType>;
+/*63*/
+
+        return $stack1;
+/*63*/
+    }
+
+/*[documentType]*/
+    public void setDocumentType(int)
+    {
+        int documentType;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        documentType := @parameter0: int;
+
+        this.<launcher.domain.RegisterInfo: int documentType> = documentType;
+/*67*/
+
+        return;
+/*68*/
+    }
+
+    public java.lang.String getDocumentNum()
+    {
+        java.lang.String $stack1;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        $stack1 = this.<launcher.domain.RegisterInfo: java.lang.String documentNum>;
+/*71*/
+
+        return $stack1;
+/*71*/
+    }
+
+/*[documentNum]*/
+    public void setDocumentNum(java.lang.String)
+    {
+        java.lang.String documentNum;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        documentNum := @parameter0: java.lang.String;
+
+        this.<launcher.domain.RegisterInfo: java.lang.String documentNum> = documentNum;
+/*75*/
+
+        return;
+/*76*/
+    }
+
+    public java.lang.String getEmail()
+    {
+        java.lang.String $stack1;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        $stack1 = this.<launcher.domain.RegisterInfo: java.lang.String email>;
+/*79*/
+
+        return $stack1;
+/*79*/
+    }
+
+/*[email]*/
+    public void setEmail(java.lang.String)
+    {
+        java.lang.String email;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        email := @parameter0: java.lang.String;
+
+        this.<launcher.domain.RegisterInfo: java.lang.String email> = email;
+/*83*/
+
+        return;
+/*84*/
+    }
+
+    public java.lang.String getVerificationCode()
+    {
+        java.lang.String $stack1;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        $stack1 = this.<launcher.domain.RegisterInfo: java.lang.String verificationCode>;
+/*87*/
+
+        return $stack1;
+/*87*/
+    }
+
+/*[verificationCode]*/
+    public void setVerificationCode(java.lang.String)
+    {
+        java.lang.String verificationCode;
+        launcher.domain.RegisterInfo this;
+
+        this := @this: launcher.domain.RegisterInfo;
+
+        verificationCode := @parameter0: java.lang.String;
+
+        this.<launcher.domain.RegisterInfo: java.lang.String verificationCode> = verificationCode;
+/*91*/
+
+        return;
+/*92*/
+    }
+}

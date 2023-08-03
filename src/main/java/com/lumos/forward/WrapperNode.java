@@ -1,5 +1,10 @@
 package com.lumos.forward;
 
+import java.util.Collections;
+import java.util.Set;
+
+import com.lumos.App;
+
 import soot.jimple.Stmt;
 
 public class WrapperNode extends IPNode {
@@ -29,6 +34,18 @@ public class WrapperNode extends IPNode {
 
     public void setExit(ExitNode exit) {
         this.exit = exit;
+    }
+
+    @Override
+    public Set<ContextSensitiveValue> getUsed() {
+        // return Collections.emptySet();
+        App.panicni();
+        return null;
+    }
+
+    @Override
+    public void flow(IPFlowInfo out) {
+        App.panicni();
     }
 
 }

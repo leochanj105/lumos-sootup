@@ -1,0 +1,68 @@
+public interface  other.repository.OrderOtherRepository extends java.lang.Object implements org.springframework.data.mongodb.repository.MongoRepository
+{
+/*Signature: Ljava/lang/Object;Lorg/springframework/data/mongodb/repository/MongoRepository<Lother/domain/Order;Ljava/lang/String;>;*/
+/*OrderOtherRepository.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/stereotype/Repository; without elements
+*/
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/data/mongodb/repository/Query; num elems: 1 elems: 
+Annotation Element: kind: s name: value value: { 'id': ?0 }
+
+*/
+    public abstract other.domain.Order findById(java.util.UUID);
+
+/*Signature: ()Ljava/util/ArrayList<Lother/domain/Order;>;*/
+    public abstract java.util.ArrayList findAll();
+
+/*Signature: (Ljava/util/UUID;)Ljava/util/ArrayList<Lother/domain/Order;>;*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/data/mongodb/repository/Query; num elems: 1 elems: 
+Annotation Element: kind: s name: value value: { 'accountId' : ?0 }
+
+*/
+    public abstract java.util.ArrayList findByAccountId(java.util.UUID);
+
+/*Signature: (Ljava/util/Date;Ljava/lang/String;)Ljava/util/ArrayList<Lother/domain/Order;>;*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/data/mongodb/repository/Query; num elems: 1 elems: 
+Annotation Element: kind: s name: value value: { 'travelDate' : ?0 , trainNumber : ?1 }
+
+*/
+    public abstract java.util.ArrayList findByTravelDateAndTrainNumber(java.util.Date, java.lang.String);
+
+    public abstract void deleteById(java.util.UUID);
+
+    public volatile java.lang.Iterable findAll()
+    {
+        other.repository.OrderOtherRepository l0;
+        java.util.ArrayList $stack1;
+
+        l0 := @this: other.repository.OrderOtherRepository;
+
+        $stack1 = interfaceinvoke l0.<other.repository.OrderOtherRepository: java.util.ArrayList findAll()>();
+/*1*/
+
+        return $stack1;
+/*1*/
+    }
+
+    public volatile java.util.List findAll()
+    {
+        other.repository.OrderOtherRepository l0;
+        java.util.ArrayList $stack1;
+
+        l0 := @this: other.repository.OrderOtherRepository;
+
+        $stack1 = interfaceinvoke l0.<other.repository.OrderOtherRepository: java.util.ArrayList findAll()>();
+/*1*/
+
+        return $stack1;
+/*1*/
+    }
+}

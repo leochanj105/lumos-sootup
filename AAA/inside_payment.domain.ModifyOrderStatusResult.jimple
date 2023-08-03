@@ -1,0 +1,87 @@
+public class inside_payment.domain.ModifyOrderStatusResult extends java.lang.Object
+{
+/*ModifyOrderStatusResult.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lcom/fasterxml/jackson/annotation/JsonIgnoreProperties; num elems: 1 elems: 
+Annotation Element: kind: Z name: ignoreUnknown value: 1
+
+*/
+    private boolean status;
+    private java.lang.String message;
+
+    public void <init>()
+    {
+        inside_payment.domain.ModifyOrderStatusResult this;
+
+        this := @this: inside_payment.domain.ModifyOrderStatusResult;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*12*/
+
+        return;
+/*14*/
+    }
+
+    public boolean isStatus()
+    {
+        inside_payment.domain.ModifyOrderStatusResult this;
+        boolean $stack1;
+
+        this := @this: inside_payment.domain.ModifyOrderStatusResult;
+
+        $stack1 = this.<inside_payment.domain.ModifyOrderStatusResult: boolean status>;
+/*17*/
+
+        return $stack1;
+/*17*/
+    }
+
+/*[status]*/
+    public void setStatus(boolean)
+    {
+        inside_payment.domain.ModifyOrderStatusResult this;
+        boolean status;
+
+        this := @this: inside_payment.domain.ModifyOrderStatusResult;
+
+        status := @parameter0: boolean;
+
+        this.<inside_payment.domain.ModifyOrderStatusResult: boolean status> = status;
+/*21*/
+
+        return;
+/*22*/
+    }
+
+    public java.lang.String getMessage()
+    {
+        inside_payment.domain.ModifyOrderStatusResult this;
+        java.lang.String $stack1;
+
+        this := @this: inside_payment.domain.ModifyOrderStatusResult;
+
+        $stack1 = this.<inside_payment.domain.ModifyOrderStatusResult: java.lang.String message>;
+/*25*/
+
+        return $stack1;
+/*25*/
+    }
+
+/*[message]*/
+    public void setMessage(java.lang.String)
+    {
+        inside_payment.domain.ModifyOrderStatusResult this;
+        java.lang.String message;
+
+        this := @this: inside_payment.domain.ModifyOrderStatusResult;
+
+        message := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.ModifyOrderStatusResult: java.lang.String message> = message;
+/*29*/
+
+        return;
+/*30*/
+    }
+}

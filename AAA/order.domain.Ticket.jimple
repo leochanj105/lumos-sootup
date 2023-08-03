@@ -1,0 +1,113 @@
+public class order.domain.Ticket extends java.lang.Object
+{
+/*Ticket.java*/
+    private int seatNo;
+    private java.lang.String startStation;
+    private java.lang.String destStation;
+
+    public void <init>()
+    {
+        order.domain.Ticket this;
+
+        this := @this: order.domain.Ticket;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*11*/
+
+        return;
+/*13*/
+    }
+
+    public int getSeatNo()
+    {
+        int $stack1;
+        order.domain.Ticket this;
+
+        this := @this: order.domain.Ticket;
+
+        $stack1 = this.<order.domain.Ticket: int seatNo>;
+/*16*/
+
+        return $stack1;
+/*16*/
+    }
+
+/*[seatNo]*/
+    public void setSeatNo(int)
+    {
+        int seatNo;
+        order.domain.Ticket this;
+
+        this := @this: order.domain.Ticket;
+
+        seatNo := @parameter0: int;
+
+        this.<order.domain.Ticket: int seatNo> = seatNo;
+/*20*/
+
+        return;
+/*21*/
+    }
+
+    public java.lang.String getStartStation()
+    {
+        order.domain.Ticket this;
+        java.lang.String $stack1;
+
+        this := @this: order.domain.Ticket;
+
+        $stack1 = this.<order.domain.Ticket: java.lang.String startStation>;
+/*24*/
+
+        return $stack1;
+/*24*/
+    }
+
+/*[startStation]*/
+    public void setStartStation(java.lang.String)
+    {
+        order.domain.Ticket this;
+        java.lang.String startStation;
+
+        this := @this: order.domain.Ticket;
+
+        startStation := @parameter0: java.lang.String;
+
+        this.<order.domain.Ticket: java.lang.String startStation> = startStation;
+/*28*/
+
+        return;
+/*29*/
+    }
+
+    public java.lang.String getDestStation()
+    {
+        order.domain.Ticket this;
+        java.lang.String $stack1;
+
+        this := @this: order.domain.Ticket;
+
+        $stack1 = this.<order.domain.Ticket: java.lang.String destStation>;
+/*32*/
+
+        return $stack1;
+/*32*/
+    }
+
+/*[destStation]*/
+    public void setDestStation(java.lang.String)
+    {
+        order.domain.Ticket this;
+        java.lang.String destStation;
+
+        this := @this: order.domain.Ticket;
+
+        destStation := @parameter0: java.lang.String;
+
+        this.<order.domain.Ticket: java.lang.String destStation> = destStation;
+/*36*/
+
+        return;
+/*37*/
+    }
+}

@@ -1,0 +1,113 @@
+public class inside_payment.domain.GetOrderResult extends java.lang.Object
+{
+/*GetOrderResult.java*/
+    private boolean status;
+    private java.lang.String message;
+    private inside_payment.domain.Order order;
+
+    public void <init>()
+    {
+        inside_payment.domain.GetOrderResult this;
+
+        this := @this: inside_payment.domain.GetOrderResult;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*11*/
+
+        return;
+/*13*/
+    }
+
+    public boolean isStatus()
+    {
+        inside_payment.domain.GetOrderResult this;
+        boolean $stack1;
+
+        this := @this: inside_payment.domain.GetOrderResult;
+
+        $stack1 = this.<inside_payment.domain.GetOrderResult: boolean status>;
+/*16*/
+
+        return $stack1;
+/*16*/
+    }
+
+/*[status]*/
+    public void setStatus(boolean)
+    {
+        inside_payment.domain.GetOrderResult this;
+        boolean status;
+
+        this := @this: inside_payment.domain.GetOrderResult;
+
+        status := @parameter0: boolean;
+
+        this.<inside_payment.domain.GetOrderResult: boolean status> = status;
+/*20*/
+
+        return;
+/*21*/
+    }
+
+    public java.lang.String getMessage()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.GetOrderResult this;
+
+        this := @this: inside_payment.domain.GetOrderResult;
+
+        $stack1 = this.<inside_payment.domain.GetOrderResult: java.lang.String message>;
+/*24*/
+
+        return $stack1;
+/*24*/
+    }
+
+/*[message]*/
+    public void setMessage(java.lang.String)
+    {
+        java.lang.String message;
+        inside_payment.domain.GetOrderResult this;
+
+        this := @this: inside_payment.domain.GetOrderResult;
+
+        message := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.GetOrderResult: java.lang.String message> = message;
+/*28*/
+
+        return;
+/*29*/
+    }
+
+    public inside_payment.domain.Order getOrder()
+    {
+        inside_payment.domain.GetOrderResult this;
+        inside_payment.domain.Order $stack1;
+
+        this := @this: inside_payment.domain.GetOrderResult;
+
+        $stack1 = this.<inside_payment.domain.GetOrderResult: inside_payment.domain.Order order>;
+/*32*/
+
+        return $stack1;
+/*32*/
+    }
+
+/*[order]*/
+    public void setOrder(inside_payment.domain.Order)
+    {
+        inside_payment.domain.GetOrderResult this;
+        inside_payment.domain.Order order;
+
+        this := @this: inside_payment.domain.GetOrderResult;
+
+        order := @parameter0: inside_payment.domain.Order;
+
+        this.<inside_payment.domain.GetOrderResult: inside_payment.domain.Order order> = order;
+/*36*/
+
+        return;
+/*37*/
+    }
+}

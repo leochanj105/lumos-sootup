@@ -12,8 +12,10 @@ import java.util.Set;
 import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
 import com.lumos.wire.HTTPReceiveWirePoint;
+import com.lumos.wire.IdentityWire;
 import com.lumos.wire.WireHTTP;
 
+import heros.flowfunc.Identity;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -257,7 +259,13 @@ public class InterProcedureGraph {
 
                 if (calleeinfo == null) {
                     // App.p(sm + " not found!");
-                    snode = new NoopNode(context, stmt);
+                    // int identityRes = IdentityWire.findWire(iexpr.toString());
+                    // if (identityRes >= 0) {
+                    // App.p("!!!! " + identityRes + ", " + stmt);
+                    snode = new IdentityNode(context, stmt);
+                    // } else {
+                    // snode = new NoopNode(context, stmt);
+                    // }
                 } else {
                     // App.p("Enter " + calleeinfo.sm.getName() + " from " +
                     // callerinfo.sm.getName());
@@ -265,13 +273,13 @@ public class InterProcedureGraph {
                     // App.p(nctx);
                     // App.p(stmt);
                     ContextSensitiveInfo newcinfo = build(nctx);
-                    EnterNode enter = new EnterNode(nctx, stmt);
+                    EnterNode enter = new EnterNode(context, stmt);
 
                     Value ret = null;
                     if (stmt instanceof JAssignStmt) {
                         ret = ((JAssignStmt) stmt).getLeftOp();
                     }
-                    ExitNode exit = new ExitNode(nctx, stmt);
+                    ExitNode exit = new ExitNode(context, stmt);
 
                     enter.setSuccessors(Collections.singletonList(newcinfo.getFirstNode()));
                     newcinfo.getFirstNode().setPredecesors(Collections.singletonList(enter));
@@ -311,11 +319,11 @@ public class InterProcedureGraph {
                             // App.p("Added aliasing pairs: " + v1 + " in " + callerinfo.sm + " and " + v2 +
                             // " in "
                             // + calleeinfo.sm);
-                            ret = callerinfo.getLocal(hwire.getRetWireName());
-                            if (ret == null) {
-                                App.p("Wiring null return value!");
-                                App.panicni();
-                            }
+                            // ret = callerinfo.getLocal(hwire.getRetWireName());
+                            // if (ret == null) {
+                            // App.p("Wiring null return value!");
+                            // App.panicni();
+                            // }
                         }
                     } else {
                         // If normal method, just connect params with args

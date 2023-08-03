@@ -1,0 +1,81 @@
+public class inside_payment.domain.DrawBackInfo extends java.lang.Object
+{
+/*DrawBackInfo.java*/
+    private java.lang.String userId;
+    private java.lang.String money;
+
+    public void <init>()
+    {
+        inside_payment.domain.DrawBackInfo this;
+
+        this := @this: inside_payment.domain.DrawBackInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*11*/
+
+        return;
+/*11*/
+    }
+
+    public java.lang.String getUserId()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.DrawBackInfo this;
+
+        this := @this: inside_payment.domain.DrawBackInfo;
+
+        $stack1 = this.<inside_payment.domain.DrawBackInfo: java.lang.String userId>;
+/*14*/
+
+        return $stack1;
+/*14*/
+    }
+
+/*[userId]*/
+    public void setUserId(java.lang.String)
+    {
+        java.lang.String userId;
+        inside_payment.domain.DrawBackInfo this;
+
+        this := @this: inside_payment.domain.DrawBackInfo;
+
+        userId := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.DrawBackInfo: java.lang.String userId> = userId;
+/*18*/
+
+        return;
+/*19*/
+    }
+
+    public java.lang.String getMoney()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.DrawBackInfo this;
+
+        this := @this: inside_payment.domain.DrawBackInfo;
+
+        $stack1 = this.<inside_payment.domain.DrawBackInfo: java.lang.String money>;
+/*22*/
+
+        return $stack1;
+/*22*/
+    }
+
+/*[money]*/
+    public void setMoney(java.lang.String)
+    {
+        java.lang.String money;
+        inside_payment.domain.DrawBackInfo this;
+
+        this := @this: inside_payment.domain.DrawBackInfo;
+
+        money := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.DrawBackInfo: java.lang.String money> = money;
+/*26*/
+
+        return;
+/*27*/
+    }
+}

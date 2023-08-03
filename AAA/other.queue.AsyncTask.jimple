@@ -1,0 +1,77 @@
+public class other.queue.AsyncTask extends java.lang.Object
+{
+/*AsyncTask.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/stereotype/Component; without elements
+*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+    private other.queue.MsgSendingBean sendingBean;
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+    private other.service.OrderOtherService service;
+
+    public void <init>()
+    {
+        other.queue.AsyncTask this;
+
+        this := @this: other.queue.AsyncTask;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*11*/
+
+        return;
+/*11*/
+    }
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lorg/springframework/scheduling/annotation/Async; num elems: 1 elems: 
+Annotation Element: kind: s name: value value: mySimpleAsync
+
+*/
+/*[changeOrderInfo]*/
+    public void putResultIntoReturnQueue(other.domain.ChangeOrderInfo)
+    {
+        java.io.PrintStream $stack3;
+        other.queue.AsyncTask this;
+        other.domain.Order $stack5;
+        other.domain.ChangeOrderInfo changeOrderInfo;
+        other.service.OrderOtherService $stack4;
+        other.domain.ChangeOrderResult $stack6;
+        other.queue.MsgSendingBean $stack7;
+
+        this := @this: other.queue.AsyncTask;
+
+        changeOrderInfo := @parameter0: other.domain.ChangeOrderInfo;
+
+        $stack3 = <java.lang.System: java.io.PrintStream out>;
+/*22*/
+
+        virtualinvoke $stack3.<java.io.PrintStream: void println(java.lang.String)>("[Order Other Service][Async Task] \u51c6\u5907\u5f00\u59cb\u4fee\u6539\u72b6\u6001");
+/*22*/
+
+        $stack4 = this.<other.queue.AsyncTask: other.service.OrderOtherService service>;
+/*23*/
+
+        $stack5 = virtualinvoke changeOrderInfo.<other.domain.ChangeOrderInfo: other.domain.Order getOrder()>();
+/*23*/
+
+        $stack6 = interfaceinvoke $stack4.<other.service.OrderOtherService: other.domain.ChangeOrderResult saveChanges(other.domain.Order)>($stack5);
+/*23*/
+
+        $stack7 = this.<other.queue.AsyncTask: other.queue.MsgSendingBean sendingBean>;
+/*25*/
+
+        virtualinvoke $stack7.<other.queue.MsgSendingBean: void sendLoginInfoToSso(other.domain.ChangeOrderResult)>($stack6);
+/*25*/
+
+        return;
+/*27*/
+    }
+}

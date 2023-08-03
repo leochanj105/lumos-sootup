@@ -1,0 +1,143 @@
+public class launcher.domain.LoginInfo extends java.lang.Object
+{
+/*LoginInfo.java*/
+    private java.lang.String email;
+    private java.lang.String password;
+    private java.lang.String verificationCode;
+
+    public void <init>()
+    {
+        launcher.domain.LoginInfo this;
+
+        this := @this: launcher.domain.LoginInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*11*/
+
+        return;
+/*13*/
+    }
+
+/*[email, password, verificationCode]*/
+    public void <init>(java.lang.String, java.lang.String, java.lang.String)
+    {
+        launcher.domain.LoginInfo this;
+        java.lang.String email, password, verificationCode;
+
+        this := @this: launcher.domain.LoginInfo;
+
+        email := @parameter0: java.lang.String;
+
+        password := @parameter1: java.lang.String;
+
+        verificationCode := @parameter2: java.lang.String;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*15*/
+
+        this.<launcher.domain.LoginInfo: java.lang.String email> = email;
+/*16*/
+
+        this.<launcher.domain.LoginInfo: java.lang.String password> = password;
+/*17*/
+
+        this.<launcher.domain.LoginInfo: java.lang.String verificationCode> = verificationCode;
+/*18*/
+
+        return;
+/*19*/
+    }
+
+    public java.lang.String getVerificationCode()
+    {
+        java.lang.String $stack1;
+        launcher.domain.LoginInfo this;
+
+        this := @this: launcher.domain.LoginInfo;
+
+        $stack1 = this.<launcher.domain.LoginInfo: java.lang.String verificationCode>;
+/*22*/
+
+        return $stack1;
+/*22*/
+    }
+
+/*[verificationCode]*/
+    public void setVerificationCode(java.lang.String)
+    {
+        java.lang.String verificationCode;
+        launcher.domain.LoginInfo this;
+
+        this := @this: launcher.domain.LoginInfo;
+
+        verificationCode := @parameter0: java.lang.String;
+
+        this.<launcher.domain.LoginInfo: java.lang.String verificationCode> = verificationCode;
+/*26*/
+
+        return;
+/*27*/
+    }
+
+    public java.lang.String getEmail()
+    {
+        java.lang.String $stack1;
+        launcher.domain.LoginInfo this;
+
+        this := @this: launcher.domain.LoginInfo;
+
+        $stack1 = this.<launcher.domain.LoginInfo: java.lang.String email>;
+/*30*/
+
+        return $stack1;
+/*30*/
+    }
+
+/*[email]*/
+    public void setEmail(java.lang.String)
+    {
+        java.lang.String email;
+        launcher.domain.LoginInfo this;
+
+        this := @this: launcher.domain.LoginInfo;
+
+        email := @parameter0: java.lang.String;
+
+        this.<launcher.domain.LoginInfo: java.lang.String email> = email;
+/*34*/
+
+        return;
+/*35*/
+    }
+
+    public java.lang.String getPassword()
+    {
+        java.lang.String $stack1;
+        launcher.domain.LoginInfo this;
+
+        this := @this: launcher.domain.LoginInfo;
+
+        $stack1 = this.<launcher.domain.LoginInfo: java.lang.String password>;
+/*38*/
+
+        return $stack1;
+/*38*/
+    }
+
+/*[password]*/
+    public void setPassword(java.lang.String)
+    {
+        java.lang.String password;
+        launcher.domain.LoginInfo this;
+
+        this := @this: launcher.domain.LoginInfo;
+
+        password := @parameter0: java.lang.String;
+
+        this.<launcher.domain.LoginInfo: java.lang.String password> = password;
+/*42*/
+
+        return;
+/*43*/
+    }
+}

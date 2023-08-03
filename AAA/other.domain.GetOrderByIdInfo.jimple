@@ -1,0 +1,49 @@
+public class other.domain.GetOrderByIdInfo extends java.lang.Object
+{
+/*GetOrderByIdInfo.java*/
+    private java.lang.String orderId;
+
+    public void <init>()
+    {
+        other.domain.GetOrderByIdInfo this;
+
+        this := @this: other.domain.GetOrderByIdInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*7*/
+
+        return;
+/*9*/
+    }
+
+    public java.lang.String getOrderId()
+    {
+        other.domain.GetOrderByIdInfo this;
+        java.lang.String $stack1;
+
+        this := @this: other.domain.GetOrderByIdInfo;
+
+        $stack1 = this.<other.domain.GetOrderByIdInfo: java.lang.String orderId>;
+/*12*/
+
+        return $stack1;
+/*12*/
+    }
+
+/*[orderId]*/
+    public void setOrderId(java.lang.String)
+    {
+        other.domain.GetOrderByIdInfo this;
+        java.lang.String orderId;
+
+        this := @this: other.domain.GetOrderByIdInfo;
+
+        orderId := @parameter0: java.lang.String;
+
+        this.<other.domain.GetOrderByIdInfo: java.lang.String orderId> = orderId;
+/*16*/
+
+        return;
+/*17*/
+    }
+}

@@ -1,0 +1,113 @@
+public class order.domain.CancelOrderInfo extends java.lang.Object
+{
+/*CancelOrderInfo.java*/
+    private java.util.UUID accountId;
+    private java.util.UUID orderId;
+    private java.lang.String loginToken;
+
+    public void <init>()
+    {
+        order.domain.CancelOrderInfo this;
+
+        this := @this: order.domain.CancelOrderInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*13*/
+
+        return;
+/*15*/
+    }
+
+    public java.lang.String getLoginToken()
+    {
+        order.domain.CancelOrderInfo this;
+        java.lang.String $stack1;
+
+        this := @this: order.domain.CancelOrderInfo;
+
+        $stack1 = this.<order.domain.CancelOrderInfo: java.lang.String loginToken>;
+/*18*/
+
+        return $stack1;
+/*18*/
+    }
+
+/*[loginToken]*/
+    public void setLoginToken(java.lang.String)
+    {
+        order.domain.CancelOrderInfo this;
+        java.lang.String loginToken;
+
+        this := @this: order.domain.CancelOrderInfo;
+
+        loginToken := @parameter0: java.lang.String;
+
+        this.<order.domain.CancelOrderInfo: java.lang.String loginToken> = loginToken;
+/*22*/
+
+        return;
+/*23*/
+    }
+
+    public java.util.UUID getAccountId()
+    {
+        order.domain.CancelOrderInfo this;
+        java.util.UUID $stack1;
+
+        this := @this: order.domain.CancelOrderInfo;
+
+        $stack1 = this.<order.domain.CancelOrderInfo: java.util.UUID accountId>;
+/*26*/
+
+        return $stack1;
+/*26*/
+    }
+
+/*[accountId]*/
+    public void setAccountId(java.util.UUID)
+    {
+        order.domain.CancelOrderInfo this;
+        java.util.UUID accountId;
+
+        this := @this: order.domain.CancelOrderInfo;
+
+        accountId := @parameter0: java.util.UUID;
+
+        this.<order.domain.CancelOrderInfo: java.util.UUID accountId> = accountId;
+/*30*/
+
+        return;
+/*31*/
+    }
+
+    public java.util.UUID getOrderId()
+    {
+        order.domain.CancelOrderInfo this;
+        java.util.UUID $stack1;
+
+        this := @this: order.domain.CancelOrderInfo;
+
+        $stack1 = this.<order.domain.CancelOrderInfo: java.util.UUID orderId>;
+/*34*/
+
+        return $stack1;
+/*34*/
+    }
+
+/*[orderId]*/
+    public void setOrderId(java.util.UUID)
+    {
+        order.domain.CancelOrderInfo this;
+        java.util.UUID orderId;
+
+        this := @this: order.domain.CancelOrderInfo;
+
+        orderId := @parameter0: java.util.UUID;
+
+        this.<order.domain.CancelOrderInfo: java.util.UUID orderId> = orderId;
+/*38*/
+
+        return;
+/*39*/
+    }
+}

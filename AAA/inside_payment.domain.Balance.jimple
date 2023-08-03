@@ -1,0 +1,91 @@
+public class inside_payment.domain.Balance extends java.lang.Object
+{
+/*Balance.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Ljavax/validation/Valid; without elements
+Annotation type: Ljavax/validation/constraints/NotNull; without elements
+*/
+    private java.lang.String userId;
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Ljavax/validation/Valid; without elements
+Annotation type: Ljavax/validation/constraints/NotNull; without elements
+*/
+    private java.lang.String balance;
+
+    public void <init>()
+    {
+        inside_payment.domain.Balance this;
+
+        this := @this: inside_payment.domain.Balance;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*18*/
+
+        return;
+/*18*/
+    }
+
+    public java.lang.String getUserId()
+    {
+        inside_payment.domain.Balance this;
+        java.lang.String $stack1;
+
+        this := @this: inside_payment.domain.Balance;
+
+        $stack1 = this.<inside_payment.domain.Balance: java.lang.String userId>;
+/*21*/
+
+        return $stack1;
+/*21*/
+    }
+
+/*[userId]*/
+    public void setUserId(java.lang.String)
+    {
+        inside_payment.domain.Balance this;
+        java.lang.String userId;
+
+        this := @this: inside_payment.domain.Balance;
+
+        userId := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Balance: java.lang.String userId> = userId;
+/*25*/
+
+        return;
+/*26*/
+    }
+
+    public java.lang.String getBalance()
+    {
+        inside_payment.domain.Balance this;
+        java.lang.String $stack1;
+
+        this := @this: inside_payment.domain.Balance;
+
+        $stack1 = this.<inside_payment.domain.Balance: java.lang.String balance>;
+/*29*/
+
+        return $stack1;
+/*29*/
+    }
+
+/*[balance]*/
+    public void setBalance(java.lang.String)
+    {
+        inside_payment.domain.Balance this;
+        java.lang.String balance;
+
+        this := @this: inside_payment.domain.Balance;
+
+        balance := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Balance: java.lang.String balance> = balance;
+/*33*/
+
+        return;
+/*34*/
+    }
+}

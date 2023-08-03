@@ -1,0 +1,870 @@
+public class inside_payment.domain.Order extends java.lang.Object
+{
+/*Order.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation: type: Lcom/fasterxml/jackson/annotation/JsonIgnoreProperties; num elems: 1 elems: 
+Annotation Element: kind: Z name: ignoreUnknown value: 1
+
+*/
+    private java.util.UUID id;
+    private java.util.Date boughtDate;
+    private java.util.Date travelDate;
+    private java.util.Date travelTime;
+    private java.util.UUID accountId;
+    private java.lang.String contactsName;
+    private int documentType;
+    private java.lang.String contactsDocumentNumber;
+    private java.lang.String trainNumber;
+    private int coachNumber;
+    private int seatClass;
+    private java.lang.String seatNumber;
+    private java.lang.String 'from';
+    private java.lang.String 'to';
+    private int status;
+    private java.lang.String price;
+
+    public void <init>()
+    {
+        java.util.Date $stack1, $stack3;
+        inside_payment.domain.SeatClass $stack4;
+        long $stack2;
+        inside_payment.domain.OrderStatus $stack6;
+        inside_payment.domain.Order this;
+        int $stack5, $stack7;
+
+        this := @this: inside_payment.domain.Order;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*46*/
+
+        $stack1 = new java.util.Date;
+/*47*/
+
+        $stack2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+/*47*/
+
+        specialinvoke $stack1.<java.util.Date: void <init>(long)>($stack2);
+/*47*/
+
+        this.<inside_payment.domain.Order: java.util.Date boughtDate> = $stack1;
+/*47*/
+
+        $stack3 = new java.util.Date;
+/*48*/
+
+        specialinvoke $stack3.<java.util.Date: void <init>(long)>(123456789L);
+/*48*/
+
+        this.<inside_payment.domain.Order: java.util.Date travelDate> = $stack3;
+/*48*/
+
+        this.<inside_payment.domain.Order: java.lang.String trainNumber> = "G1235";
+/*49*/
+
+        this.<inside_payment.domain.Order: int coachNumber> = 5;
+/*50*/
+
+        $stack4 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass FIRSTCLASS>;
+/*51*/
+
+        $stack5 = virtualinvoke $stack4.<inside_payment.domain.SeatClass: int getCode()>();
+/*51*/
+
+        this.<inside_payment.domain.Order: int seatClass> = $stack5;
+/*51*/
+
+        this.<inside_payment.domain.Order: java.lang.String seatNumber> = "5A";
+/*52*/
+
+        this.<inside_payment.domain.Order: java.lang.String 'from'> = "\u4e0a\u6d77";
+/*53*/
+
+        this.<inside_payment.domain.Order: java.lang.String 'to'> = "\u592a\u539f";
+/*54*/
+
+        $stack6 = <inside_payment.domain.OrderStatus: inside_payment.domain.OrderStatus PAID>;
+/*55*/
+
+        $stack7 = virtualinvoke $stack6.<inside_payment.domain.OrderStatus: int getCode()>();
+/*55*/
+
+        this.<inside_payment.domain.Order: int status> = $stack7;
+/*55*/
+
+        this.<inside_payment.domain.Order: java.lang.String price> = "0.0";
+/*56*/
+
+        return;
+/*57*/
+    }
+
+/*[obj]*/
+    public boolean equals(java.lang.Object)
+    {
+        java.util.Date $stack5, $stack6, $stack8, $stack9, $stack12, $stack13;
+        boolean $stack7, $stack10, $stack14, $stack17, $stack20, $stack23, $stack28, $stack35, $stack38, $stack41, $stack46;
+        java.util.UUID $stack15, $stack16;
+        inside_payment.domain.Order this, other;
+        int $stack24, $stack25, $stack29, $stack30, $stack31, $stack32, $stack42, $stack43;
+        java.lang.String $stack18, $stack19, $stack21, $stack22, $stack26, $stack27, $stack33, $stack34, $stack36, $stack37, $stack39, $stack40, $stack44, $stack45;
+        java.lang.Object obj;
+        java.lang.Class $stack3, $stack4;
+
+        this := @this: inside_payment.domain.Order;
+
+        obj := @parameter0: java.lang.Object;
+
+        if this != obj goto label1;
+/*61*/
+
+        return 1;
+/*62*/
+
+     label1:
+        if obj != null goto label2;
+/*64*/
+
+        return 0;
+/*65*/
+
+     label2:
+        $stack3 = virtualinvoke this.<java.lang.Object: java.lang.Class getClass()>();
+/*67*/
+
+        $stack4 = virtualinvoke obj.<java.lang.Object: java.lang.Class getClass()>();
+/*67*/
+
+        if $stack3 == $stack4 goto label3;
+/*67*/
+
+        return 0;
+/*68*/
+
+     label3:
+        other = (inside_payment.domain.Order) obj;
+/*70*/
+
+        $stack5 = this.<inside_payment.domain.Order: java.util.Date boughtDate>;
+/*71*/
+
+        $stack6 = virtualinvoke other.<inside_payment.domain.Order: java.util.Date getBoughtDate()>();
+/*71*/
+
+        $stack7 = virtualinvoke $stack5.<java.util.Date: boolean equals(java.lang.Object)>($stack6);
+/*71*/
+
+        if $stack7 == 0 goto label4;
+/*71*/
+
+        $stack8 = this.<inside_payment.domain.Order: java.util.Date travelDate>;
+/*72*/
+
+        $stack9 = virtualinvoke other.<inside_payment.domain.Order: java.util.Date getTravelDate()>();
+/*72*/
+
+        $stack10 = virtualinvoke $stack8.<java.util.Date: boolean equals(java.lang.Object)>($stack9);
+/*72*/
+
+        if $stack10 == 0 goto label4;
+/*72*/
+
+        $stack12 = this.<inside_payment.domain.Order: java.util.Date travelTime>;
+/*73*/
+
+        $stack13 = virtualinvoke other.<inside_payment.domain.Order: java.util.Date getTravelTime()>();
+/*73*/
+
+        $stack14 = virtualinvoke $stack12.<java.util.Date: boolean equals(java.lang.Object)>($stack13);
+/*73*/
+
+        if $stack14 == 0 goto label4;
+/*73*/
+
+        $stack15 = this.<inside_payment.domain.Order: java.util.UUID accountId>;
+/*74*/
+
+        $stack16 = virtualinvoke other.<inside_payment.domain.Order: java.util.UUID getAccountId()>();
+/*74*/
+
+        $stack17 = virtualinvoke $stack15.<java.util.UUID: boolean equals(java.lang.Object)>($stack16);
+/*74*/
+
+        if $stack17 == 0 goto label4;
+/*74*/
+
+        $stack18 = this.<inside_payment.domain.Order: java.lang.String contactsName>;
+/*75*/
+
+        $stack19 = virtualinvoke other.<inside_payment.domain.Order: java.lang.String getContactsName()>();
+/*75*/
+
+        $stack20 = virtualinvoke $stack18.<java.lang.String: boolean equals(java.lang.Object)>($stack19);
+/*75*/
+
+        if $stack20 == 0 goto label4;
+/*75*/
+
+        $stack21 = this.<inside_payment.domain.Order: java.lang.String contactsDocumentNumber>;
+/*76*/
+
+        $stack22 = virtualinvoke other.<inside_payment.domain.Order: java.lang.String getContactsDocumentNumber()>();
+/*76*/
+
+        $stack23 = virtualinvoke $stack21.<java.lang.String: boolean equals(java.lang.Object)>($stack22);
+/*76*/
+
+        if $stack23 == 0 goto label4;
+/*76*/
+
+        $stack24 = this.<inside_payment.domain.Order: int documentType>;
+/*77*/
+
+        $stack25 = virtualinvoke other.<inside_payment.domain.Order: int getDocumentType()>();
+/*77*/
+
+        if $stack24 != $stack25 goto label4;
+/*77*/
+
+        $stack26 = this.<inside_payment.domain.Order: java.lang.String trainNumber>;
+/*78*/
+
+        $stack27 = virtualinvoke other.<inside_payment.domain.Order: java.lang.String getTrainNumber()>();
+/*78*/
+
+        $stack28 = virtualinvoke $stack26.<java.lang.String: boolean equals(java.lang.Object)>($stack27);
+/*78*/
+
+        if $stack28 == 0 goto label4;
+/*78*/
+
+        $stack29 = this.<inside_payment.domain.Order: int coachNumber>;
+/*79*/
+
+        $stack30 = virtualinvoke other.<inside_payment.domain.Order: int getCoachNumber()>();
+/*79*/
+
+        if $stack29 != $stack30 goto label4;
+/*79*/
+
+        $stack31 = this.<inside_payment.domain.Order: int seatClass>;
+/*80*/
+
+        $stack32 = virtualinvoke other.<inside_payment.domain.Order: int getSeatClass()>();
+/*80*/
+
+        if $stack31 != $stack32 goto label4;
+/*80*/
+
+        $stack33 = this.<inside_payment.domain.Order: java.lang.String seatNumber>;
+/*81*/
+
+        $stack34 = virtualinvoke other.<inside_payment.domain.Order: java.lang.String getSeatNumber()>();
+/*81*/
+
+        $stack35 = virtualinvoke $stack33.<java.lang.String: boolean equals(java.lang.Object)>($stack34);
+/*81*/
+
+        if $stack35 == 0 goto label4;
+/*81*/
+
+        $stack36 = this.<inside_payment.domain.Order: java.lang.String 'from'>;
+/*82*/
+
+        $stack37 = virtualinvoke other.<inside_payment.domain.Order: java.lang.String getFrom()>();
+/*82*/
+
+        $stack38 = virtualinvoke $stack36.<java.lang.String: boolean equals(java.lang.Object)>($stack37);
+/*82*/
+
+        if $stack38 == 0 goto label4;
+/*82*/
+
+        $stack39 = this.<inside_payment.domain.Order: java.lang.String 'to'>;
+/*83*/
+
+        $stack40 = virtualinvoke other.<inside_payment.domain.Order: java.lang.String getTo()>();
+/*83*/
+
+        $stack41 = virtualinvoke $stack39.<java.lang.String: boolean equals(java.lang.Object)>($stack40);
+/*83*/
+
+        if $stack41 == 0 goto label4;
+/*83*/
+
+        $stack42 = this.<inside_payment.domain.Order: int status>;
+/*84*/
+
+        $stack43 = virtualinvoke other.<inside_payment.domain.Order: int getStatus()>();
+/*84*/
+
+        if $stack42 != $stack43 goto label4;
+/*84*/
+
+        $stack45 = this.<inside_payment.domain.Order: java.lang.String price>;
+/*85*/
+
+        $stack44 = other.<inside_payment.domain.Order: java.lang.String price>;
+/*85*/
+
+        $stack46 = virtualinvoke $stack45.<java.lang.String: boolean equals(java.lang.Object)>($stack44);
+/*85*/
+
+        if $stack46 == 0 goto label4;
+/*85*/
+
+        return 1;
+/*71*/
+
+     label4:
+        return 0;
+/*71*/
+    }
+
+    public java.util.UUID getId()
+    {
+        java.util.UUID $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.util.UUID id>;
+/*89*/
+
+        return $stack1;
+/*89*/
+    }
+
+/*[id]*/
+    public void setId(java.util.UUID)
+    {
+        java.util.UUID id;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        id := @parameter0: java.util.UUID;
+
+        this.<inside_payment.domain.Order: java.util.UUID id> = id;
+/*93*/
+
+        return;
+/*94*/
+    }
+
+    public java.util.UUID getAccountId()
+    {
+        java.util.UUID $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.util.UUID accountId>;
+/*97*/
+
+        return $stack1;
+/*97*/
+    }
+
+/*[accountId]*/
+    public void setAccountId(java.util.UUID)
+    {
+        java.util.UUID accountId;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        accountId := @parameter0: java.util.UUID;
+
+        this.<inside_payment.domain.Order: java.util.UUID accountId> = accountId;
+/*101*/
+
+        return;
+/*102*/
+    }
+
+    public java.util.Date getBoughtDate()
+    {
+        java.util.Date $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.util.Date boughtDate>;
+/*105*/
+
+        return $stack1;
+/*105*/
+    }
+
+/*[boughtDate]*/
+    public void setBoughtDate(java.util.Date)
+    {
+        java.util.Date boughtDate;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        boughtDate := @parameter0: java.util.Date;
+
+        this.<inside_payment.domain.Order: java.util.Date boughtDate> = boughtDate;
+/*109*/
+
+        return;
+/*110*/
+    }
+
+    public java.util.Date getTravelDate()
+    {
+        java.util.Date $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.util.Date travelDate>;
+/*113*/
+
+        return $stack1;
+/*113*/
+    }
+
+/*[travelDate]*/
+    public void setTravelDate(java.util.Date)
+    {
+        java.util.Date travelDate;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        travelDate := @parameter0: java.util.Date;
+
+        this.<inside_payment.domain.Order: java.util.Date travelDate> = travelDate;
+/*117*/
+
+        return;
+/*118*/
+    }
+
+/*[year, month, day]*/
+    public void setTravelDate(int, int, int)
+    {
+        java.util.Date $stack5;
+        inside_payment.domain.Order this;
+        int year, month, day;
+
+        this := @this: inside_payment.domain.Order;
+
+        year := @parameter0: int;
+
+        month := @parameter1: int;
+
+        day := @parameter2: int;
+
+        $stack5 = new java.util.Date;
+/*121*/
+
+        specialinvoke $stack5.<java.util.Date: void <init>(int,int,int,int,int,int)>(year, month, day, 0, 0, 0);
+/*121*/
+
+        this.<inside_payment.domain.Order: java.util.Date travelDate> = $stack5;
+/*122*/
+
+        return;
+/*123*/
+    }
+
+    public java.util.Date getTravelTime()
+    {
+        java.util.Date $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.util.Date travelTime>;
+/*126*/
+
+        return $stack1;
+/*126*/
+    }
+
+/*[travelTime]*/
+    public void setTravelTime(java.util.Date)
+    {
+        java.util.Date travelTime;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        travelTime := @parameter0: java.util.Date;
+
+        this.<inside_payment.domain.Order: java.util.Date travelTime> = travelTime;
+/*130*/
+
+        return;
+/*131*/
+    }
+
+/*[hour, minute]*/
+    public void setTravelTime(int, int)
+    {
+        java.util.Date $stack4;
+        inside_payment.domain.Order this;
+        int hour, minute;
+
+        this := @this: inside_payment.domain.Order;
+
+        hour := @parameter0: int;
+
+        minute := @parameter1: int;
+
+        $stack4 = new java.util.Date;
+/*134*/
+
+        specialinvoke $stack4.<java.util.Date: void <init>(int,int,int,int,int,int)>(1970, 1, 1, hour, minute, 0);
+/*134*/
+
+        return;
+/*135*/
+    }
+
+    public java.lang.String getTrainNumber()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.lang.String trainNumber>;
+/*138*/
+
+        return $stack1;
+/*138*/
+    }
+
+/*[trainNumber]*/
+    public void setTrainNumber(java.lang.String)
+    {
+        java.lang.String trainNumber;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        trainNumber := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Order: java.lang.String trainNumber> = trainNumber;
+/*142*/
+
+        return;
+/*143*/
+    }
+
+    public int getCoachNumber()
+    {
+        int $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: int coachNumber>;
+/*146*/
+
+        return $stack1;
+/*146*/
+    }
+
+/*[coachNumber]*/
+    public void setCoachNumber(int)
+    {
+        int coachNumber;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        coachNumber := @parameter0: int;
+
+        this.<inside_payment.domain.Order: int coachNumber> = coachNumber;
+/*150*/
+
+        return;
+/*151*/
+    }
+
+    public int getSeatClass()
+    {
+        int $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: int seatClass>;
+/*154*/
+
+        return $stack1;
+/*154*/
+    }
+
+/*[seatClass]*/
+    public void setSeatClass(int)
+    {
+        int seatClass;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        seatClass := @parameter0: int;
+
+        this.<inside_payment.domain.Order: int seatClass> = seatClass;
+/*158*/
+
+        return;
+/*159*/
+    }
+
+    public java.lang.String getSeatNumber()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.lang.String seatNumber>;
+/*162*/
+
+        return $stack1;
+/*162*/
+    }
+
+/*[seatNumber]*/
+    public void setSeatNumber(java.lang.String)
+    {
+        java.lang.String seatNumber;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        seatNumber := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Order: java.lang.String seatNumber> = seatNumber;
+/*166*/
+
+        return;
+/*167*/
+    }
+
+    public java.lang.String getFrom()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.lang.String 'from'>;
+/*170*/
+
+        return $stack1;
+/*170*/
+    }
+
+/*[from]*/
+    public void setFrom(java.lang.String)
+    {
+        java.lang.String 'from';
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        'from' := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Order: java.lang.String 'from'> = 'from';
+/*174*/
+
+        return;
+/*175*/
+    }
+
+    public java.lang.String getTo()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.lang.String 'to'>;
+/*178*/
+
+        return $stack1;
+/*178*/
+    }
+
+/*[to]*/
+    public void setTo(java.lang.String)
+    {
+        java.lang.String 'to';
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        'to' := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Order: java.lang.String 'to'> = 'to';
+/*182*/
+
+        return;
+/*183*/
+    }
+
+    public int getStatus()
+    {
+        int $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: int status>;
+/*186*/
+
+        return $stack1;
+/*186*/
+    }
+
+/*[status]*/
+    public void setStatus(int)
+    {
+        int status;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        status := @parameter0: int;
+
+        this.<inside_payment.domain.Order: int status> = status;
+/*190*/
+
+        return;
+/*191*/
+    }
+
+    public java.lang.String getPrice()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.lang.String price>;
+/*194*/
+
+        return $stack1;
+/*194*/
+    }
+
+/*[price]*/
+    public void setPrice(java.lang.String)
+    {
+        java.lang.String price;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        price := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Order: java.lang.String price> = price;
+/*198*/
+
+        return;
+/*199*/
+    }
+
+    public java.lang.String getContactsName()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.lang.String contactsName>;
+/*202*/
+
+        return $stack1;
+/*202*/
+    }
+
+/*[contactsName]*/
+    public void setContactsName(java.lang.String)
+    {
+        java.lang.String contactsName;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        contactsName := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Order: java.lang.String contactsName> = contactsName;
+/*206*/
+
+        return;
+/*207*/
+    }
+
+    public int getDocumentType()
+    {
+        int $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: int documentType>;
+/*210*/
+
+        return $stack1;
+/*210*/
+    }
+
+/*[documentType]*/
+    public void setDocumentType(int)
+    {
+        int documentType;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        documentType := @parameter0: int;
+
+        this.<inside_payment.domain.Order: int documentType> = documentType;
+/*214*/
+
+        return;
+/*215*/
+    }
+
+    public java.lang.String getContactsDocumentNumber()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        $stack1 = this.<inside_payment.domain.Order: java.lang.String contactsDocumentNumber>;
+/*218*/
+
+        return $stack1;
+/*218*/
+    }
+
+/*[contactsDocumentNumber]*/
+    public void setContactsDocumentNumber(java.lang.String)
+    {
+        java.lang.String contactsDocumentNumber;
+        inside_payment.domain.Order this;
+
+        this := @this: inside_payment.domain.Order;
+
+        contactsDocumentNumber := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.Order: java.lang.String contactsDocumentNumber> = contactsDocumentNumber;
+/*222*/
+
+        return;
+/*223*/
+    }
+}

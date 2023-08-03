@@ -1,0 +1,81 @@
+public class inside_payment.domain.CreateAccountInfo extends java.lang.Object
+{
+/*CreateAccountInfo.java*/
+    private java.lang.String userId;
+    private java.lang.String money;
+
+    public void <init>()
+    {
+        inside_payment.domain.CreateAccountInfo this;
+
+        this := @this: inside_payment.domain.CreateAccountInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*14*/
+
+        return;
+/*14*/
+    }
+
+    public java.lang.String getUserId()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.CreateAccountInfo this;
+
+        this := @this: inside_payment.domain.CreateAccountInfo;
+
+        $stack1 = this.<inside_payment.domain.CreateAccountInfo: java.lang.String userId>;
+/*17*/
+
+        return $stack1;
+/*17*/
+    }
+
+/*[userId]*/
+    public void setUserId(java.lang.String)
+    {
+        java.lang.String userId;
+        inside_payment.domain.CreateAccountInfo this;
+
+        this := @this: inside_payment.domain.CreateAccountInfo;
+
+        userId := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.CreateAccountInfo: java.lang.String userId> = userId;
+/*21*/
+
+        return;
+/*22*/
+    }
+
+    public java.lang.String getMoney()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.CreateAccountInfo this;
+
+        this := @this: inside_payment.domain.CreateAccountInfo;
+
+        $stack1 = this.<inside_payment.domain.CreateAccountInfo: java.lang.String money>;
+/*25*/
+
+        return $stack1;
+/*25*/
+    }
+
+/*[money]*/
+    public void setMoney(java.lang.String)
+    {
+        java.lang.String money;
+        inside_payment.domain.CreateAccountInfo this;
+
+        this := @this: inside_payment.domain.CreateAccountInfo;
+
+        money := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.CreateAccountInfo: java.lang.String money> = money;
+/*29*/
+
+        return;
+/*30*/
+    }
+}

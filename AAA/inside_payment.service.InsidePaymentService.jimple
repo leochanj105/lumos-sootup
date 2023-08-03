@@ -1,0 +1,25 @@
+public interface  inside_payment.service.InsidePaymentService extends java.lang.Object
+{
+/*InsidePaymentService.java*/
+
+    public abstract boolean pay(inside_payment.domain.PaymentInfo, javax.servlet.http.HttpServletRequest);
+
+    public abstract boolean createAccount(inside_payment.domain.CreateAccountInfo);
+
+    public abstract boolean addMoney(inside_payment.domain.AddMoneyInfo);
+
+/*Signature: ()Ljava/util/List<Linside_payment/domain/Payment;>;*/
+    public abstract java.util.List queryPayment();
+
+/*Signature: ()Ljava/util/List<Linside_payment/domain/Balance;>;*/
+    public abstract java.util.List queryAccount();
+
+    public abstract boolean drawBack(inside_payment.domain.DrawBackInfo);
+
+    public abstract boolean payDifference(inside_payment.domain.PaymentDifferenceInfo, javax.servlet.http.HttpServletRequest);
+
+/*Signature: ()Ljava/util/List<Linside_payment/domain/AddMoney;>;*/
+    public abstract java.util.List queryAddMoney();
+
+    public abstract void initPayment(inside_payment.domain.Payment);
+}

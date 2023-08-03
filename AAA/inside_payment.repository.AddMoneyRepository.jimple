@@ -1,0 +1,25 @@
+public interface  inside_payment.repository.AddMoneyRepository extends java.lang.Object implements org.springframework.data.repository.CrudRepository
+{
+/*Signature: Ljava/lang/Object;Lorg/springframework/data/repository/CrudRepository<Linside_payment/domain/AddMoney;Ljava/lang/String;>;*/
+/*AddMoneyRepository.java*/
+
+/*Signature: (Ljava/lang/String;)Ljava/util/List<Linside_payment/domain/AddMoney;>;*/
+    public abstract java.util.List findByUserId(java.lang.String);
+
+/*Signature: ()Ljava/util/List<Linside_payment/domain/AddMoney;>;*/
+    public abstract java.util.List findAll();
+
+    public volatile java.lang.Iterable findAll()
+    {
+        java.util.List $stack1;
+        inside_payment.repository.AddMoneyRepository l0;
+
+        l0 := @this: inside_payment.repository.AddMoneyRepository;
+
+        $stack1 = interfaceinvoke l0.<inside_payment.repository.AddMoneyRepository: java.util.List findAll()>();
+/*1*/
+
+        return $stack1;
+/*1*/
+    }
+}

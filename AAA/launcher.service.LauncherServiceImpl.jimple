@@ -1,0 +1,470 @@
+public class launcher.service.LauncherServiceImpl extends java.lang.Object implements launcher.service.LauncherService
+{
+/*LauncherServiceImpl.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/stereotype/Service; without elements
+*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+    private org.springframework.web.client.RestTemplate restTemplate;
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+    private launcher.task.AsyncTask asyncTask;
+    public static int count;
+
+    public void <init>()
+    {
+        launcher.service.LauncherServiceImpl this;
+
+        this := @this: launcher.service.LauncherServiceImpl;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*14*/
+
+        return;
+/*14*/
+    }
+
+/*[email, password]*/
+    public void doErrorQueue(java.lang.String, java.lang.String)
+    {
+        java.util.concurrent.Future $stack48, $stack50, $stack52, $stack54, $stack45;
+        launcher.task.AsyncTask $stack47, $stack49, $stack51, $stack53, $stack44;
+        launcher.domain.RegisterResult registerResult, registerResultExtraOne, registerResultExtraTwo;
+        java.lang.Exception $stack122, $stack123;
+        java.lang.StringBuilder $stack20, $stack22, $stack24, $stack69, $stack72, $stack73, $stack79, $stack81, $stack83, $stack106, $stack109, $stack110, $stack116, $stack118, $stack120, $stack36, $stack38, $stack40;
+        java.lang.Object[] $stack17, $stack76, $stack113, $stack29;
+        launcher.domain.RegisterInfo $stack16, $stack75, $stack112;
+        launcher.service.LauncherServiceImpl this;
+        launcher.domain.LoginInfo $stack28;
+        java.lang.String email, password, $stack23, $stack25, $stack74, $stack82, $stack84, $stack111, $stack119, $stack121, $stack34, $stack35, $stack39, $stack41, $stack43;
+        java.lang.RuntimeException $stack67;
+        java.util.Random $stack26, $stack70, $stack85, $stack107;
+        launcher.domain.LoginResult $stack95;
+        launcher.domain.CancelOrderResult $stack61;
+        launcher.domain.OrderTicketsResult $stack105;
+        org.springframework.web.client.RestTemplate $stack18, $stack77, $stack114, $stack30;
+        boolean $stack27, $stack57, $stack58, $stack62, $stack65, $stack66, $stack86, $stack55, $stack68;
+        java.util.UUID $stack33, $stack42;
+        launcher.domain.Account $stack32;
+        int $stack71, $stack108;
+        java.lang.Boolean $stack64;
+        java.io.PrintStream $stack21, $stack80, $stack117, $stack37;
+        java.lang.Object $stack19, $stack60, $stack63, $stack78, $stack115, $stack31, $stack46;
+
+        this := @this: launcher.service.LauncherServiceImpl;
+
+        email := @parameter0: java.lang.String;
+
+        password := @parameter1: java.lang.String;
+
+        $stack16 = new launcher.domain.RegisterInfo;
+/*27*/
+
+        specialinvoke $stack16.<launcher.domain.RegisterInfo: void <init>(java.lang.String,java.lang.String)>(email, password);
+/*27*/
+
+        $stack18 = this.<launcher.service.LauncherServiceImpl: org.springframework.web.client.RestTemplate restTemplate>;
+/*28*/
+
+        $stack17 = newarray (java.lang.Object)[0];
+/*28*/
+
+        $stack19 = virtualinvoke $stack18.<org.springframework.web.client.RestTemplate: java.lang.Object postForObject(java.lang.String,java.lang.Object,java.lang.Class,java.lang.Object[])>("http://ts-register-service:12344/register", $stack16, class "Llauncher/domain/RegisterResult;", $stack17);
+/*28*/
+
+        registerResult = (launcher.domain.RegisterResult) $stack19;
+/*28*/
+
+        $stack21 = <java.lang.System: java.io.PrintStream out>;
+/*31*/
+
+        $stack20 = new java.lang.StringBuilder;
+/*31*/
+
+        specialinvoke $stack20.<java.lang.StringBuilder: void <init>()>();
+/*31*/
+
+        $stack22 = virtualinvoke $stack20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[Register Result] ");
+/*31*/
+
+        $stack23 = virtualinvoke registerResult.<launcher.domain.RegisterResult: java.lang.String getMessage()>();
+/*31*/
+
+        $stack24 = virtualinvoke $stack22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($stack23);
+/*31*/
+
+        $stack25 = virtualinvoke $stack24.<java.lang.StringBuilder: java.lang.String toString()>();
+/*31*/
+
+        virtualinvoke $stack21.<java.io.PrintStream: void println(java.lang.String)>($stack25);
+/*31*/
+
+        $stack26 = new java.util.Random;
+/*34*/
+
+        specialinvoke $stack26.<java.util.Random: void <init>()>();
+/*34*/
+
+        $stack27 = virtualinvoke $stack26.<java.util.Random: boolean nextBoolean()>();
+/*34*/
+
+        if $stack27 == 0 goto label01;
+/*34*/
+
+        $stack69 = new java.lang.StringBuilder;
+/*35*/
+
+        specialinvoke $stack69.<java.lang.StringBuilder: void <init>()>();
+/*35*/
+
+        $stack70 = new java.util.Random;
+/*35*/
+
+        specialinvoke $stack70.<java.util.Random: void <init>()>();
+/*35*/
+
+        $stack71 = virtualinvoke $stack70.<java.util.Random: int nextInt(int)>(10000000);
+/*35*/
+
+        $stack72 = virtualinvoke $stack69.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($stack71);
+/*35*/
+
+        $stack73 = virtualinvoke $stack72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("@fudan.edu.cn");
+/*35*/
+
+        $stack74 = virtualinvoke $stack73.<java.lang.StringBuilder: java.lang.String toString()>();
+/*35*/
+
+        $stack75 = new launcher.domain.RegisterInfo;
+/*36*/
+
+        specialinvoke $stack75.<launcher.domain.RegisterInfo: void <init>(java.lang.String,java.lang.String)>($stack74, "passwordpassword");
+/*36*/
+
+        $stack77 = this.<launcher.service.LauncherServiceImpl: org.springframework.web.client.RestTemplate restTemplate>;
+/*37*/
+
+        $stack76 = newarray (java.lang.Object)[0];
+/*37*/
+
+        $stack78 = virtualinvoke $stack77.<org.springframework.web.client.RestTemplate: java.lang.Object postForObject(java.lang.String,java.lang.Object,java.lang.Class,java.lang.Object[])>("http://ts-register-service:12344/register", $stack75, class "Llauncher/domain/RegisterResult;", $stack76);
+/*37*/
+
+        registerResultExtraOne = (launcher.domain.RegisterResult) $stack78;
+/*37*/
+
+        $stack80 = <java.lang.System: java.io.PrintStream out>;
+/*40*/
+
+        $stack79 = new java.lang.StringBuilder;
+/*40*/
+
+        specialinvoke $stack79.<java.lang.StringBuilder: void <init>()>();
+/*40*/
+
+        $stack81 = virtualinvoke $stack79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[Random First Account]");
+/*40*/
+
+        $stack82 = virtualinvoke registerResultExtraOne.<launcher.domain.RegisterResult: java.lang.String getMessage()>();
+/*40*/
+
+        $stack83 = virtualinvoke $stack81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($stack82);
+/*40*/
+
+        $stack84 = virtualinvoke $stack83.<java.lang.StringBuilder: java.lang.String toString()>();
+/*40*/
+
+        virtualinvoke $stack80.<java.io.PrintStream: void println(java.lang.String)>($stack84);
+/*40*/
+
+        $stack85 = new java.util.Random;
+/*41*/
+
+        specialinvoke $stack85.<java.util.Random: void <init>()>();
+/*41*/
+
+        $stack86 = virtualinvoke $stack85.<java.util.Random: boolean nextBoolean()>();
+/*41*/
+
+        if $stack86 == 0 goto label01;
+/*41*/
+
+        $stack106 = new java.lang.StringBuilder;
+/*42*/
+
+        specialinvoke $stack106.<java.lang.StringBuilder: void <init>()>();
+/*42*/
+
+        $stack107 = new java.util.Random;
+/*42*/
+
+        specialinvoke $stack107.<java.util.Random: void <init>()>();
+/*42*/
+
+        $stack108 = virtualinvoke $stack107.<java.util.Random: int nextInt(int)>(10000000);
+/*42*/
+
+        $stack109 = virtualinvoke $stack106.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($stack108);
+/*42*/
+
+        $stack110 = virtualinvoke $stack109.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("@fudan.edu.cn");
+/*42*/
+
+        $stack111 = virtualinvoke $stack110.<java.lang.StringBuilder: java.lang.String toString()>();
+/*42*/
+
+        $stack112 = new launcher.domain.RegisterInfo;
+/*43*/
+
+        specialinvoke $stack112.<launcher.domain.RegisterInfo: void <init>(java.lang.String,java.lang.String)>($stack111, "passwordpassword");
+/*43*/
+
+        $stack114 = this.<launcher.service.LauncherServiceImpl: org.springframework.web.client.RestTemplate restTemplate>;
+/*44*/
+
+        $stack113 = newarray (java.lang.Object)[0];
+/*44*/
+
+        $stack115 = virtualinvoke $stack114.<org.springframework.web.client.RestTemplate: java.lang.Object postForObject(java.lang.String,java.lang.Object,java.lang.Class,java.lang.Object[])>("http://ts-register-service:12344/register", $stack112, class "Llauncher/domain/RegisterResult;", $stack113);
+/*44*/
+
+        registerResultExtraTwo = (launcher.domain.RegisterResult) $stack115;
+/*44*/
+
+        $stack117 = <java.lang.System: java.io.PrintStream out>;
+/*47*/
+
+        $stack116 = new java.lang.StringBuilder;
+/*47*/
+
+        specialinvoke $stack116.<java.lang.StringBuilder: void <init>()>();
+/*47*/
+
+        $stack118 = virtualinvoke $stack116.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[Random Second Account]");
+/*47*/
+
+        $stack119 = virtualinvoke registerResultExtraTwo.<launcher.domain.RegisterResult: java.lang.String getMessage()>();
+/*47*/
+
+        $stack120 = virtualinvoke $stack118.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($stack119);
+/*47*/
+
+        $stack121 = virtualinvoke $stack120.<java.lang.StringBuilder: java.lang.String toString()>();
+/*47*/
+
+        virtualinvoke $stack117.<java.io.PrintStream: void println(java.lang.String)>($stack121);
+/*47*/
+
+     label01:
+        $stack28 = new launcher.domain.LoginInfo;
+/*52*/
+
+        specialinvoke $stack28.<launcher.domain.LoginInfo: void <init>(java.lang.String,java.lang.String,java.lang.String)>(email, password, "abcd");
+/*52*/
+
+        $stack30 = this.<launcher.service.LauncherServiceImpl: org.springframework.web.client.RestTemplate restTemplate>;
+/*56*/
+
+        $stack29 = newarray (java.lang.Object)[0];
+/*56*/
+
+        $stack31 = virtualinvoke $stack30.<org.springframework.web.client.RestTemplate: java.lang.Object postForObject(java.lang.String,java.lang.Object,java.lang.Class,java.lang.Object[])>("http://ts-login-service:12342/login", $stack28, class "Llauncher/domain/LoginResult;", $stack29);
+/*56*/
+
+        $stack95 = (launcher.domain.LoginResult) $stack31;
+/*56*/
+
+        $stack32 = virtualinvoke $stack95.<launcher.domain.LoginResult: launcher.domain.Account getAccount()>();
+/*60*/
+
+        $stack33 = virtualinvoke $stack32.<launcher.domain.Account: java.util.UUID getId()>();
+/*60*/
+
+        $stack34 = virtualinvoke $stack33.<java.util.UUID: java.lang.String toString()>();
+/*60*/
+
+        $stack35 = virtualinvoke $stack95.<launcher.domain.LoginResult: java.lang.String getToken()>();
+/*61*/
+
+        $stack37 = <java.lang.System: java.io.PrintStream out>;
+/*62*/
+
+        $stack36 = new java.lang.StringBuilder;
+/*62*/
+
+        specialinvoke $stack36.<java.lang.StringBuilder: void <init>()>();
+/*62*/
+
+        $stack38 = virtualinvoke $stack36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[Login Result] ");
+/*62*/
+
+        $stack39 = virtualinvoke $stack95.<launcher.domain.LoginResult: java.lang.String getMessage()>();
+/*62*/
+
+        $stack40 = virtualinvoke $stack38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($stack39);
+/*62*/
+
+        $stack41 = virtualinvoke $stack40.<java.lang.StringBuilder: java.lang.String toString()>();
+/*62*/
+
+        virtualinvoke $stack37.<java.io.PrintStream: void println(java.lang.String)>($stack41);
+/*62*/
+
+        $stack42 = staticinvoke <java.util.UUID: java.util.UUID randomUUID()>();
+/*64*/
+
+        $stack43 = virtualinvoke $stack42.<java.util.UUID: java.lang.String toString()>();
+/*64*/
+
+        $stack44 = this.<launcher.service.LauncherServiceImpl: launcher.task.AsyncTask asyncTask>;
+/*67*/
+
+        $stack45 = virtualinvoke $stack44.<launcher.task.AsyncTask: java.util.concurrent.Future sendOrderTicket(java.lang.String,java.lang.String,java.lang.String)>($stack43, $stack34, $stack35);
+/*67*/
+
+     label02:
+        $stack46 = interfaceinvoke $stack45.<java.util.concurrent.Future: java.lang.Object get()>();
+/*69*/
+
+        $stack105 = (launcher.domain.OrderTicketsResult) $stack46;
+/*69*/
+
+     label03:
+        goto label05;
+/*72*/
+
+     label04:
+        $stack123 := @caughtexception;
+/*137*/
+
+        virtualinvoke $stack123.<java.lang.Exception: void printStackTrace()>();
+/*71*/
+
+     label05:
+        $stack47 = this.<launcher.service.LauncherServiceImpl: launcher.task.AsyncTask asyncTask>;
+/*81*/
+
+        $stack48 = virtualinvoke $stack47.<launcher.task.AsyncTask: java.util.concurrent.Future sendInsidePayment(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($stack43, "Z1234", $stack34, $stack35);
+/*81*/
+
+        $stack49 = this.<launcher.service.LauncherServiceImpl: launcher.task.AsyncTask asyncTask>;
+/*92*/
+
+        $stack50 = virtualinvoke $stack49.<launcher.task.AsyncTask: java.util.concurrent.Future sendOrderCancel(java.lang.String,java.lang.String,java.lang.String)>($stack43, $stack34, $stack35);
+/*92*/
+
+        $stack51 = this.<launcher.service.LauncherServiceImpl: launcher.task.AsyncTask asyncTask>;
+/*101*/
+
+        $stack52 = virtualinvoke $stack51.<launcher.task.AsyncTask: java.util.concurrent.Future sendQueryOrder(java.lang.String,java.lang.String)>($stack34, $stack35);
+/*101*/
+
+        $stack53 = this.<launcher.service.LauncherServiceImpl: launcher.task.AsyncTask asyncTask>;
+/*102*/
+
+        $stack54 = virtualinvoke $stack53.<launcher.task.AsyncTask: java.util.concurrent.Future sendQueryOtherOrder(java.lang.String,java.lang.String)>($stack34, $stack35);
+/*102*/
+
+     label06:
+        $stack55 = interfaceinvoke $stack52.<java.util.concurrent.Future: boolean isDone()>();
+/*104*/
+
+        if $stack55 == 0 goto label06;
+/*104*/
+
+        $stack57 = interfaceinvoke $stack54.<java.util.concurrent.Future: boolean isDone()>();
+/*104*/
+
+        if $stack57 == 0 goto label06;
+/*104*/
+
+        goto label07;
+/*105*/
+
+     label07:
+        $stack58 = interfaceinvoke $stack50.<java.util.concurrent.Future: boolean isDone()>();
+/*125*/
+
+        if $stack58 == 0 goto label07;
+/*125*/
+
+        $stack60 = interfaceinvoke $stack50.<java.util.concurrent.Future: java.lang.Object get()>();
+/*126*/
+
+        $stack61 = (launcher.domain.CancelOrderResult) $stack60;
+/*126*/
+
+        $stack62 = virtualinvoke $stack61.<launcher.domain.CancelOrderResult: boolean isStatus()>();
+/*126*/
+
+        $stack63 = interfaceinvoke $stack48.<java.util.concurrent.Future: java.lang.Object get()>();
+/*126*/
+
+        $stack64 = (java.lang.Boolean) $stack63;
+/*126*/
+
+        $stack65 = virtualinvoke $stack64.<java.lang.Boolean: boolean booleanValue()>();
+/*126*/
+
+        if $stack65 != 0 goto label08;
+/*126*/
+
+        $stack68 = 1;
+/*126*/
+
+        goto label09;
+/*126*/
+
+     label08:
+        $stack68 = 0;
+/*126*/
+
+     label09:
+        $stack66 = $stack62 & $stack68;
+/*126*/
+
+        if $stack66 == 0 goto label10;
+/*126*/
+
+        $stack67 = new java.lang.RuntimeException;
+/*127*/
+
+        specialinvoke $stack67.<java.lang.RuntimeException: void <init>(java.lang.String)>("[Error Queue]");
+/*127*/
+
+        throw $stack67;
+/*127*/
+
+     label10:
+        return;
+/*129*/
+
+     label11:
+        $stack122 := @caughtexception;
+/*72*/
+
+        virtualinvoke $stack122.<java.lang.Exception: void printStackTrace()>();
+/*134*/
+
+        return;
+/*137*/
+
+        catch java.lang.Exception from label02 to label03 with label04;
+        catch java.lang.Exception from label07 to label10 with label11;
+    }
+
+    static void <clinit>()
+    {
+        <launcher.service.LauncherServiceImpl: int count> = 0;
+/*22*/
+
+        return;
+/*22*/
+    }
+}

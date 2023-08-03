@@ -1,0 +1,81 @@
+public class launcher.domain.CancelOrderResult extends java.lang.Object
+{
+/*CancelOrderResult.java*/
+    private boolean status;
+    private java.lang.String message;
+
+    public void <init>()
+    {
+        launcher.domain.CancelOrderResult this;
+
+        this := @this: launcher.domain.CancelOrderResult;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*9*/
+
+        return;
+/*11*/
+    }
+
+    public boolean isStatus()
+    {
+        launcher.domain.CancelOrderResult this;
+        boolean $stack1;
+
+        this := @this: launcher.domain.CancelOrderResult;
+
+        $stack1 = this.<launcher.domain.CancelOrderResult: boolean status>;
+/*14*/
+
+        return $stack1;
+/*14*/
+    }
+
+/*[status]*/
+    public void setStatus(boolean)
+    {
+        launcher.domain.CancelOrderResult this;
+        boolean status;
+
+        this := @this: launcher.domain.CancelOrderResult;
+
+        status := @parameter0: boolean;
+
+        this.<launcher.domain.CancelOrderResult: boolean status> = status;
+/*18*/
+
+        return;
+/*19*/
+    }
+
+    public java.lang.String getMessage()
+    {
+        launcher.domain.CancelOrderResult this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.CancelOrderResult;
+
+        $stack1 = this.<launcher.domain.CancelOrderResult: java.lang.String message>;
+/*22*/
+
+        return $stack1;
+/*22*/
+    }
+
+/*[message]*/
+    public void setMessage(java.lang.String)
+    {
+        launcher.domain.CancelOrderResult this;
+        java.lang.String message;
+
+        this := @this: launcher.domain.CancelOrderResult;
+
+        message := @parameter0: java.lang.String;
+
+        this.<launcher.domain.CancelOrderResult: java.lang.String message> = message;
+/*26*/
+
+        return;
+/*27*/
+    }
+}

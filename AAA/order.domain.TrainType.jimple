@@ -1,0 +1,335 @@
+public final enum class order.domain.TrainType extends java.lang.Enum
+{
+/*Signature: Ljava/lang/Enum<Lorder/domain/TrainType;>;*/
+/*TrainType.java*/
+    public static final enum order.domain.TrainType GAOTIE;
+    public static final enum order.domain.TrainType DONGCHE;
+    public static final enum order.domain.TrainType CHENGJI;
+    public static final enum order.domain.TrainType ZHIDA;
+    public static final enum order.domain.TrainType TEKUAI;
+    public static final enum order.domain.TrainType KUAISU;
+    public static final enum order.domain.TrainType LINKE;
+    public static final enum order.domain.TrainType YOULAN;
+    public static final enum order.domain.TrainType CHENGJIAO;
+    public static final enum order.domain.TrainType OTHER;
+    private int code;
+    private java.lang.String name;
+    private static final order.domain.TrainType[] ENUM$VALUES;
+
+    static void <clinit>()
+    {
+        order.domain.TrainType $stack0, $stack1, $stack2, $stack3, $stack4, $stack5, $stack6, $stack7, $stack8, $stack9, $stack11, $stack12, $stack13, $stack14, $stack15, $stack16, $stack17, $stack18, $stack19, $stack20;
+        order.domain.TrainType[] $stack10;
+
+        $stack0 = new order.domain.TrainType;
+/*5*/
+
+        specialinvoke $stack0.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("GAOTIE", 0, 0, "G");
+/*5*/
+
+        <order.domain.TrainType: order.domain.TrainType GAOTIE> = $stack0;
+/*5*/
+
+        $stack1 = new order.domain.TrainType;
+/*6*/
+
+        specialinvoke $stack1.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("DONGCHE", 1, 1, "D");
+/*6*/
+
+        <order.domain.TrainType: order.domain.TrainType DONGCHE> = $stack1;
+/*6*/
+
+        $stack2 = new order.domain.TrainType;
+/*7*/
+
+        specialinvoke $stack2.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("CHENGJI", 2, 2, "C");
+/*7*/
+
+        <order.domain.TrainType: order.domain.TrainType CHENGJI> = $stack2;
+/*7*/
+
+        $stack3 = new order.domain.TrainType;
+/*8*/
+
+        specialinvoke $stack3.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("ZHIDA", 3, 3, "Z");
+/*8*/
+
+        <order.domain.TrainType: order.domain.TrainType ZHIDA> = $stack3;
+/*8*/
+
+        $stack4 = new order.domain.TrainType;
+/*9*/
+
+        specialinvoke $stack4.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("TEKUAI", 4, 4, "T");
+/*9*/
+
+        <order.domain.TrainType: order.domain.TrainType TEKUAI> = $stack4;
+/*9*/
+
+        $stack5 = new order.domain.TrainType;
+/*10*/
+
+        specialinvoke $stack5.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("KUAISU", 5, 5, "K");
+/*10*/
+
+        <order.domain.TrainType: order.domain.TrainType KUAISU> = $stack5;
+/*10*/
+
+        $stack6 = new order.domain.TrainType;
+/*11*/
+
+        specialinvoke $stack6.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("LINKE", 6, 6, "L");
+/*11*/
+
+        <order.domain.TrainType: order.domain.TrainType LINKE> = $stack6;
+/*11*/
+
+        $stack7 = new order.domain.TrainType;
+/*12*/
+
+        specialinvoke $stack7.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("YOULAN", 7, 7, "Y");
+/*12*/
+
+        <order.domain.TrainType: order.domain.TrainType YOULAN> = $stack7;
+/*12*/
+
+        $stack8 = new order.domain.TrainType;
+/*13*/
+
+        specialinvoke $stack8.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("CHENGJIAO", 8, 8, "S");
+/*13*/
+
+        <order.domain.TrainType: order.domain.TrainType CHENGJIAO> = $stack8;
+/*13*/
+
+        $stack9 = new order.domain.TrainType;
+/*14*/
+
+        specialinvoke $stack9.<order.domain.TrainType: void <init>(java.lang.String,int,int,java.lang.String)>("OTHER", 9, 9, "");
+/*14*/
+
+        <order.domain.TrainType: order.domain.TrainType OTHER> = $stack9;
+/*14*/
+
+        $stack10 = newarray (order.domain.TrainType)[10];
+/*3*/
+
+        $stack11 = <order.domain.TrainType: order.domain.TrainType GAOTIE>;
+/*3*/
+
+        $stack10[0] = $stack11;
+/*3*/
+
+        $stack12 = <order.domain.TrainType: order.domain.TrainType DONGCHE>;
+/*3*/
+
+        $stack10[1] = $stack12;
+/*3*/
+
+        $stack13 = <order.domain.TrainType: order.domain.TrainType CHENGJI>;
+/*3*/
+
+        $stack10[2] = $stack13;
+/*3*/
+
+        $stack14 = <order.domain.TrainType: order.domain.TrainType ZHIDA>;
+/*3*/
+
+        $stack10[3] = $stack14;
+/*3*/
+
+        $stack15 = <order.domain.TrainType: order.domain.TrainType TEKUAI>;
+/*3*/
+
+        $stack10[4] = $stack15;
+/*3*/
+
+        $stack16 = <order.domain.TrainType: order.domain.TrainType KUAISU>;
+/*3*/
+
+        $stack10[5] = $stack16;
+/*3*/
+
+        $stack17 = <order.domain.TrainType: order.domain.TrainType LINKE>;
+/*3*/
+
+        $stack10[6] = $stack17;
+/*3*/
+
+        $stack18 = <order.domain.TrainType: order.domain.TrainType YOULAN>;
+/*3*/
+
+        $stack10[7] = $stack18;
+/*3*/
+
+        $stack19 = <order.domain.TrainType: order.domain.TrainType CHENGJIAO>;
+/*3*/
+
+        $stack10[8] = $stack19;
+/*3*/
+
+        $stack20 = <order.domain.TrainType: order.domain.TrainType OTHER>;
+/*3*/
+
+        $stack10[9] = $stack20;
+/*3*/
+
+        <order.domain.TrainType: order.domain.TrainType[] ENUM$VALUES> = $stack10;
+/*3*/
+
+        return;
+/*3*/
+    }
+
+/*[null, null, code, name]*/
+    private void <init>(java.lang.String, int, int, java.lang.String)
+    {
+        int l2, code;
+        java.lang.String l1, name;
+        order.domain.TrainType this;
+
+        this := @this: order.domain.TrainType;
+
+        l1 := @parameter0: java.lang.String;
+
+        l2 := @parameter1: int;
+
+        code := @parameter2: int;
+
+        name := @parameter3: java.lang.String;
+
+        specialinvoke this.<java.lang.Enum: void <init>(java.lang.String,int)>(l1, l2);
+/*19*/
+
+        this.<order.domain.TrainType: int code> = code;
+/*20*/
+
+        this.<order.domain.TrainType: java.lang.String name> = name;
+/*21*/
+
+        return;
+/*22*/
+    }
+
+    public int getCode()
+    {
+        int $stack1;
+        order.domain.TrainType this;
+
+        this := @this: order.domain.TrainType;
+
+        $stack1 = this.<order.domain.TrainType: int code>;
+/*25*/
+
+        return $stack1;
+/*25*/
+    }
+
+    public java.lang.String getName()
+    {
+        java.lang.String $stack1;
+        order.domain.TrainType this;
+
+        this := @this: order.domain.TrainType;
+
+        $stack1 = this.<order.domain.TrainType: java.lang.String name>;
+/*29*/
+
+        return $stack1;
+/*29*/
+    }
+
+    public static java.lang.String getNameByCode(int)
+    {
+        order.domain.TrainType[] $stack6;
+        int l4, l3, $stack7, code;
+        java.lang.String $stack10, $stack12;
+        order.domain.TrainType trainType, $stack11;
+
+        code := @parameter0: int;
+
+        $stack6 = staticinvoke <order.domain.TrainType: order.domain.TrainType[] values()>();
+/*33*/
+
+        l4 = lengthof $stack6;
+/*34*/
+
+        l3 = 0;
+/*34*/
+
+        goto label3;
+/*34*/
+
+     label1:
+        trainType = $stack6[l3];
+/*34*/
+
+        $stack7 = virtualinvoke trainType.<order.domain.TrainType: int getCode()>();
+/*35*/
+
+        if $stack7 != code goto label2;
+/*35*/
+
+        $stack10 = virtualinvoke trainType.<order.domain.TrainType: java.lang.String getName()>();
+/*36*/
+
+        return $stack10;
+/*36*/
+
+     label2:
+        l3 = l3 + 1;
+/*34*/
+
+     label3:
+        if l3 < l4 goto label1;
+/*34*/
+
+        $stack11 = $stack6[0];
+/*39*/
+
+        $stack12 = virtualinvoke $stack11.<order.domain.TrainType: java.lang.String getName()>();
+/*39*/
+
+        return $stack12;
+/*39*/
+    }
+
+    public static order.domain.TrainType[] values()
+    {
+        int $stack4;
+        order.domain.TrainType[] $stack3, $stack5;
+
+        $stack3 = <order.domain.TrainType: order.domain.TrainType[] ENUM$VALUES>;
+/*1*/
+
+        $stack4 = lengthof $stack3;
+/*1*/
+
+        $stack5 = newarray (order.domain.TrainType)[$stack4];
+/*1*/
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($stack3, 0, $stack5, 0, $stack4);
+/*1*/
+
+        return $stack5;
+/*1*/
+    }
+
+    public static order.domain.TrainType valueOf(java.lang.String)
+    {
+        java.lang.String l0;
+        java.lang.Enum $stack1;
+        order.domain.TrainType $stack2;
+
+        l0 := @parameter0: java.lang.String;
+
+        $stack1 = staticinvoke <java.lang.Enum: java.lang.Enum valueOf(java.lang.Class,java.lang.String)>(class "Lorder/domain/TrainType;", l0);
+/*1*/
+
+        $stack2 = (order.domain.TrainType) $stack1;
+/*1*/
+
+        return $stack2;
+/*1*/
+    }
+}

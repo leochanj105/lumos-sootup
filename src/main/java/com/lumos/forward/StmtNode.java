@@ -8,12 +8,14 @@ import com.lumos.App;
 import soot.Local;
 import soot.RefLikeType;
 import soot.Value;
+import soot.ValueBox;
 import soot.jimple.Constant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
 import soot.jimple.internal.JIdentityStmt;
 import soot.jimple.internal.JInstanceFieldRef;
+import soot.jimple.internal.JReturnStmt;
 
 public class StmtNode extends IPNode {
     // Context context;
@@ -91,9 +93,14 @@ public class StmtNode extends IPNode {
                         UniqueName value = def.getDefinedValue();
                         newdefs.add(Definition.getDefinition(value, this));
                     }
+                    out.clearDefinition(cvlop);
                     out.putDefinition(cvlop, newdefs);
                 }
-                // if(cvlop)
+
+                // if (cvrop.toString().contains("this.<inside_payment.domain.AddMoney")) {
+
+                // App.p(defs.size());
+                // }
             } else if (lop instanceof JInstanceFieldRef) {
                 Set<UniqueName> unames = out.getUniqueNamesForRef(cvlop);
                 Set<Definition> possibleDefinitions = out.getDefinitionsByCV(cvrop);
@@ -109,6 +116,7 @@ public class StmtNode extends IPNode {
 
                 for (UniqueName uname : unames) {
                     if (unames.size() == 1) {
+                        out.clearDefinition(uname);
                         out.putDefinition(uname, currDefs);
                     } else {
                         out.getCurrMapping().get(uname).addAll(currDefs);
@@ -120,5 +128,38 @@ public class StmtNode extends IPNode {
                 App.panicni();
             }
         }
+    }
+
+    @Override
+    public Set<ContextSensitiveValue> getUsed() {
+        Set<ContextSensitiveValue> cvused = new HashSet<>();
+        if (stmt instanceof JReturnStmt) {
+            Value ret = ((JReturnStmt) stmt).getOp();
+            cvused.add(ContextSensitiveValue.getCValue(getContext(), ret));
+        } else {
+            // JAssignStmt astmt = (JAssignStmt) stmt;
+            Set<Value> banned = new HashSet<>();
+            for (ValueBox vbox : stmt.getUseBoxes()) {
+                Value use = vbox.getValue();
+
+                if (banned.contains(use)) {
+                    continue;
+                }
+                if ((stmt instanceof JAssignStmt)
+                        && ((JAssignStmt) stmt).getLeftOp().getUseBoxes().contains(vbox)) {
+                    continue;
+                }
+
+                if ((use instanceof Local) || (use instanceof JInstanceFieldRef)) {
+                    ContextSensitiveValue cvuse = ContextSensitiveValue.getCValue(getContext(), use);
+                    cvused.add(cvuse);
+                    if (use instanceof JInstanceFieldRef) {
+                        banned.add(((JInstanceFieldRef) use).getBase());
+                    }
+                }
+            }
+
+        }
+        return cvused;
     }
 }

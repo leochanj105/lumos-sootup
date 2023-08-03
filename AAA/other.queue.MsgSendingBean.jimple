@@ -1,0 +1,106 @@
+public class other.queue.MsgSendingBean extends java.lang.Object
+{
+/*MsgSendingBean.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/stereotype/Component; without elements
+Annotation: type: Lorg/springframework/cloud/stream/annotation/EnableBinding; num elems: 1 elems: 
+Annotation Element: kind: [ name: value values: [Annotation Element: kind: c name: null decription: Lorg/springframework/cloud/stream/messaging/Source;]
+
+*/
+    private org.springframework.cloud.stream.messaging.Source source;
+
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+/*[source]*/
+    public void <init>(org.springframework.cloud.stream.messaging.Source)
+    {
+        other.queue.MsgSendingBean this;
+        org.springframework.cloud.stream.messaging.Source source;
+
+        this := @this: other.queue.MsgSendingBean;
+
+        source := @parameter0: org.springframework.cloud.stream.messaging.Source;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*18*/
+
+        this.<other.queue.MsgSendingBean: org.springframework.cloud.stream.messaging.Source source> = source;
+/*19*/
+
+        return;
+/*20*/
+    }
+
+/*[changeOrderResult]*/
+    public void sendLoginInfoToSso(other.domain.ChangeOrderResult)
+    {
+        java.io.PrintStream $stack4, $stack8;
+        other.domain.ChangeOrderResult changeOrderResult;
+        org.springframework.messaging.MessageChannel $stack12;
+        other.queue.MsgSendingBean this;
+        com.google.gson.Gson $stack5;
+        java.lang.StringBuilder $stack7, $stack9;
+        org.springframework.messaging.Message $stack14;
+        java.lang.String $stack6, $stack10;
+        org.springframework.cloud.stream.messaging.Source $stack11;
+        org.springframework.messaging.support.MessageBuilder $stack13;
+
+        this := @this: other.queue.MsgSendingBean;
+
+        changeOrderResult := @parameter0: other.domain.ChangeOrderResult;
+
+        $stack4 = <java.lang.System: java.io.PrintStream out>;
+/*23*/
+
+        virtualinvoke $stack4.<java.io.PrintStream: void println(java.lang.String)>("[Order Other Service][Sending Bean] Send Login Into To SSO");
+/*23*/
+
+        $stack5 = new com.google.gson.Gson;
+/*24*/
+
+        specialinvoke $stack5.<com.google.gson.Gson: void <init>()>();
+/*24*/
+
+        $stack6 = virtualinvoke $stack5.<com.google.gson.Gson: java.lang.String toJson(java.lang.Object)>(changeOrderResult);
+/*25*/
+
+        $stack8 = <java.lang.System: java.io.PrintStream out>;
+/*26*/
+
+        $stack7 = new java.lang.StringBuilder;
+/*26*/
+
+        specialinvoke $stack7.<java.lang.StringBuilder: void <init>(java.lang.String)>("[Orde Other Service][Sending Bean] Sending Data:");
+/*26*/
+
+        $stack9 = virtualinvoke $stack7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($stack6);
+/*26*/
+
+        $stack10 = virtualinvoke $stack9.<java.lang.StringBuilder: java.lang.String toString()>();
+/*26*/
+
+        virtualinvoke $stack8.<java.io.PrintStream: void println(java.lang.String)>($stack10);
+/*26*/
+
+        $stack11 = this.<other.queue.MsgSendingBean: org.springframework.cloud.stream.messaging.Source source>;
+/*27*/
+
+        $stack12 = interfaceinvoke $stack11.<org.springframework.cloud.stream.messaging.Source: org.springframework.messaging.MessageChannel output()>();
+/*27*/
+
+        $stack13 = staticinvoke <org.springframework.messaging.support.MessageBuilder: org.springframework.messaging.support.MessageBuilder withPayload(java.lang.Object)>($stack6);
+/*27*/
+
+        $stack14 = virtualinvoke $stack13.<org.springframework.messaging.support.MessageBuilder: org.springframework.messaging.Message build()>();
+/*27*/
+
+        interfaceinvoke $stack12.<org.springframework.messaging.MessageChannel: boolean send(org.springframework.messaging.Message)>($stack14);
+/*27*/
+
+        return;
+/*28*/
+    }
+}

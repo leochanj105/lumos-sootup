@@ -235,13 +235,17 @@ public class MethodInfo {
         Map<Stmt, Set<Stmt>> dominators = new HashMap<>();
         Set<Stmt> worklist = new HashSet<>();
         Map<Stmt, Set<Stmt>> cfdeps = new HashMap<>();
-        // Set<Stmt> allStmt = new HashSet<>();
+        Set<Stmt> allStmt = new HashSet<>();
         for (Unit u : this.sm.getActiveBody().getUnits()) {
             Stmt stmt = (Stmt) u;
-            // allStmt.add(stmt);
+            allStmt.add(stmt);
             worklist.add(stmt);
-            dominators.put(stmt, new HashSet<>());
             cfdeps.put(stmt, new HashSet<>());
+        }
+        for (Unit u : this.sm.getActiveBody().getUnits()) {
+            Stmt stmt = (Stmt) u;
+            dominators.put(stmt, new HashSet<>(allStmt));
+
         }
 
         while (!worklist.isEmpty()) {
@@ -250,9 +254,6 @@ public class MethodInfo {
             worklist.remove(stmt);
             Set<Stmt> pds = new HashSet<>(Collections.singletonList(stmt));
             Set<Stmt> intersection = null;
-            // if (cfg.getSuccsOf(u).isEmpty()) {
-
-            // } else {
             for (Unit succ : cfg.getSuccsOf(stmt)) {
                 Stmt succStmt = (Stmt) succ;
                 Set<Stmt> succpds = dominators.get(succStmt);

@@ -1,0 +1,310 @@
+public class launcher.domain.OrderTicketsInfoWithOrderId extends java.lang.Object
+{
+/*OrderTicketsInfoWithOrderId.java*/
+    private java.lang.String contactsId;
+    private java.lang.String tripId;
+    private int seatType;
+    private java.util.Date date;
+    private java.lang.String 'from';
+    private java.lang.String 'to';
+    private java.lang.String orderId;
+    private int assurance;
+    private int foodType;
+    private java.lang.String stationName;
+    private java.lang.String storeName;
+    private java.lang.String foodName;
+    private double foodPrice;
+    private java.lang.String handleDate;
+    private java.lang.String consigneeName;
+    private java.lang.String consigneePhone;
+    private double consigneeWeight;
+    private boolean isWithin;
+
+    public void <init>()
+    {
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*46*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: int foodType> = 0;
+/*25*/
+
+        return;
+/*48*/
+    }
+
+/*[contactsId, tripId, seatType, date, from, to, orderId]*/
+    public void <init>(java.lang.String, java.lang.String, int, java.util.Date, java.lang.String, java.lang.String, java.lang.String)
+    {
+        java.util.Date date;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+        int seatType;
+        java.lang.String contactsId, tripId, 'from', 'to', orderId;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        contactsId := @parameter0: java.lang.String;
+
+        tripId := @parameter1: java.lang.String;
+
+        seatType := @parameter2: int;
+
+        date := @parameter3: java.util.Date;
+
+        'from' := @parameter4: java.lang.String;
+
+        'to' := @parameter5: java.lang.String;
+
+        orderId := @parameter6: java.lang.String;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*50*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: int foodType> = 0;
+/*25*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String contactsId> = contactsId;
+/*51*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String tripId> = tripId;
+/*52*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: int seatType> = seatType;
+/*53*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.util.Date date> = date;
+/*54*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String 'from'> = 'from';
+/*55*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String 'to'> = 'to';
+/*56*/
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String orderId> = orderId;
+/*57*/
+
+        return;
+/*58*/
+    }
+
+    public java.lang.String getContactsId()
+    {
+        java.lang.String $stack1;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        $stack1 = this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String contactsId>;
+/*61*/
+
+        return $stack1;
+/*61*/
+    }
+
+/*[contactsId]*/
+    public void setContactsId(java.lang.String)
+    {
+        java.lang.String contactsId;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        contactsId := @parameter0: java.lang.String;
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String contactsId> = contactsId;
+/*65*/
+
+        return;
+/*66*/
+    }
+
+    public java.lang.String getTripId()
+    {
+        java.lang.String $stack1;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        $stack1 = this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String tripId>;
+/*69*/
+
+        return $stack1;
+/*69*/
+    }
+
+/*[tripId]*/
+    public void setTripId(java.lang.String)
+    {
+        java.lang.String tripId;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        tripId := @parameter0: java.lang.String;
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String tripId> = tripId;
+/*73*/
+
+        return;
+/*74*/
+    }
+
+    public int getSeatType()
+    {
+        int $stack1;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        $stack1 = this.<launcher.domain.OrderTicketsInfoWithOrderId: int seatType>;
+/*77*/
+
+        return $stack1;
+/*77*/
+    }
+
+/*[seatType]*/
+    public void setSeatType(int)
+    {
+        int seatType;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        seatType := @parameter0: int;
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: int seatType> = seatType;
+/*81*/
+
+        return;
+/*82*/
+    }
+
+    public java.util.Date getDate()
+    {
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+        java.util.Date $stack1;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        $stack1 = this.<launcher.domain.OrderTicketsInfoWithOrderId: java.util.Date date>;
+/*85*/
+
+        return $stack1;
+/*85*/
+    }
+
+/*[date]*/
+    public void setDate(java.util.Date)
+    {
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+        java.util.Date date;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        date := @parameter0: java.util.Date;
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.util.Date date> = date;
+/*89*/
+
+        return;
+/*90*/
+    }
+
+    public java.lang.String getFrom()
+    {
+        java.lang.String $stack1;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        $stack1 = this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String 'from'>;
+/*93*/
+
+        return $stack1;
+/*93*/
+    }
+
+/*[from]*/
+    public void setFrom(java.lang.String)
+    {
+        java.lang.String 'from';
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        'from' := @parameter0: java.lang.String;
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String 'from'> = 'from';
+/*97*/
+
+        return;
+/*98*/
+    }
+
+    public java.lang.String getTo()
+    {
+        java.lang.String $stack1;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        $stack1 = this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String 'to'>;
+/*101*/
+
+        return $stack1;
+/*101*/
+    }
+
+/*[to]*/
+    public void setTo(java.lang.String)
+    {
+        java.lang.String 'to';
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        'to' := @parameter0: java.lang.String;
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String 'to'> = 'to';
+/*105*/
+
+        return;
+/*106*/
+    }
+
+    public java.lang.String getOrderId()
+    {
+        java.lang.String $stack1;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        $stack1 = this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String orderId>;
+/*109*/
+
+        return $stack1;
+/*109*/
+    }
+
+/*[orderId]*/
+    public void setOrderId(java.lang.String)
+    {
+        java.lang.String orderId;
+        launcher.domain.OrderTicketsInfoWithOrderId this;
+
+        this := @this: launcher.domain.OrderTicketsInfoWithOrderId;
+
+        orderId := @parameter0: java.lang.String;
+
+        this.<launcher.domain.OrderTicketsInfoWithOrderId: java.lang.String orderId> = orderId;
+/*113*/
+
+        return;
+/*114*/
+    }
+}

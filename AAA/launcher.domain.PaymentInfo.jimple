@@ -1,0 +1,106 @@
+public class launcher.domain.PaymentInfo extends java.lang.Object
+{
+/*PaymentInfo.java*/
+    private java.lang.String orderId;
+    private java.lang.String tripId;
+
+    public void <init>()
+    {
+        launcher.domain.PaymentInfo this;
+
+        this := @this: launcher.domain.PaymentInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*8*/
+
+        return;
+/*10*/
+    }
+
+/*[orderId, tripId]*/
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        launcher.domain.PaymentInfo this;
+        java.lang.String orderId, tripId;
+
+        this := @this: launcher.domain.PaymentInfo;
+
+        orderId := @parameter0: java.lang.String;
+
+        tripId := @parameter1: java.lang.String;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*12*/
+
+        this.<launcher.domain.PaymentInfo: java.lang.String orderId> = orderId;
+/*13*/
+
+        this.<launcher.domain.PaymentInfo: java.lang.String tripId> = tripId;
+/*14*/
+
+        return;
+/*15*/
+    }
+
+    public java.lang.String getOrderId()
+    {
+        launcher.domain.PaymentInfo this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.PaymentInfo;
+
+        $stack1 = this.<launcher.domain.PaymentInfo: java.lang.String orderId>;
+/*18*/
+
+        return $stack1;
+/*18*/
+    }
+
+/*[orderId]*/
+    public void setOrderId(java.lang.String)
+    {
+        launcher.domain.PaymentInfo this;
+        java.lang.String orderId;
+
+        this := @this: launcher.domain.PaymentInfo;
+
+        orderId := @parameter0: java.lang.String;
+
+        this.<launcher.domain.PaymentInfo: java.lang.String orderId> = orderId;
+/*22*/
+
+        return;
+/*23*/
+    }
+
+    public java.lang.String getTripId()
+    {
+        launcher.domain.PaymentInfo this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.PaymentInfo;
+
+        $stack1 = this.<launcher.domain.PaymentInfo: java.lang.String tripId>;
+/*26*/
+
+        return $stack1;
+/*26*/
+    }
+
+/*[tripId]*/
+    public void setTripId(java.lang.String)
+    {
+        launcher.domain.PaymentInfo this;
+        java.lang.String tripId;
+
+        this := @this: launcher.domain.PaymentInfo;
+
+        tripId := @parameter0: java.lang.String;
+
+        this.<launcher.domain.PaymentInfo: java.lang.String tripId> = tripId;
+/*30*/
+
+        return;
+/*31*/
+    }
+}

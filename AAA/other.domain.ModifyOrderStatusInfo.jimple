@@ -1,0 +1,81 @@
+public class other.domain.ModifyOrderStatusInfo extends java.lang.Object
+{
+/*ModifyOrderStatusInfo.java*/
+    private java.lang.String orderId;
+    private int status;
+
+    public void <init>()
+    {
+        other.domain.ModifyOrderStatusInfo this;
+
+        this := @this: other.domain.ModifyOrderStatusInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*9*/
+
+        return;
+/*11*/
+    }
+
+    public java.lang.String getOrderId()
+    {
+        other.domain.ModifyOrderStatusInfo this;
+        java.lang.String $stack1;
+
+        this := @this: other.domain.ModifyOrderStatusInfo;
+
+        $stack1 = this.<other.domain.ModifyOrderStatusInfo: java.lang.String orderId>;
+/*14*/
+
+        return $stack1;
+/*14*/
+    }
+
+/*[orderId]*/
+    public void setOrderId(java.lang.String)
+    {
+        other.domain.ModifyOrderStatusInfo this;
+        java.lang.String orderId;
+
+        this := @this: other.domain.ModifyOrderStatusInfo;
+
+        orderId := @parameter0: java.lang.String;
+
+        this.<other.domain.ModifyOrderStatusInfo: java.lang.String orderId> = orderId;
+/*18*/
+
+        return;
+/*19*/
+    }
+
+    public int getStatus()
+    {
+        int $stack1;
+        other.domain.ModifyOrderStatusInfo this;
+
+        this := @this: other.domain.ModifyOrderStatusInfo;
+
+        $stack1 = this.<other.domain.ModifyOrderStatusInfo: int status>;
+/*22*/
+
+        return $stack1;
+/*22*/
+    }
+
+/*[status]*/
+    public void setStatus(int)
+    {
+        int status;
+        other.domain.ModifyOrderStatusInfo this;
+
+        this := @this: other.domain.ModifyOrderStatusInfo;
+
+        status := @parameter0: int;
+
+        this.<other.domain.ModifyOrderStatusInfo: int status> = status;
+/*26*/
+
+        return;
+/*27*/
+    }
+}

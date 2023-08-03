@@ -1,0 +1,40 @@
+public class other.init.InitData extends java.lang.Object implements org.springframework.boot.CommandLineRunner
+{
+/*InitData.java*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/stereotype/Component; without elements
+*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Lorg/springframework/beans/factory/annotation/Autowired; without elements
+*/
+    other.service.OrderOtherService service;
+
+    public void <init>()
+    {
+        other.init.InitData this;
+
+        this := @this: other.init.InitData;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*9*/
+
+        return;
+/*9*/
+    }
+
+/*[args]*/
+    public transient void run(java.lang.String[]) throws java.lang.Exception
+    {
+        java.lang.String[] args;
+        other.init.InitData this;
+
+        this := @this: other.init.InitData;
+
+        args := @parameter0: java.lang.String[];
+
+        return;
+/*15*/
+    }
+}

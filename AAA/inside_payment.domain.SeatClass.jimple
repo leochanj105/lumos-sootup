@@ -1,0 +1,319 @@
+public final enum class inside_payment.domain.SeatClass extends java.lang.Enum
+{
+/*Signature: Ljava/lang/Enum<Linside_payment/domain/SeatClass;>;*/
+/*SeatClass.java*/
+    public static final enum inside_payment.domain.SeatClass NONE;
+    public static final enum inside_payment.domain.SeatClass BUSINESS;
+    public static final enum inside_payment.domain.SeatClass FIRSTCLASS;
+    public static final enum inside_payment.domain.SeatClass SECONDCLASS;
+    public static final enum inside_payment.domain.SeatClass HARDSEAT;
+    public static final enum inside_payment.domain.SeatClass SOFTSEAT;
+    public static final enum inside_payment.domain.SeatClass HARDBED;
+    public static final enum inside_payment.domain.SeatClass SOFTBED;
+    public static final enum inside_payment.domain.SeatClass HIGHSOFTBED;
+    private int code;
+    private java.lang.String name;
+    private static final inside_payment.domain.SeatClass[] ENUM$VALUES;
+
+    static void <clinit>()
+    {
+        inside_payment.domain.SeatClass $stack0, $stack1, $stack2, $stack3, $stack4, $stack5, $stack6, $stack7, $stack8, $stack10, $stack11, $stack12, $stack13, $stack14, $stack15, $stack16, $stack17, $stack18;
+        inside_payment.domain.SeatClass[] $stack9;
+
+        $stack0 = new inside_payment.domain.SeatClass;
+/*5*/
+
+        specialinvoke $stack0.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("NONE", 0, 0, "\u65e0\u5ea7");
+/*5*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass NONE> = $stack0;
+/*5*/
+
+        $stack1 = new inside_payment.domain.SeatClass;
+/*6*/
+
+        specialinvoke $stack1.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("BUSINESS", 1, 1, "\u5546\u52a1\u5ea7");
+/*6*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass BUSINESS> = $stack1;
+/*6*/
+
+        $stack2 = new inside_payment.domain.SeatClass;
+/*7*/
+
+        specialinvoke $stack2.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("FIRSTCLASS", 2, 2, "\u4e00\u7b49\u5ea7");
+/*7*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass FIRSTCLASS> = $stack2;
+/*7*/
+
+        $stack3 = new inside_payment.domain.SeatClass;
+/*8*/
+
+        specialinvoke $stack3.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("SECONDCLASS", 3, 3, "\u4e8c\u7b49\u5ea7");
+/*8*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass SECONDCLASS> = $stack3;
+/*8*/
+
+        $stack4 = new inside_payment.domain.SeatClass;
+/*9*/
+
+        specialinvoke $stack4.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("HARDSEAT", 4, 4, "\u786c\u5ea7");
+/*9*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass HARDSEAT> = $stack4;
+/*9*/
+
+        $stack5 = new inside_payment.domain.SeatClass;
+/*10*/
+
+        specialinvoke $stack5.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("SOFTSEAT", 5, 5, "\u8f6f\u5ea7");
+/*10*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass SOFTSEAT> = $stack5;
+/*10*/
+
+        $stack6 = new inside_payment.domain.SeatClass;
+/*11*/
+
+        specialinvoke $stack6.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("HARDBED", 6, 6, "\u786c\u5367");
+/*11*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass HARDBED> = $stack6;
+/*11*/
+
+        $stack7 = new inside_payment.domain.SeatClass;
+/*12*/
+
+        specialinvoke $stack7.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("SOFTBED", 7, 7, "\u8f6f\u5367");
+/*12*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass SOFTBED> = $stack7;
+/*12*/
+
+        $stack8 = new inside_payment.domain.SeatClass;
+/*13*/
+
+        specialinvoke $stack8.<inside_payment.domain.SeatClass: void <init>(java.lang.String,int,int,java.lang.String)>("HIGHSOFTBED", 8, 8, "\u9ad8\u7ea7\u8f6f\u5367");
+/*13*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass HIGHSOFTBED> = $stack8;
+/*13*/
+
+        $stack9 = newarray (inside_payment.domain.SeatClass)[9];
+/*3*/
+
+        $stack10 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass NONE>;
+/*3*/
+
+        $stack9[0] = $stack10;
+/*3*/
+
+        $stack11 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass BUSINESS>;
+/*3*/
+
+        $stack9[1] = $stack11;
+/*3*/
+
+        $stack12 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass FIRSTCLASS>;
+/*3*/
+
+        $stack9[2] = $stack12;
+/*3*/
+
+        $stack13 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass SECONDCLASS>;
+/*3*/
+
+        $stack9[3] = $stack13;
+/*3*/
+
+        $stack14 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass HARDSEAT>;
+/*3*/
+
+        $stack9[4] = $stack14;
+/*3*/
+
+        $stack15 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass SOFTSEAT>;
+/*3*/
+
+        $stack9[5] = $stack15;
+/*3*/
+
+        $stack16 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass HARDBED>;
+/*3*/
+
+        $stack9[6] = $stack16;
+/*3*/
+
+        $stack17 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass SOFTBED>;
+/*3*/
+
+        $stack9[7] = $stack17;
+/*3*/
+
+        $stack18 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass HIGHSOFTBED>;
+/*3*/
+
+        $stack9[8] = $stack18;
+/*3*/
+
+        <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass[] ENUM$VALUES> = $stack9;
+/*3*/
+
+        return;
+/*3*/
+    }
+
+/*[null, null, code, name]*/
+    private void <init>(java.lang.String, int, int, java.lang.String)
+    {
+        int l2, code;
+        inside_payment.domain.SeatClass this;
+        java.lang.String l1, name;
+
+        this := @this: inside_payment.domain.SeatClass;
+
+        l1 := @parameter0: java.lang.String;
+
+        l2 := @parameter1: int;
+
+        code := @parameter2: int;
+
+        name := @parameter3: java.lang.String;
+
+        specialinvoke this.<java.lang.Enum: void <init>(java.lang.String,int)>(l1, l2);
+/*18*/
+
+        this.<inside_payment.domain.SeatClass: int code> = code;
+/*19*/
+
+        this.<inside_payment.domain.SeatClass: java.lang.String name> = name;
+/*20*/
+
+        return;
+/*21*/
+    }
+
+    public int getCode()
+    {
+        int $stack1;
+        inside_payment.domain.SeatClass this;
+
+        this := @this: inside_payment.domain.SeatClass;
+
+        $stack1 = this.<inside_payment.domain.SeatClass: int code>;
+/*24*/
+
+        return $stack1;
+/*24*/
+    }
+
+    public java.lang.String getName()
+    {
+        inside_payment.domain.SeatClass this;
+        java.lang.String $stack1;
+
+        this := @this: inside_payment.domain.SeatClass;
+
+        $stack1 = this.<inside_payment.domain.SeatClass: java.lang.String name>;
+/*28*/
+
+        return $stack1;
+/*28*/
+    }
+
+    public static java.lang.String getNameByCode(int)
+    {
+        inside_payment.domain.SeatClass seatClass, $stack11;
+        int l4, $stack7, code, l3;
+        java.lang.String $stack10, $stack12;
+        inside_payment.domain.SeatClass[] $stack6;
+
+        code := @parameter0: int;
+
+        $stack6 = staticinvoke <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass[] values()>();
+/*32*/
+
+        l4 = lengthof $stack6;
+/*33*/
+
+        l3 = 0;
+/*33*/
+
+        goto label3;
+/*33*/
+
+     label1:
+        seatClass = $stack6[l3];
+/*33*/
+
+        $stack7 = virtualinvoke seatClass.<inside_payment.domain.SeatClass: int getCode()>();
+/*34*/
+
+        if $stack7 != code goto label2;
+/*34*/
+
+        $stack10 = virtualinvoke seatClass.<inside_payment.domain.SeatClass: java.lang.String getName()>();
+/*35*/
+
+        return $stack10;
+/*35*/
+
+     label2:
+        l3 = l3 + 1;
+/*33*/
+
+     label3:
+        if l3 < l4 goto label1;
+/*33*/
+
+        $stack11 = $stack6[0];
+/*38*/
+
+        $stack12 = virtualinvoke $stack11.<inside_payment.domain.SeatClass: java.lang.String getName()>();
+/*38*/
+
+        return $stack12;
+/*38*/
+    }
+
+    public static inside_payment.domain.SeatClass[] values()
+    {
+        int $stack4;
+        inside_payment.domain.SeatClass[] $stack3, $stack5;
+
+        $stack3 = <inside_payment.domain.SeatClass: inside_payment.domain.SeatClass[] ENUM$VALUES>;
+/*1*/
+
+        $stack4 = lengthof $stack3;
+/*1*/
+
+        $stack5 = newarray (inside_payment.domain.SeatClass)[$stack4];
+/*1*/
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($stack3, 0, $stack5, 0, $stack4);
+/*1*/
+
+        return $stack5;
+/*1*/
+    }
+
+    public static inside_payment.domain.SeatClass valueOf(java.lang.String)
+    {
+        inside_payment.domain.SeatClass $stack2;
+        java.lang.String l0;
+        java.lang.Enum $stack1;
+
+        l0 := @parameter0: java.lang.String;
+
+        $stack1 = staticinvoke <java.lang.Enum: java.lang.Enum valueOf(java.lang.Class,java.lang.String)>(class "Linside_payment/domain/SeatClass;", l0);
+/*1*/
+
+        $stack2 = (inside_payment.domain.SeatClass) $stack1;
+/*1*/
+
+        return $stack2;
+/*1*/
+    }
+}

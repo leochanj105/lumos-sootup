@@ -1,0 +1,113 @@
+public class order.domain.ChangeOrderResult extends java.lang.Object
+{
+/*ChangeOrderResult.java*/
+    private boolean status;
+    private java.lang.String message;
+    private order.domain.Order order;
+
+    public void <init>()
+    {
+        order.domain.ChangeOrderResult this;
+
+        this := @this: order.domain.ChangeOrderResult;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*3*/
+
+        return;
+/*3*/
+    }
+
+    public boolean isStatus()
+    {
+        order.domain.ChangeOrderResult this;
+        boolean $stack1;
+
+        this := @this: order.domain.ChangeOrderResult;
+
+        $stack1 = this.<order.domain.ChangeOrderResult: boolean status>;
+/*12*/
+
+        return $stack1;
+/*12*/
+    }
+
+/*[status]*/
+    public void setStatus(boolean)
+    {
+        order.domain.ChangeOrderResult this;
+        boolean status;
+
+        this := @this: order.domain.ChangeOrderResult;
+
+        status := @parameter0: boolean;
+
+        this.<order.domain.ChangeOrderResult: boolean status> = status;
+/*16*/
+
+        return;
+/*17*/
+    }
+
+    public java.lang.String getMessage()
+    {
+        order.domain.ChangeOrderResult this;
+        java.lang.String $stack1;
+
+        this := @this: order.domain.ChangeOrderResult;
+
+        $stack1 = this.<order.domain.ChangeOrderResult: java.lang.String message>;
+/*20*/
+
+        return $stack1;
+/*20*/
+    }
+
+/*[message]*/
+    public void setMessage(java.lang.String)
+    {
+        order.domain.ChangeOrderResult this;
+        java.lang.String message;
+
+        this := @this: order.domain.ChangeOrderResult;
+
+        message := @parameter0: java.lang.String;
+
+        this.<order.domain.ChangeOrderResult: java.lang.String message> = message;
+/*24*/
+
+        return;
+/*25*/
+    }
+
+    public order.domain.Order getOrder()
+    {
+        order.domain.ChangeOrderResult this;
+        order.domain.Order $stack1;
+
+        this := @this: order.domain.ChangeOrderResult;
+
+        $stack1 = this.<order.domain.ChangeOrderResult: order.domain.Order order>;
+/*28*/
+
+        return $stack1;
+/*28*/
+    }
+
+/*[order]*/
+    public void setOrder(order.domain.Order)
+    {
+        order.domain.ChangeOrderResult this;
+        order.domain.Order order;
+
+        this := @this: order.domain.ChangeOrderResult;
+
+        order := @parameter0: order.domain.Order;
+
+        this.<order.domain.ChangeOrderResult: order.domain.Order order> = order;
+/*32*/
+
+        return;
+/*33*/
+    }
+}

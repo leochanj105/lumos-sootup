@@ -1,0 +1,92 @@
+public class order.domain.CalculateSoldTicketInfo extends java.lang.Object
+{
+/*CalculateSoldTicketInfo.java*/
+    private java.util.Date travelDate;
+    private java.lang.String trainNumber;
+
+    public void <init>()
+    {
+        order.domain.CalculateSoldTicketInfo this;
+
+        this := @this: order.domain.CalculateSoldTicketInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*5*/
+
+        return;
+/*5*/
+    }
+
+    public java.util.Date getTravelDate()
+    {
+        order.domain.CalculateSoldTicketInfo this;
+        java.util.Date $stack1;
+
+        this := @this: order.domain.CalculateSoldTicketInfo;
+
+        $stack1 = this.<order.domain.CalculateSoldTicketInfo: java.util.Date travelDate>;
+/*12*/
+
+        return $stack1;
+/*12*/
+    }
+
+/*[year, month, day]*/
+    public void setTravelDate(int, int, int)
+    {
+        java.util.Date $stack5;
+        order.domain.CalculateSoldTicketInfo this;
+        int year, month, day;
+
+        this := @this: order.domain.CalculateSoldTicketInfo;
+
+        year := @parameter0: int;
+
+        month := @parameter1: int;
+
+        day := @parameter2: int;
+
+        $stack5 = new java.util.Date;
+/*16*/
+
+        specialinvoke $stack5.<java.util.Date: void <init>(int,int,int,int,int,int)>(year, month, day, 0, 0, 0);
+/*16*/
+
+        this.<order.domain.CalculateSoldTicketInfo: java.util.Date travelDate> = $stack5;
+/*17*/
+
+        return;
+/*18*/
+    }
+
+    public java.lang.String getTrainNumber()
+    {
+        java.lang.String $stack1;
+        order.domain.CalculateSoldTicketInfo this;
+
+        this := @this: order.domain.CalculateSoldTicketInfo;
+
+        $stack1 = this.<order.domain.CalculateSoldTicketInfo: java.lang.String trainNumber>;
+/*21*/
+
+        return $stack1;
+/*21*/
+    }
+
+/*[trainNumber]*/
+    public void setTrainNumber(java.lang.String)
+    {
+        java.lang.String trainNumber;
+        order.domain.CalculateSoldTicketInfo this;
+
+        this := @this: order.domain.CalculateSoldTicketInfo;
+
+        trainNumber := @parameter0: java.lang.String;
+
+        this.<order.domain.CalculateSoldTicketInfo: java.lang.String trainNumber> = trainNumber;
+/*25*/
+
+        return;
+/*26*/
+    }
+}

@@ -1,0 +1,805 @@
+public class launcher.domain.Order extends java.lang.Object
+{
+/*Order.java*/
+    private java.util.UUID id;
+    private java.util.Date boughtDate;
+    private java.util.Date travelDate;
+    private java.util.Date travelTime;
+    private java.util.UUID accountId;
+    private java.lang.String contactsName;
+    private int documentType;
+    private java.lang.String contactsDocumentNumber;
+    private java.lang.String trainNumber;
+    private int coachNumber;
+    private int seatClass;
+    private java.lang.String seatNumber;
+    private java.lang.String 'from';
+    private java.lang.String 'to';
+    private int status;
+    private java.lang.String price;
+
+    public void <init>()
+    {
+        launcher.domain.Order this;
+
+        this := @this: launcher.domain.Order;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*44*/
+
+        return;
+/*46*/
+    }
+
+/*[obj]*/
+    public boolean equals(java.lang.Object)
+    {
+        java.util.Date $stack5, $stack6, $stack8, $stack9, $stack12, $stack13;
+        boolean $stack7, $stack10, $stack14, $stack17, $stack20, $stack23, $stack28, $stack35, $stack38, $stack41, $stack11;
+        java.util.UUID $stack15, $stack16;
+        launcher.domain.Order this, other;
+        int $stack24, $stack25, $stack29, $stack30, $stack31, $stack32, $stack42, $stack43;
+        java.lang.String $stack18, $stack19, $stack21, $stack22, $stack26, $stack27, $stack33, $stack34, $stack36, $stack37, $stack39, $stack40, $stack44, $stack45;
+        java.lang.Object obj;
+        java.lang.Class $stack3, $stack4;
+
+        this := @this: launcher.domain.Order;
+
+        obj := @parameter0: java.lang.Object;
+
+        if this != obj goto label1;
+/*50*/
+
+        return 1;
+/*51*/
+
+     label1:
+        if obj != null goto label2;
+/*53*/
+
+        return 0;
+/*54*/
+
+     label2:
+        $stack3 = virtualinvoke this.<java.lang.Object: java.lang.Class getClass()>();
+/*56*/
+
+        $stack4 = virtualinvoke obj.<java.lang.Object: java.lang.Class getClass()>();
+/*56*/
+
+        if $stack3 == $stack4 goto label3;
+/*56*/
+
+        return 0;
+/*57*/
+
+     label3:
+        other = (launcher.domain.Order) obj;
+/*59*/
+
+        $stack5 = this.<launcher.domain.Order: java.util.Date boughtDate>;
+/*60*/
+
+        $stack6 = virtualinvoke other.<launcher.domain.Order: java.util.Date getBoughtDate()>();
+/*60*/
+
+        $stack7 = virtualinvoke $stack5.<java.util.Date: boolean equals(java.lang.Object)>($stack6);
+/*60*/
+
+        if $stack7 == 0 goto label4;
+/*60*/
+
+        $stack8 = this.<launcher.domain.Order: java.util.Date travelDate>;
+/*61*/
+
+        $stack9 = virtualinvoke other.<launcher.domain.Order: java.util.Date getTravelDate()>();
+/*61*/
+
+        $stack10 = virtualinvoke $stack8.<java.util.Date: boolean equals(java.lang.Object)>($stack9);
+/*61*/
+
+        if $stack10 == 0 goto label4;
+/*61*/
+
+        $stack12 = this.<launcher.domain.Order: java.util.Date travelTime>;
+/*62*/
+
+        $stack13 = virtualinvoke other.<launcher.domain.Order: java.util.Date getTravelTime()>();
+/*62*/
+
+        $stack14 = virtualinvoke $stack12.<java.util.Date: boolean equals(java.lang.Object)>($stack13);
+/*62*/
+
+        if $stack14 == 0 goto label4;
+/*62*/
+
+        $stack15 = this.<launcher.domain.Order: java.util.UUID accountId>;
+/*63*/
+
+        $stack16 = virtualinvoke other.<launcher.domain.Order: java.util.UUID getAccountId()>();
+/*63*/
+
+        $stack17 = virtualinvoke $stack15.<java.util.UUID: boolean equals(java.lang.Object)>($stack16);
+/*63*/
+
+        if $stack17 == 0 goto label4;
+/*63*/
+
+        $stack18 = this.<launcher.domain.Order: java.lang.String contactsName>;
+/*64*/
+
+        $stack19 = virtualinvoke other.<launcher.domain.Order: java.lang.String getContactsName()>();
+/*64*/
+
+        $stack20 = virtualinvoke $stack18.<java.lang.String: boolean equals(java.lang.Object)>($stack19);
+/*64*/
+
+        if $stack20 == 0 goto label4;
+/*64*/
+
+        $stack21 = this.<launcher.domain.Order: java.lang.String contactsDocumentNumber>;
+/*65*/
+
+        $stack22 = virtualinvoke other.<launcher.domain.Order: java.lang.String getContactsDocumentNumber()>();
+/*65*/
+
+        $stack23 = virtualinvoke $stack21.<java.lang.String: boolean equals(java.lang.Object)>($stack22);
+/*65*/
+
+        if $stack23 == 0 goto label4;
+/*65*/
+
+        $stack24 = this.<launcher.domain.Order: int documentType>;
+/*66*/
+
+        $stack25 = virtualinvoke other.<launcher.domain.Order: int getDocumentType()>();
+/*66*/
+
+        if $stack24 != $stack25 goto label4;
+/*66*/
+
+        $stack26 = this.<launcher.domain.Order: java.lang.String trainNumber>;
+/*67*/
+
+        $stack27 = virtualinvoke other.<launcher.domain.Order: java.lang.String getTrainNumber()>();
+/*67*/
+
+        $stack28 = virtualinvoke $stack26.<java.lang.String: boolean equals(java.lang.Object)>($stack27);
+/*67*/
+
+        if $stack28 == 0 goto label4;
+/*67*/
+
+        $stack29 = this.<launcher.domain.Order: int coachNumber>;
+/*68*/
+
+        $stack30 = virtualinvoke other.<launcher.domain.Order: int getCoachNumber()>();
+/*68*/
+
+        if $stack29 != $stack30 goto label4;
+/*68*/
+
+        $stack31 = this.<launcher.domain.Order: int seatClass>;
+/*69*/
+
+        $stack32 = virtualinvoke other.<launcher.domain.Order: int getSeatClass()>();
+/*69*/
+
+        if $stack31 != $stack32 goto label4;
+/*69*/
+
+        $stack33 = this.<launcher.domain.Order: java.lang.String seatNumber>;
+/*70*/
+
+        $stack34 = virtualinvoke other.<launcher.domain.Order: java.lang.String getSeatNumber()>();
+/*70*/
+
+        $stack35 = virtualinvoke $stack33.<java.lang.String: boolean equals(java.lang.Object)>($stack34);
+/*70*/
+
+        if $stack35 == 0 goto label4;
+/*70*/
+
+        $stack36 = this.<launcher.domain.Order: java.lang.String 'from'>;
+/*71*/
+
+        $stack37 = virtualinvoke other.<launcher.domain.Order: java.lang.String getFrom()>();
+/*71*/
+
+        $stack38 = virtualinvoke $stack36.<java.lang.String: boolean equals(java.lang.Object)>($stack37);
+/*71*/
+
+        if $stack38 == 0 goto label4;
+/*71*/
+
+        $stack39 = this.<launcher.domain.Order: java.lang.String 'to'>;
+/*72*/
+
+        $stack40 = virtualinvoke other.<launcher.domain.Order: java.lang.String getTo()>();
+/*72*/
+
+        $stack41 = virtualinvoke $stack39.<java.lang.String: boolean equals(java.lang.Object)>($stack40);
+/*72*/
+
+        if $stack41 == 0 goto label4;
+/*72*/
+
+        $stack42 = this.<launcher.domain.Order: int status>;
+/*73*/
+
+        $stack43 = virtualinvoke other.<launcher.domain.Order: int getStatus()>();
+/*73*/
+
+        if $stack42 != $stack43 goto label4;
+/*73*/
+
+        $stack45 = this.<launcher.domain.Order: java.lang.String price>;
+/*73*/
+
+        $stack44 = other.<launcher.domain.Order: java.lang.String price>;
+/*73*/
+
+        if $stack45 != $stack44 goto label4;
+/*73*/
+
+        $stack11 = 1;
+/*60*/
+
+        goto label5;
+/*73*/
+
+     label4:
+        $stack11 = 0;
+
+     label5:
+        return $stack11;
+/*60*/
+    }
+
+    public java.util.UUID getId()
+    {
+        launcher.domain.Order this;
+        java.util.UUID $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.util.UUID id>;
+/*78*/
+
+        return $stack1;
+/*78*/
+    }
+
+/*[id]*/
+    public void setId(java.util.UUID)
+    {
+        launcher.domain.Order this;
+        java.util.UUID id;
+
+        this := @this: launcher.domain.Order;
+
+        id := @parameter0: java.util.UUID;
+
+        this.<launcher.domain.Order: java.util.UUID id> = id;
+/*82*/
+
+        return;
+/*83*/
+    }
+
+    public java.util.UUID getAccountId()
+    {
+        launcher.domain.Order this;
+        java.util.UUID $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.util.UUID accountId>;
+/*86*/
+
+        return $stack1;
+/*86*/
+    }
+
+/*[accountId]*/
+    public void setAccountId(java.util.UUID)
+    {
+        launcher.domain.Order this;
+        java.util.UUID accountId;
+
+        this := @this: launcher.domain.Order;
+
+        accountId := @parameter0: java.util.UUID;
+
+        this.<launcher.domain.Order: java.util.UUID accountId> = accountId;
+/*90*/
+
+        return;
+/*91*/
+    }
+
+    public java.util.Date getBoughtDate()
+    {
+        launcher.domain.Order this;
+        java.util.Date $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.util.Date boughtDate>;
+/*94*/
+
+        return $stack1;
+/*94*/
+    }
+
+/*[boughtDate]*/
+    public void setBoughtDate(java.util.Date)
+    {
+        launcher.domain.Order this;
+        java.util.Date boughtDate;
+
+        this := @this: launcher.domain.Order;
+
+        boughtDate := @parameter0: java.util.Date;
+
+        this.<launcher.domain.Order: java.util.Date boughtDate> = boughtDate;
+/*98*/
+
+        return;
+/*99*/
+    }
+
+    public java.util.Date getTravelDate()
+    {
+        launcher.domain.Order this;
+        java.util.Date $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.util.Date travelDate>;
+/*102*/
+
+        return $stack1;
+/*102*/
+    }
+
+/*[travelDate]*/
+    public void setTravelDate(java.util.Date)
+    {
+        launcher.domain.Order this;
+        java.util.Date travelDate;
+
+        this := @this: launcher.domain.Order;
+
+        travelDate := @parameter0: java.util.Date;
+
+        this.<launcher.domain.Order: java.util.Date travelDate> = travelDate;
+/*106*/
+
+        return;
+/*107*/
+    }
+
+/*[year, month, day]*/
+    public void setTravelDate(int, int, int)
+    {
+        launcher.domain.Order this;
+        java.util.Date $stack5;
+        int year, month, day;
+
+        this := @this: launcher.domain.Order;
+
+        year := @parameter0: int;
+
+        month := @parameter1: int;
+
+        day := @parameter2: int;
+
+        $stack5 = new java.util.Date;
+/*110*/
+
+        specialinvoke $stack5.<java.util.Date: void <init>(int,int,int,int,int,int)>(year, month, day, 0, 0, 0);
+/*110*/
+
+        this.<launcher.domain.Order: java.util.Date travelDate> = $stack5;
+/*111*/
+
+        return;
+/*112*/
+    }
+
+    public java.util.Date getTravelTime()
+    {
+        launcher.domain.Order this;
+        java.util.Date $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.util.Date travelTime>;
+/*115*/
+
+        return $stack1;
+/*115*/
+    }
+
+/*[travelTime]*/
+    public void setTravelTime(java.util.Date)
+    {
+        launcher.domain.Order this;
+        java.util.Date travelTime;
+
+        this := @this: launcher.domain.Order;
+
+        travelTime := @parameter0: java.util.Date;
+
+        this.<launcher.domain.Order: java.util.Date travelTime> = travelTime;
+/*119*/
+
+        return;
+/*120*/
+    }
+
+/*[hour, minute]*/
+    public void setTravelTime(int, int)
+    {
+        launcher.domain.Order this;
+        java.util.Date $stack4;
+        int hour, minute;
+
+        this := @this: launcher.domain.Order;
+
+        hour := @parameter0: int;
+
+        minute := @parameter1: int;
+
+        $stack4 = new java.util.Date;
+/*123*/
+
+        specialinvoke $stack4.<java.util.Date: void <init>(int,int,int,int,int,int)>(1970, 1, 1, hour, minute, 0);
+/*123*/
+
+        return;
+/*124*/
+    }
+
+    public java.lang.String getTrainNumber()
+    {
+        launcher.domain.Order this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.lang.String trainNumber>;
+/*127*/
+
+        return $stack1;
+/*127*/
+    }
+
+/*[trainNumber]*/
+    public void setTrainNumber(java.lang.String)
+    {
+        launcher.domain.Order this;
+        java.lang.String trainNumber;
+
+        this := @this: launcher.domain.Order;
+
+        trainNumber := @parameter0: java.lang.String;
+
+        this.<launcher.domain.Order: java.lang.String trainNumber> = trainNumber;
+/*131*/
+
+        return;
+/*132*/
+    }
+
+    public int getCoachNumber()
+    {
+        launcher.domain.Order this;
+        int $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: int coachNumber>;
+/*135*/
+
+        return $stack1;
+/*135*/
+    }
+
+/*[coachNumber]*/
+    public void setCoachNumber(int)
+    {
+        launcher.domain.Order this;
+        int coachNumber;
+
+        this := @this: launcher.domain.Order;
+
+        coachNumber := @parameter0: int;
+
+        this.<launcher.domain.Order: int coachNumber> = coachNumber;
+/*139*/
+
+        return;
+/*140*/
+    }
+
+    public int getSeatClass()
+    {
+        launcher.domain.Order this;
+        int $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: int seatClass>;
+/*143*/
+
+        return $stack1;
+/*143*/
+    }
+
+/*[seatClass]*/
+    public void setSeatClass(int)
+    {
+        launcher.domain.Order this;
+        int seatClass;
+
+        this := @this: launcher.domain.Order;
+
+        seatClass := @parameter0: int;
+
+        this.<launcher.domain.Order: int seatClass> = seatClass;
+/*147*/
+
+        return;
+/*148*/
+    }
+
+    public java.lang.String getSeatNumber()
+    {
+        launcher.domain.Order this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.lang.String seatNumber>;
+/*151*/
+
+        return $stack1;
+/*151*/
+    }
+
+/*[seatNumber]*/
+    public void setSeatNumber(java.lang.String)
+    {
+        launcher.domain.Order this;
+        java.lang.String seatNumber;
+
+        this := @this: launcher.domain.Order;
+
+        seatNumber := @parameter0: java.lang.String;
+
+        this.<launcher.domain.Order: java.lang.String seatNumber> = seatNumber;
+/*155*/
+
+        return;
+/*156*/
+    }
+
+    public java.lang.String getFrom()
+    {
+        launcher.domain.Order this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.lang.String 'from'>;
+/*159*/
+
+        return $stack1;
+/*159*/
+    }
+
+/*[from]*/
+    public void setFrom(java.lang.String)
+    {
+        launcher.domain.Order this;
+        java.lang.String 'from';
+
+        this := @this: launcher.domain.Order;
+
+        'from' := @parameter0: java.lang.String;
+
+        this.<launcher.domain.Order: java.lang.String 'from'> = 'from';
+/*163*/
+
+        return;
+/*164*/
+    }
+
+    public java.lang.String getTo()
+    {
+        launcher.domain.Order this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.lang.String 'to'>;
+/*167*/
+
+        return $stack1;
+/*167*/
+    }
+
+/*[to]*/
+    public void setTo(java.lang.String)
+    {
+        launcher.domain.Order this;
+        java.lang.String 'to';
+
+        this := @this: launcher.domain.Order;
+
+        'to' := @parameter0: java.lang.String;
+
+        this.<launcher.domain.Order: java.lang.String 'to'> = 'to';
+/*171*/
+
+        return;
+/*172*/
+    }
+
+    public int getStatus()
+    {
+        launcher.domain.Order this;
+        int $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: int status>;
+/*175*/
+
+        return $stack1;
+/*175*/
+    }
+
+/*[status]*/
+    public void setStatus(int)
+    {
+        launcher.domain.Order this;
+        int status;
+
+        this := @this: launcher.domain.Order;
+
+        status := @parameter0: int;
+
+        this.<launcher.domain.Order: int status> = status;
+/*179*/
+
+        return;
+/*180*/
+    }
+
+    public java.lang.String getPrice()
+    {
+        launcher.domain.Order this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.lang.String price>;
+/*183*/
+
+        return $stack1;
+/*183*/
+    }
+
+/*[price]*/
+    public void setPrice(java.lang.String)
+    {
+        launcher.domain.Order this;
+        java.lang.String price;
+
+        this := @this: launcher.domain.Order;
+
+        price := @parameter0: java.lang.String;
+
+        this.<launcher.domain.Order: java.lang.String price> = price;
+/*187*/
+
+        return;
+/*188*/
+    }
+
+    public java.lang.String getContactsName()
+    {
+        launcher.domain.Order this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.lang.String contactsName>;
+/*191*/
+
+        return $stack1;
+/*191*/
+    }
+
+/*[contactsName]*/
+    public void setContactsName(java.lang.String)
+    {
+        launcher.domain.Order this;
+        java.lang.String contactsName;
+
+        this := @this: launcher.domain.Order;
+
+        contactsName := @parameter0: java.lang.String;
+
+        this.<launcher.domain.Order: java.lang.String contactsName> = contactsName;
+/*195*/
+
+        return;
+/*196*/
+    }
+
+    public int getDocumentType()
+    {
+        launcher.domain.Order this;
+        int $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: int documentType>;
+/*199*/
+
+        return $stack1;
+/*199*/
+    }
+
+/*[documentType]*/
+    public void setDocumentType(int)
+    {
+        launcher.domain.Order this;
+        int documentType;
+
+        this := @this: launcher.domain.Order;
+
+        documentType := @parameter0: int;
+
+        this.<launcher.domain.Order: int documentType> = documentType;
+/*203*/
+
+        return;
+/*204*/
+    }
+
+    public java.lang.String getContactsDocumentNumber()
+    {
+        launcher.domain.Order this;
+        java.lang.String $stack1;
+
+        this := @this: launcher.domain.Order;
+
+        $stack1 = this.<launcher.domain.Order: java.lang.String contactsDocumentNumber>;
+/*207*/
+
+        return $stack1;
+/*207*/
+    }
+
+/*[contactsDocumentNumber]*/
+    public void setContactsDocumentNumber(java.lang.String)
+    {
+        launcher.domain.Order this;
+        java.lang.String contactsDocumentNumber;
+
+        this := @this: launcher.domain.Order;
+
+        contactsDocumentNumber := @parameter0: java.lang.String;
+
+        this.<launcher.domain.Order: java.lang.String contactsDocumentNumber> = contactsDocumentNumber;
+/*211*/
+
+        return;
+/*212*/
+    }
+}

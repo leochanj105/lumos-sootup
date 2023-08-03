@@ -1,0 +1,81 @@
+public class other.domain.CreateOrderInfo extends java.lang.Object
+{
+/*CreateOrderInfo.java*/
+    private other.domain.Order order;
+    private java.lang.String loginToken;
+
+    public void <init>()
+    {
+        other.domain.CreateOrderInfo this;
+
+        this := @this: other.domain.CreateOrderInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*3*/
+
+        return;
+/*3*/
+    }
+
+    public other.domain.Order getOrder()
+    {
+        other.domain.Order $stack1;
+        other.domain.CreateOrderInfo this;
+
+        this := @this: other.domain.CreateOrderInfo;
+
+        $stack1 = this.<other.domain.CreateOrderInfo: other.domain.Order order>;
+/*10*/
+
+        return $stack1;
+/*10*/
+    }
+
+/*[order]*/
+    public void setOrder(other.domain.Order)
+    {
+        other.domain.Order order;
+        other.domain.CreateOrderInfo this;
+
+        this := @this: other.domain.CreateOrderInfo;
+
+        order := @parameter0: other.domain.Order;
+
+        this.<other.domain.CreateOrderInfo: other.domain.Order order> = order;
+/*14*/
+
+        return;
+/*15*/
+    }
+
+    public java.lang.String getLoginToken()
+    {
+        java.lang.String $stack1;
+        other.domain.CreateOrderInfo this;
+
+        this := @this: other.domain.CreateOrderInfo;
+
+        $stack1 = this.<other.domain.CreateOrderInfo: java.lang.String loginToken>;
+/*18*/
+
+        return $stack1;
+/*18*/
+    }
+
+/*[loginToken]*/
+    public void setLoginToken(java.lang.String)
+    {
+        java.lang.String loginToken;
+        other.domain.CreateOrderInfo this;
+
+        this := @this: other.domain.CreateOrderInfo;
+
+        loginToken := @parameter0: java.lang.String;
+
+        this.<other.domain.CreateOrderInfo: java.lang.String loginToken> = loginToken;
+/*22*/
+
+        return;
+/*23*/
+    }
+}

@@ -1,0 +1,145 @@
+public class other.domain.OrderAlterResult extends java.lang.Object
+{
+/*OrderAlterResult.java*/
+    private boolean status;
+    private java.lang.String message;
+    private other.domain.Order oldOrder;
+    private other.domain.Order newOrder;
+
+    public void <init>()
+    {
+        other.domain.OrderAlterResult this;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*3*/
+
+        return;
+/*3*/
+    }
+
+    public boolean isStatus()
+    {
+        other.domain.OrderAlterResult this;
+        boolean $stack1;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        $stack1 = this.<other.domain.OrderAlterResult: boolean status>;
+/*14*/
+
+        return $stack1;
+/*14*/
+    }
+
+/*[status]*/
+    public void setStatus(boolean)
+    {
+        other.domain.OrderAlterResult this;
+        boolean status;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        status := @parameter0: boolean;
+
+        this.<other.domain.OrderAlterResult: boolean status> = status;
+/*18*/
+
+        return;
+/*19*/
+    }
+
+    public java.lang.String getMessage()
+    {
+        java.lang.String $stack1;
+        other.domain.OrderAlterResult this;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        $stack1 = this.<other.domain.OrderAlterResult: java.lang.String message>;
+/*22*/
+
+        return $stack1;
+/*22*/
+    }
+
+/*[message]*/
+    public void setMessage(java.lang.String)
+    {
+        java.lang.String message;
+        other.domain.OrderAlterResult this;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        message := @parameter0: java.lang.String;
+
+        this.<other.domain.OrderAlterResult: java.lang.String message> = message;
+/*26*/
+
+        return;
+/*27*/
+    }
+
+    public other.domain.Order getOldOrder()
+    {
+        other.domain.Order $stack1;
+        other.domain.OrderAlterResult this;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        $stack1 = this.<other.domain.OrderAlterResult: other.domain.Order oldOrder>;
+/*30*/
+
+        return $stack1;
+/*30*/
+    }
+
+/*[oldOrder]*/
+    public void setOldOrder(other.domain.Order)
+    {
+        other.domain.Order oldOrder;
+        other.domain.OrderAlterResult this;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        oldOrder := @parameter0: other.domain.Order;
+
+        this.<other.domain.OrderAlterResult: other.domain.Order oldOrder> = oldOrder;
+/*34*/
+
+        return;
+/*35*/
+    }
+
+    public other.domain.Order getNewOrder()
+    {
+        other.domain.Order $stack1;
+        other.domain.OrderAlterResult this;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        $stack1 = this.<other.domain.OrderAlterResult: other.domain.Order newOrder>;
+/*38*/
+
+        return $stack1;
+/*38*/
+    }
+
+/*[newOrder]*/
+    public void setNewOrder(other.domain.Order)
+    {
+        other.domain.Order newOrder;
+        other.domain.OrderAlterResult this;
+
+        this := @this: other.domain.OrderAlterResult;
+
+        newOrder := @parameter0: other.domain.Order;
+
+        this.<other.domain.OrderAlterResult: other.domain.Order newOrder> = newOrder;
+/*42*/
+
+        return;
+/*43*/
+    }
+}

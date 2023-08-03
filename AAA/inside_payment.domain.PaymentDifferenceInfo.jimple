@@ -1,0 +1,145 @@
+public class inside_payment.domain.PaymentDifferenceInfo extends java.lang.Object
+{
+/*PaymentDifferenceInfo.java*/
+    private java.lang.String orderId;
+    private java.lang.String tripId;
+    private java.lang.String userId;
+    private java.lang.String price;
+
+    public void <init>()
+    {
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*8*/
+
+        return;
+/*8*/
+    }
+
+    public java.lang.String getOrderId()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        $stack1 = this.<inside_payment.domain.PaymentDifferenceInfo: java.lang.String orderId>;
+/*17*/
+
+        return $stack1;
+/*17*/
+    }
+
+/*[orderId]*/
+    public void setOrderId(java.lang.String)
+    {
+        java.lang.String orderId;
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        orderId := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.PaymentDifferenceInfo: java.lang.String orderId> = orderId;
+/*21*/
+
+        return;
+/*22*/
+    }
+
+    public java.lang.String getTripId()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        $stack1 = this.<inside_payment.domain.PaymentDifferenceInfo: java.lang.String tripId>;
+/*25*/
+
+        return $stack1;
+/*25*/
+    }
+
+/*[tripId]*/
+    public void setTripId(java.lang.String)
+    {
+        java.lang.String tripId;
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        tripId := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.PaymentDifferenceInfo: java.lang.String tripId> = tripId;
+/*29*/
+
+        return;
+/*30*/
+    }
+
+    public java.lang.String getUserId()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        $stack1 = this.<inside_payment.domain.PaymentDifferenceInfo: java.lang.String userId>;
+/*33*/
+
+        return $stack1;
+/*33*/
+    }
+
+/*[userId]*/
+    public void setUserId(java.lang.String)
+    {
+        java.lang.String userId;
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        userId := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.PaymentDifferenceInfo: java.lang.String userId> = userId;
+/*37*/
+
+        return;
+/*38*/
+    }
+
+    public java.lang.String getPrice()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        $stack1 = this.<inside_payment.domain.PaymentDifferenceInfo: java.lang.String price>;
+/*41*/
+
+        return $stack1;
+/*41*/
+    }
+
+/*[price]*/
+    public void setPrice(java.lang.String)
+    {
+        java.lang.String price;
+        inside_payment.domain.PaymentDifferenceInfo this;
+
+        this := @this: inside_payment.domain.PaymentDifferenceInfo;
+
+        price := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.PaymentDifferenceInfo: java.lang.String price> = price;
+/*45*/
+
+        return;
+/*46*/
+    }
+}

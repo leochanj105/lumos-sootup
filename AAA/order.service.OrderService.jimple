@@ -1,0 +1,41 @@
+public interface  order.service.OrderService extends java.lang.Object
+{
+/*OrderService.java*/
+
+    public abstract order.domain.Order findOrderById(java.util.UUID);
+
+    public abstract order.domain.CreateOrderResult create(order.domain.Order);
+
+    public abstract order.domain.ChangeOrderResult saveChanges(order.domain.Order);
+
+    public abstract order.domain.CancelOrderResult cancelOrder(order.domain.CancelOrderInfo);
+
+/*Signature: (Lorder/domain/QueryInfo;Ljava/lang/String;)Ljava/util/ArrayList<Lorder/domain/Order;>;*/
+    public abstract java.util.ArrayList queryOrders(order.domain.QueryInfo, java.lang.String);
+
+    public abstract order.domain.OrderAlterResult alterOrder(order.domain.OrderAlterInfo);
+
+    public abstract order.domain.CalculateSoldTicketResult queryAlreadySoldOrders(order.domain.CalculateSoldTicketInfo);
+
+    public abstract order.domain.QueryOrderResult getAllOrders();
+
+    public abstract order.domain.ModifyOrderStatusResult modifyOrder(order.domain.ModifyOrderStatusInfo);
+
+    public abstract order.domain.GetOrderPriceResult getOrderPrice(order.domain.GetOrderPrice);
+
+    public abstract order.domain.PayOrderResult payOrder(order.domain.PayOrderInfo);
+
+    public abstract order.domain.GetOrderResult getOrderById(order.domain.GetOrderByIdInfo);
+
+    public abstract order.domain.GetOrderInfoForSecurityResult checkSecurityAboutOrder(order.domain.GetOrderInfoForSecurity);
+
+    public abstract void initOrder(order.domain.Order);
+
+    public abstract order.domain.DeleteOrderResult deleteOrder(order.domain.DeleteOrderInfo);
+
+    public abstract order.domain.LeftTicketInfo getSoldTickets(order.domain.SeatRequest);
+
+    public abstract order.domain.AddOrderResult addNewOrder(order.domain.Order);
+
+    public abstract order.domain.UpdateOrderResult updateOrder(order.domain.Order);
+}

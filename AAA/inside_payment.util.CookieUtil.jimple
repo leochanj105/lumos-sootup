@@ -1,0 +1,148 @@
+public class inside_payment.util.CookieUtil extends java.lang.Object
+{
+/*CookieUtil.java*/
+
+    public void <init>()
+    {
+        inside_payment.util.CookieUtil this;
+
+        this := @this: inside_payment.util.CookieUtil;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*12*/
+
+        return;
+/*12*/
+    }
+
+/*[null, name, value, maxAge]*/
+    public static void addCookie(javax.servlet.http.HttpServletResponse, java.lang.String, java.lang.String, int)
+    {
+        int maxAge;
+        javax.servlet.http.HttpServletResponse response;
+        java.lang.String name, value;
+        javax.servlet.http.Cookie $stack5;
+
+        response := @parameter0: javax.servlet.http.HttpServletResponse;
+
+        name := @parameter1: java.lang.String;
+
+        value := @parameter2: java.lang.String;
+
+        maxAge := @parameter3: int;
+
+        $stack5 = new javax.servlet.http.Cookie;
+/*21*/
+
+        specialinvoke $stack5.<javax.servlet.http.Cookie: void <init>(java.lang.String,java.lang.String)>(name, value);
+/*21*/
+
+        virtualinvoke $stack5.<javax.servlet.http.Cookie: void setPath(java.lang.String)>("/");
+/*22*/
+
+        if maxAge <= 0 goto label1;
+/*23*/
+
+        virtualinvoke $stack5.<javax.servlet.http.Cookie: void setMaxAge(int)>(maxAge);
+/*23*/
+
+     label1:
+        interfaceinvoke response.<javax.servlet.http.HttpServletResponse: void addCookie(javax.servlet.http.Cookie)>($stack5);
+/*24*/
+
+        return;
+/*25*/
+    }
+
+/*[null, name]*/
+    public static javax.servlet.http.Cookie getCookieByName(javax.servlet.http.HttpServletRequest, java.lang.String)
+    {
+        javax.servlet.http.HttpServletRequest request;
+        java.util.Map $stack4;
+        java.lang.Object $stack6;
+        java.lang.String name;
+        javax.servlet.http.Cookie cookie;
+        boolean $stack5;
+
+        request := @parameter0: javax.servlet.http.HttpServletRequest;
+
+        name := @parameter1: java.lang.String;
+
+        $stack4 = staticinvoke <inside_payment.util.CookieUtil: java.util.Map ReadCookieMap(javax.servlet.http.HttpServletRequest)>(request);
+/*33*/
+
+        $stack5 = interfaceinvoke $stack4.<java.util.Map: boolean containsKey(java.lang.Object)>(name);
+/*34*/
+
+        if $stack5 == 0 goto label1;
+/*34*/
+
+        $stack6 = interfaceinvoke $stack4.<java.util.Map: java.lang.Object get(java.lang.Object)>(name);
+/*35*/
+
+        cookie = (javax.servlet.http.Cookie) $stack6;
+/*35*/
+
+        return cookie;
+/*36*/
+
+     label1:
+        return null;
+/*38*/
+    }
+
+/*Signature: (Ljavax/servlet/http/HttpServletRequest;)Ljava/util/Map<Ljava/lang/String;Ljavax/servlet/http/Cookie;>;*/
+    private static java.util.Map ReadCookieMap(javax.servlet.http.HttpServletRequest)
+    {
+        javax.servlet.http.HttpServletRequest request;
+        int l5, l4;
+        javax.servlet.http.Cookie[] $stack8;
+        java.util.HashMap $stack7;
+        java.lang.String $stack9;
+        javax.servlet.http.Cookie cookie;
+
+        request := @parameter0: javax.servlet.http.HttpServletRequest;
+
+        $stack7 = new java.util.HashMap;
+/*47*/
+
+        specialinvoke $stack7.<java.util.HashMap: void <init>()>();
+/*47*/
+
+        $stack8 = interfaceinvoke request.<javax.servlet.http.HttpServletRequest: javax.servlet.http.Cookie[] getCookies()>();
+/*48*/
+
+        if $stack8 == null goto label3;
+/*49*/
+
+        l5 = lengthof $stack8;
+/*50*/
+
+        l4 = 0;
+/*50*/
+
+        goto label2;
+/*50*/
+
+     label1:
+        cookie = $stack8[l4];
+/*50*/
+
+        $stack9 = virtualinvoke cookie.<javax.servlet.http.Cookie: java.lang.String getName()>();
+/*51*/
+
+        interfaceinvoke $stack7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($stack9, cookie);
+/*51*/
+
+        l4 = l4 + 1;
+/*50*/
+
+     label2:
+        if l4 < l5 goto label1;
+/*50*/
+
+     label3:
+        return $stack7;
+/*54*/
+    }
+}

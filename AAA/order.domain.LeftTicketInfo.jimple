@@ -1,0 +1,57 @@
+public class order.domain.LeftTicketInfo extends java.lang.Object
+{
+/*LeftTicketInfo.java*/
+/*Signature: Ljava/util/Set<Lorder/domain/Ticket;>;*/
+/*Visibility Annotation: level: RUNTIME (runtime-visible)
+ Annotations:
+Annotation type: Ljavax/validation/Valid; without elements
+Annotation type: Ljavax/validation/constraints/NotNull; without elements
+*/
+    private java.util.Set soldTickets;
+
+    public void <init>()
+    {
+        order.domain.LeftTicketInfo this;
+
+        this := @this: order.domain.LeftTicketInfo;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*12*/
+
+        return;
+/*14*/
+    }
+
+/*Signature: ()Ljava/util/Set<Lorder/domain/Ticket;>;*/
+    public java.util.Set getSoldTickets()
+    {
+        java.util.Set $stack1;
+        order.domain.LeftTicketInfo this;
+
+        this := @this: order.domain.LeftTicketInfo;
+
+        $stack1 = this.<order.domain.LeftTicketInfo: java.util.Set soldTickets>;
+/*17*/
+
+        return $stack1;
+/*17*/
+    }
+
+/*Signature: (Ljava/util/Set<Lorder/domain/Ticket;>;)V*/
+/*[soldTickets]*/
+    public void setSoldTickets(java.util.Set)
+    {
+        java.util.Set soldTickets;
+        order.domain.LeftTicketInfo this;
+
+        this := @this: order.domain.LeftTicketInfo;
+
+        soldTickets := @parameter0: java.util.Set;
+
+        this.<order.domain.LeftTicketInfo: java.util.Set soldTickets> = soldTickets;
+/*21*/
+
+        return;
+/*22*/
+    }
+}

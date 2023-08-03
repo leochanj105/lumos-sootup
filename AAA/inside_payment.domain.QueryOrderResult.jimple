@@ -1,0 +1,113 @@
+public class inside_payment.domain.QueryOrderResult extends java.lang.Object
+{
+/*QueryOrderResult.java*/
+    private boolean status;
+    private java.lang.String message;
+    private java.lang.String price;
+
+    public void <init>()
+    {
+        inside_payment.domain.QueryOrderResult this;
+
+        this := @this: inside_payment.domain.QueryOrderResult;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*14*/
+
+        return;
+/*14*/
+    }
+
+    public boolean isStatus()
+    {
+        inside_payment.domain.QueryOrderResult this;
+        boolean $stack1;
+
+        this := @this: inside_payment.domain.QueryOrderResult;
+
+        $stack1 = this.<inside_payment.domain.QueryOrderResult: boolean status>;
+/*17*/
+
+        return $stack1;
+/*17*/
+    }
+
+/*[status]*/
+    public void setStatus(boolean)
+    {
+        inside_payment.domain.QueryOrderResult this;
+        boolean status;
+
+        this := @this: inside_payment.domain.QueryOrderResult;
+
+        status := @parameter0: boolean;
+
+        this.<inside_payment.domain.QueryOrderResult: boolean status> = status;
+/*21*/
+
+        return;
+/*22*/
+    }
+
+    public java.lang.String getMessage()
+    {
+        inside_payment.domain.QueryOrderResult this;
+        java.lang.String $stack1;
+
+        this := @this: inside_payment.domain.QueryOrderResult;
+
+        $stack1 = this.<inside_payment.domain.QueryOrderResult: java.lang.String message>;
+/*25*/
+
+        return $stack1;
+/*25*/
+    }
+
+/*[message]*/
+    public void setMessage(java.lang.String)
+    {
+        inside_payment.domain.QueryOrderResult this;
+        java.lang.String message;
+
+        this := @this: inside_payment.domain.QueryOrderResult;
+
+        message := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.QueryOrderResult: java.lang.String message> = message;
+/*29*/
+
+        return;
+/*30*/
+    }
+
+    public java.lang.String getPrice()
+    {
+        inside_payment.domain.QueryOrderResult this;
+        java.lang.String $stack1;
+
+        this := @this: inside_payment.domain.QueryOrderResult;
+
+        $stack1 = this.<inside_payment.domain.QueryOrderResult: java.lang.String price>;
+/*33*/
+
+        return $stack1;
+/*33*/
+    }
+
+/*[price]*/
+    public void setPrice(java.lang.String)
+    {
+        inside_payment.domain.QueryOrderResult this;
+        java.lang.String price;
+
+        this := @this: inside_payment.domain.QueryOrderResult;
+
+        price := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.QueryOrderResult: java.lang.String price> = price;
+/*37*/
+
+        return;
+/*38*/
+    }
+}

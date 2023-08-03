@@ -1,0 +1,81 @@
+public class order.domain.GetOrderInfoForSecurity extends java.lang.Object
+{
+/*GetOrderInfoForSecurity.java*/
+    private java.util.Date checkDate;
+    private java.lang.String accountId;
+
+    public void <init>()
+    {
+        order.domain.GetOrderInfoForSecurity this;
+
+        this := @this: order.domain.GetOrderInfoForSecurity;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*11*/
+
+        return;
+/*13*/
+    }
+
+    public java.util.Date getCheckDate()
+    {
+        order.domain.GetOrderInfoForSecurity this;
+        java.util.Date $stack1;
+
+        this := @this: order.domain.GetOrderInfoForSecurity;
+
+        $stack1 = this.<order.domain.GetOrderInfoForSecurity: java.util.Date checkDate>;
+/*16*/
+
+        return $stack1;
+/*16*/
+    }
+
+/*[checkDate]*/
+    public void setCheckDate(java.util.Date)
+    {
+        order.domain.GetOrderInfoForSecurity this;
+        java.util.Date checkDate;
+
+        this := @this: order.domain.GetOrderInfoForSecurity;
+
+        checkDate := @parameter0: java.util.Date;
+
+        this.<order.domain.GetOrderInfoForSecurity: java.util.Date checkDate> = checkDate;
+/*20*/
+
+        return;
+/*21*/
+    }
+
+    public java.lang.String getAccountId()
+    {
+        order.domain.GetOrderInfoForSecurity this;
+        java.lang.String $stack1;
+
+        this := @this: order.domain.GetOrderInfoForSecurity;
+
+        $stack1 = this.<order.domain.GetOrderInfoForSecurity: java.lang.String accountId>;
+/*24*/
+
+        return $stack1;
+/*24*/
+    }
+
+/*[accountId]*/
+    public void setAccountId(java.lang.String)
+    {
+        order.domain.GetOrderInfoForSecurity this;
+        java.lang.String accountId;
+
+        this := @this: order.domain.GetOrderInfoForSecurity;
+
+        accountId := @parameter0: java.lang.String;
+
+        this.<order.domain.GetOrderInfoForSecurity: java.lang.String accountId> = accountId;
+/*28*/
+
+        return;
+/*29*/
+    }
+}

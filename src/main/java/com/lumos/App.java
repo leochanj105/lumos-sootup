@@ -36,6 +36,7 @@ import com.lumos.common.RefSeq;
 import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
+import com.lumos.forward.CallSite;
 import com.lumos.forward.ContextSensitiveInfo;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
@@ -47,6 +48,7 @@ import com.lumos.forward.IPNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.StmtNode;
 import com.lumos.forward.UniqueName;
+import com.lumos.wire.Banned;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.WireForAllParams;
 import com.lumos.wire.WireHTTP;
@@ -213,73 +215,34 @@ public class App {
             visitedNodes.add(node);
             Stmt stmt = node.getStmt();
             App.p("\nBacktracking at " + node);
-            MethodInfo minfo = node.getContext().getStackLast();
+
+            MethodInfo minfo = null;
+            // if (node instanceof ExitNode) {
+            // List<CallSite> cs = node.getContext().getCtrace();
+            // minfo = cs.get(cs.size() - 2).getMinfo();
+            // } else {
+            minfo = node.getContext().getStackLast();
+            // }
+            // p(minfo.cfDependency + ", " + minfo.sm.getName());
+            // minfo.cfg.getBody().
             for (Stmt cfstmt : minfo.cfDependency.get(stmt)) {
+                // Context context = null;
+                // if()
                 IPNode cfnode = igraph.getIPNode(node.getContext(), cfstmt);
                 unresolvedNodes.add(cfnode);
             }
 
-            // Definition def = satisfiedDefs.iterator().next();
-            // satisfiedDefs.remove(def);
-            // if (stmt.toString().contains("return $stack1")) {
-            // App.p(fia.getBefore(node));
-            // }
-
-            Set<ContextSensitiveValue> cvused = new HashSet<>();
-            if (stmt instanceof JReturnStmt) {
-                Value ret = ((JReturnStmt) stmt).getOp();
-                cvused.add(ContextSensitiveValue.getCValue(node.getContext(), ret));
-            } else {
-                // JAssignStmt astmt = (JAssignStmt) stmt;
-                Set<Value> banned = new HashSet<>();
-                for (ValueBox vbox : stmt.getUseBoxes()) {
-                    Value use = vbox.getValue();
-
-                    if (banned.contains(use)) {
-                        continue;
-                    }
-                    if ((stmt instanceof JAssignStmt)
-                            && ((JAssignStmt) stmt).getLeftOp().getUseBoxes().contains(vbox)) {
-                        continue;
-                    }
-
-                    if ((use instanceof Local) || (use instanceof JInstanceFieldRef)) {
-                        ContextSensitiveValue cvuse = ContextSensitiveValue.getCValue(node.getContext(), use);
-                        cvused.add(cvuse);
-                        if (use instanceof JInstanceFieldRef) {
-                            banned.add(((JInstanceFieldRef) use).getBase());
-                        }
-                    }
-                }
-
-            }
-            for (ContextSensitiveValue cv : cvused) {
-
+            for (ContextSensitiveValue cv : node.getUsed()) {
                 Set<Definition> satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
 
-                // if (cv.toString().contains("sendInsidePayment,pay,getStatus ==> $stack1")) {
-                // App.p("------------------- \n" + node);
-                // App.p(fia.getBefore(node));
-                // IPNode nodex = node.getPredecesors().get(0);
-                // App.p("------------------- \n" + nodex);
-                // App.p(fia.getAfter(nodex));
-                // }
-
                 App.p("Potential Provenance value: " + cv);
-
-                if (cv.toString().contains("this.<inside_payment.domain.Order: int status>")) {
-                    // App.p("!!!!! " + cv);
-                    // for (Definition satdef : satisfiedDefs) {
-                    // for (SootFieldRef ref : satdef.getDefinedValue().suffix) {
-                    // App.p("!!!" + ref.declaringClass().toString());
-                    // }
-
-                    // }
-                    // for()
+                if (Banned.isBanned(cv.getValue().getType().toString())) {
+                    p("Not tracking banned type: " + cv.getValue().getType());
+                    continue;
                 }
+
                 boolean unresolved = true;
                 for (Definition satdef : satisfiedDefs) {
-
                     if (satdef.getDefinedLocation() != null) {
                         unresolved = false;
                         unresolvedNodes.add(satdef.getDefinedLocation());
@@ -293,7 +256,18 @@ public class App {
                         if (!cvun.getSuffix().isEmpty() && !cvun.getBase().toString().contains("null")) {
                             App.p("Try resolving base:");
                             ContextSensitiveValue cvbase = cvun.getBase();
-                            App.p(fia.getBefore(node).getDefinitionsByCV(cvbase));
+                            Set<Definition> resbasedefs = fia.getBefore(node).getDefinitionsByCV(cvbase);
+                            App.p(resbasedefs);
+                            if (!resbasedefs.isEmpty()) {
+                                for (Definition bdef : resbasedefs) {
+                                    App.p(bdef.getDefinedLocation());
+                                    if (bdef.getDefinedLocation() != null) {
+                                        App.p("New Provenance due to field: " + cvun + " at "
+                                                + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
+                                        unresolvedNodes.add(bdef.getDefinedLocation());
+                                    }
+                                }
+                            }
                         }
                     }
                     App.p("<<<<<\n");

@@ -1,0 +1,149 @@
+public class other.domain.QueryOrderResult extends java.lang.Object
+{
+/*QueryOrderResult.java*/
+    private boolean status;
+    private java.lang.String message;
+/*Signature: Ljava/util/ArrayList<Lother/domain/Order;>;*/
+    private java.util.ArrayList orders;
+
+    public void <init>()
+    {
+        other.domain.QueryOrderResult this;
+
+        this := @this: other.domain.QueryOrderResult;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*13*/
+
+        return;
+/*15*/
+    }
+
+/*Signature: (ZLjava/lang/String;Ljava/util/ArrayList<Lother/domain/Order;>;)V*/
+/*[status, message, orders]*/
+    public void <init>(boolean, java.lang.String, java.util.ArrayList)
+    {
+        other.domain.QueryOrderResult this;
+        java.lang.String message;
+        boolean status;
+        java.util.ArrayList orders;
+
+        this := @this: other.domain.QueryOrderResult;
+
+        status := @parameter0: boolean;
+
+        message := @parameter1: java.lang.String;
+
+        orders := @parameter2: java.util.ArrayList;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+/*17*/
+
+        this.<other.domain.QueryOrderResult: boolean status> = status;
+/*18*/
+
+        this.<other.domain.QueryOrderResult: java.lang.String message> = message;
+/*19*/
+
+        this.<other.domain.QueryOrderResult: java.util.ArrayList orders> = orders;
+/*20*/
+
+        return;
+/*21*/
+    }
+
+    public boolean isStatus()
+    {
+        other.domain.QueryOrderResult this;
+        boolean $stack1;
+
+        this := @this: other.domain.QueryOrderResult;
+
+        $stack1 = this.<other.domain.QueryOrderResult: boolean status>;
+/*24*/
+
+        return $stack1;
+/*24*/
+    }
+
+/*[status]*/
+    public void setStatus(boolean)
+    {
+        other.domain.QueryOrderResult this;
+        boolean status;
+
+        this := @this: other.domain.QueryOrderResult;
+
+        status := @parameter0: boolean;
+
+        this.<other.domain.QueryOrderResult: boolean status> = status;
+/*28*/
+
+        return;
+/*29*/
+    }
+
+    public java.lang.String getMessage()
+    {
+        java.lang.String $stack1;
+        other.domain.QueryOrderResult this;
+
+        this := @this: other.domain.QueryOrderResult;
+
+        $stack1 = this.<other.domain.QueryOrderResult: java.lang.String message>;
+/*32*/
+
+        return $stack1;
+/*32*/
+    }
+
+/*[message]*/
+    public void setMessage(java.lang.String)
+    {
+        java.lang.String message;
+        other.domain.QueryOrderResult this;
+
+        this := @this: other.domain.QueryOrderResult;
+
+        message := @parameter0: java.lang.String;
+
+        this.<other.domain.QueryOrderResult: java.lang.String message> = message;
+/*36*/
+
+        return;
+/*37*/
+    }
+
+/*Signature: ()Ljava/util/ArrayList<Lother/domain/Order;>;*/
+    public java.util.ArrayList getOrders()
+    {
+        other.domain.QueryOrderResult this;
+        java.util.ArrayList $stack1;
+
+        this := @this: other.domain.QueryOrderResult;
+
+        $stack1 = this.<other.domain.QueryOrderResult: java.util.ArrayList orders>;
+/*40*/
+
+        return $stack1;
+/*40*/
+    }
+
+/*Signature: (Ljava/util/ArrayList<Lother/domain/Order;>;)V*/
+/*[orders]*/
+    public void setOrders(java.util.ArrayList)
+    {
+        other.domain.QueryOrderResult this;
+        java.util.ArrayList orders;
+
+        this := @this: other.domain.QueryOrderResult;
+
+        orders := @parameter0: java.util.ArrayList;
+
+        this.<other.domain.QueryOrderResult: java.util.ArrayList orders> = orders;
+/*44*/
+
+        return;
+/*45*/
+    }
+}

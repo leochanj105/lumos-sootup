@@ -1,0 +1,267 @@
+public final enum class inside_payment.domain.PaymentType extends java.lang.Enum implements java.io.Serializable
+{
+/*Signature: Ljava/lang/Enum<Linside_payment/domain/PaymentType;>;Ljava/io/Serializable;*/
+/*PaymentType.java*/
+    public static final enum inside_payment.domain.PaymentType P;
+    public static final enum inside_payment.domain.PaymentType D;
+    public static final enum inside_payment.domain.PaymentType O;
+    public static final enum inside_payment.domain.PaymentType E;
+    private java.lang.String name;
+    private int index;
+    private static final inside_payment.domain.PaymentType[] ENUM$VALUES;
+
+    static void <clinit>()
+    {
+        inside_payment.domain.PaymentType[] $stack4;
+        inside_payment.domain.PaymentType $stack0, $stack1, $stack2, $stack3, $stack5, $stack6, $stack7, $stack8;
+
+        $stack0 = new inside_payment.domain.PaymentType;
+/*9*/
+
+        specialinvoke $stack0.<inside_payment.domain.PaymentType: void <init>(java.lang.String,int,java.lang.String,int)>("P", 0, "Payment", 1);
+/*10*/
+
+        <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType P> = $stack0;
+/*10*/
+
+        $stack1 = new inside_payment.domain.PaymentType;
+/*10*/
+
+        specialinvoke $stack1.<inside_payment.domain.PaymentType: void <init>(java.lang.String,int,java.lang.String,int)>("D", 1, "Difference", 2);
+/*10*/
+
+        <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType D> = $stack1;
+/*10*/
+
+        $stack2 = new inside_payment.domain.PaymentType;
+/*10*/
+
+        specialinvoke $stack2.<inside_payment.domain.PaymentType: void <init>(java.lang.String,int,java.lang.String,int)>("O", 2, "Outside Payment", 3);
+/*10*/
+
+        <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType O> = $stack2;
+/*10*/
+
+        $stack3 = new inside_payment.domain.PaymentType;
+/*10*/
+
+        specialinvoke $stack3.<inside_payment.domain.PaymentType: void <init>(java.lang.String,int,java.lang.String,int)>("E", 3, "Difference & Outside Payment", 4);
+/*10*/
+
+        <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType E> = $stack3;
+/*10*/
+
+        $stack4 = newarray (inside_payment.domain.PaymentType)[4];
+/*8*/
+
+        $stack5 = <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType P>;
+/*8*/
+
+        $stack4[0] = $stack5;
+/*8*/
+
+        $stack6 = <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType D>;
+/*8*/
+
+        $stack4[1] = $stack6;
+/*8*/
+
+        $stack7 = <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType O>;
+/*8*/
+
+        $stack4[2] = $stack7;
+/*8*/
+
+        $stack8 = <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType E>;
+/*8*/
+
+        $stack4[3] = $stack8;
+/*8*/
+
+        <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType[] ENUM$VALUES> = $stack4;
+/*8*/
+
+        return;
+/*8*/
+    }
+
+/*[null, null, name, index]*/
+    private void <init>(java.lang.String, int, java.lang.String, int)
+    {
+        inside_payment.domain.PaymentType this;
+        int l2, index;
+        java.lang.String l1, name;
+
+        this := @this: inside_payment.domain.PaymentType;
+
+        l1 := @parameter0: java.lang.String;
+
+        l2 := @parameter1: int;
+
+        name := @parameter2: java.lang.String;
+
+        index := @parameter3: int;
+
+        specialinvoke this.<java.lang.Enum: void <init>(java.lang.String,int)>(l1, l2);
+/*15*/
+
+        this.<inside_payment.domain.PaymentType: java.lang.String name> = name;
+/*16*/
+
+        this.<inside_payment.domain.PaymentType: int index> = index;
+/*17*/
+
+        return;
+/*18*/
+    }
+
+    public static java.lang.String getName(int)
+    {
+        inside_payment.domain.PaymentType[] $stack5;
+        inside_payment.domain.PaymentType type;
+        int l3, $stack6, index, l2;
+        java.lang.String $stack9;
+
+        index := @parameter0: int;
+
+        $stack5 = staticinvoke <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType[] values()>();
+/*21*/
+
+        l3 = lengthof $stack5;
+/*21*/
+
+        l2 = 0;
+/*21*/
+
+        goto label3;
+/*21*/
+
+     label1:
+        type = $stack5[l2];
+/*21*/
+
+        $stack6 = virtualinvoke type.<inside_payment.domain.PaymentType: int getIndex()>();
+/*22*/
+
+        if $stack6 != index goto label2;
+/*22*/
+
+        $stack9 = type.<inside_payment.domain.PaymentType: java.lang.String name>;
+/*23*/
+
+        return $stack9;
+/*23*/
+
+     label2:
+        l2 = l2 + 1;
+/*21*/
+
+     label3:
+        if l2 < l3 goto label1;
+/*21*/
+
+        return null;
+/*26*/
+    }
+
+    public java.lang.String getName()
+    {
+        java.lang.String $stack1;
+        inside_payment.domain.PaymentType this;
+
+        this := @this: inside_payment.domain.PaymentType;
+
+        $stack1 = this.<inside_payment.domain.PaymentType: java.lang.String name>;
+/*30*/
+
+        return $stack1;
+/*30*/
+    }
+
+/*[name]*/
+    public void setName(java.lang.String)
+    {
+        java.lang.String name;
+        inside_payment.domain.PaymentType this;
+
+        this := @this: inside_payment.domain.PaymentType;
+
+        name := @parameter0: java.lang.String;
+
+        this.<inside_payment.domain.PaymentType: java.lang.String name> = name;
+/*34*/
+
+        return;
+/*35*/
+    }
+
+    public int getIndex()
+    {
+        int $stack1;
+        inside_payment.domain.PaymentType this;
+
+        this := @this: inside_payment.domain.PaymentType;
+
+        $stack1 = this.<inside_payment.domain.PaymentType: int index>;
+/*38*/
+
+        return $stack1;
+/*38*/
+    }
+
+/*[index]*/
+    public void setIndex(int)
+    {
+        int index;
+        inside_payment.domain.PaymentType this;
+
+        this := @this: inside_payment.domain.PaymentType;
+
+        index := @parameter0: int;
+
+        this.<inside_payment.domain.PaymentType: int index> = index;
+/*42*/
+
+        return;
+/*43*/
+    }
+
+    public static inside_payment.domain.PaymentType[] values()
+    {
+        int $stack4;
+        inside_payment.domain.PaymentType[] $stack3, $stack5;
+
+        $stack3 = <inside_payment.domain.PaymentType: inside_payment.domain.PaymentType[] ENUM$VALUES>;
+/*1*/
+
+        $stack4 = lengthof $stack3;
+/*1*/
+
+        $stack5 = newarray (inside_payment.domain.PaymentType)[$stack4];
+/*1*/
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($stack3, 0, $stack5, 0, $stack4);
+/*1*/
+
+        return $stack5;
+/*1*/
+    }
+
+    public static inside_payment.domain.PaymentType valueOf(java.lang.String)
+    {
+        java.lang.String l0;
+        java.lang.Enum $stack1;
+        inside_payment.domain.PaymentType $stack2;
+
+        l0 := @parameter0: java.lang.String;
+
+        $stack1 = staticinvoke <java.lang.Enum: java.lang.Enum valueOf(java.lang.Class,java.lang.String)>(class "Linside_payment/domain/PaymentType;", l0);
+/*1*/
+
+        $stack2 = (inside_payment.domain.PaymentType) $stack1;
+/*1*/
+
+        return $stack2;
+/*1*/
+    }
+}
