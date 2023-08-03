@@ -83,4 +83,30 @@ public class Context {
         CallSite cs = ctrace.get(ctrace.size() - 1);
         return cs.minfo;
     }
+
+    public boolean parentOf(Context other) {
+        if (other.getCtrace().size() < this.getCtrace().size()) {
+            return false;
+        }
+        // boolean included = true;
+        for (int i = 0; i < this.getCtrace().size(); i++) {
+            if (!this.getCtrace().get(i).equals(other.getCtrace().get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean strictParentOf(Context other) {
+        if (other.getCtrace().size() <= this.getCtrace().size()) {
+            return false;
+        }
+        // boolean included = true;
+        for (int i = 0; i < this.getCtrace().size(); i++) {
+            if (!this.getCtrace().get(i).equals(other.getCtrace().get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

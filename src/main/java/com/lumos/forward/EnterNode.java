@@ -22,6 +22,7 @@ public class EnterNode extends IPNode {
     public SootMethod sm;
 
     // public Context context;
+    public ExitNode exitNode;
 
     public List<Value> arguments;
     public List<Local> parameters;
@@ -30,12 +31,29 @@ public class EnterNode extends IPNode {
 
     boolean isRemote;
 
+    public ExitNode getExitNode() {
+        return exitNode;
+    }
+
+    public void setExitNode(ExitNode exitNode) {
+        this.exitNode = exitNode;
+    }
+
     public boolean isRemote() {
         return isRemote;
     }
 
     public void setRemote(boolean isRemote) {
         this.isRemote = isRemote;
+    }
+
+    public ContextSensitiveValue getAlias(ContextSensitiveValue toresolve) {
+        for (List<ContextSensitiveValue> pair : aliasPairs) {
+            if (pair.get(1).equals(toresolve)) {
+                return pair.get(0);
+            }
+        }
+        return null;
     }
 
     public List<List<ContextSensitiveValue>> getAliasPairs() {
@@ -92,15 +110,38 @@ public class EnterNode extends IPNode {
             ContextSensitiveValue cv1 = aliasp.get(0);
             ContextSensitiveValue cv2 = aliasp.get(1);
             out.clearDefinition(cv2);
-            if (!isRemote()) {
-                Set<Definition> defs = out.getDefinitionsByCV(cv1);
+            // if (!isRemote()) {
+            // if (true) {
+            Set<Definition> defs = out.getDefinitionsByCV(cv1);
+            // out.clearDefinition(cv2);
+            // if (cv2.toString().contains("info")) {
+            // for (UniqueName unn : out.currMapping.keySet()) {
+            // if (unn.toString().contains("info")) {
+            // App.p(unn + ", " + out.currMapping.get(unn) + ", " + unn.getBase().hashCode()
+            // + ", "
+            // + ((Local) unn.getBase().getValue()).equivHashCode() + ", "
+            // + ((Local) unn.getBase().getValue()).getName() + ", " +
+            // ((Local) unn.getBase().getValue()).getType());
+            // }
+            // }
+            // }
+            out.putDefinition(cv2, defs);
+            // if (cv2.toString().contains("info")) {
+            // // for (Definition def : defs) {
+            // App.p("!!!! " + cv2 + ", " + cv1 + "," + defs);
 
-                out.putDefinition(cv2, defs);
-            } else {
+            // }
 
-                out.putDefinition(cv2);
-            }
+            // } else {
+
+            // Set<Definition> newdefs = new HashSet<>();
+            // for(Definition def: defs){
+            // newdefs.add(Definition.getDefinition(null, null))
+            // }
+            // out.putDefinition(cv2);
+            // }
         }
+
     }
 
     @Override

@@ -93,6 +93,7 @@ import soot.jimple.internal.JInvokeStmt;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.options.Options;
+import soot.util.Cons;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -240,33 +241,73 @@ public class App {
                     p("Not tracking banned type: " + cv.getValue().getType());
                     continue;
                 }
+                // App.p(cv.getValue().getClass());
 
                 boolean unresolved = true;
+                List<Value> constants = new ArrayList<>();
                 for (Definition satdef : satisfiedDefs) {
                     if (satdef.getDefinedLocation() != null) {
                         unresolved = false;
                         unresolvedNodes.add(satdef.getDefinedLocation());
+
+                    } else {
+                        Value defval = satdef.getDefinedValue().getBase().getValue();
+                        if (defval instanceof Constant) {
+                            constants.add(defval);
+                        }
                     }
                 }
                 if (unresolved) {
+                    if (!constants.isEmpty() && constants.size() == satisfiedDefs.size()) {
+                        p("Not tracking constant: " + cv + " with constant value " + constants);
+                        continue;
+                    }
+
                     App.p(">>>>>\nUnresolved " + cv + " with:");
                     for (Definition satdef : satisfiedDefs) {
                         App.p(satdef.getDefinedValue());
                         UniqueName cvun = satdef.getDefinedValue();
-                        if (!cvun.getSuffix().isEmpty() && !cvun.getBase().toString().contains("null")) {
+                        if (!cvun.getBase().toString().contains("null")) {
                             App.p("Try resolving base:");
                             ContextSensitiveValue cvbase = cvun.getBase();
                             Set<Definition> resbasedefs = fia.getBefore(node).getDefinitionsByCV(cvbase);
                             App.p(resbasedefs);
+
+                            // if (resbasedefs.size() == 1) {
+                            // Definition bdef = resbasedefs.iterator().next();
+                            // if (bdef.getDefinedLocation() instanceof EnterNode) {
+                            // // if (bdef.getDefinedLocation() instanceof EnterNode) {
+                            // App.p("Traslated cross-service aliasing for " + cvbase);
+                            // ContextSensitiveValue translated = ((EnterNode) bdef.getDefinedLocation())
+                            // .getAlias(cvbase);
+                            // // ContextSensitiveValue realName =
+                            // UniqueName newun = new UniqueName(translated, cvun.getSuffix());
+                            // for (Definition def : fia.getBefore(node).getCurrMapping().get(newun)) {
+                            // if (def.getDefinedLocation() != null) {
+                            // unresolvedNodes.add(def.getDefinedLocation());
+                            // }
+                            // }
+                            // continue;
+                            // // }
+                            // }
+                            // }
+
+                            boolean alternative = false;
                             if (!resbasedefs.isEmpty()) {
                                 for (Definition bdef : resbasedefs) {
                                     App.p(bdef.getDefinedLocation());
                                     if (bdef.getDefinedLocation() != null) {
+
+                                        alternative = true;
+
                                         App.p("New Provenance due to field: " + cvun + " at "
                                                 + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
                                         unresolvedNodes.add(bdef.getDefinedLocation());
                                     }
                                 }
+                            }
+                            if (!alternative) {
+                                App.p("Can't resolve " + cvun + " at all");
                             }
                         }
                     }

@@ -16,6 +16,7 @@ import com.lumos.wire.IdentityWire;
 import com.lumos.wire.WireHTTP;
 
 import heros.flowfunc.Identity;
+import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -281,6 +282,9 @@ public class InterProcedureGraph {
                     }
                     ExitNode exit = new ExitNode(context, stmt);
 
+                    enter.setExitNode(exit);
+                    exit.setEnterNode(enter);
+
                     enter.setSuccessors(Collections.singletonList(newcinfo.getFirstNode()));
                     newcinfo.getFirstNode().setPredecesors(Collections.singletonList(enter));
 
@@ -312,10 +316,23 @@ public class InterProcedureGraph {
                                 App.p("Wiring null values!");
                                 App.panicni();
                             }
-                            ContextSensitiveValue cv1 = ContextSensitiveValue.getCValue(context, v2);
+                            ContextSensitiveValue cv1 = ContextSensitiveValue.getCValue(context, v1);
                             ContextSensitiveValue cv2 = ContextSensitiveValue.getCValue(nctx, v2);
+
+                            // if (cv2.toString().contains("info")) {
+                            // for (UniqueName unn : out.currMapping.keySet()) {
+                            // if (unn.toString().contains("info")) {
+                            // App.p(unn + ", " + out.currMapping.get(unn) + ", " + unn.getBase().hashCode()
+                            // + ", "
+                            // + ((Local) cv2.get).equivHashCode() + ", "
+                            // + ((Local) unn.getBase().getValue()).getName() + ", " +
+                            // ((Local) unn.getBase().getValue()).getType());
+                            // }
+                            // }
+                            // }
                             enter.addAlising(cv1, cv2);
                             enter.setRemote(true);
+                            exit.setRemote(true);
                             // App.p("Added aliasing pairs: " + v1 + " in " + callerinfo.sm + " and " + v2 +
                             // " in "
                             // + calleeinfo.sm);

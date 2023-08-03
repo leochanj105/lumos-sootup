@@ -28,6 +28,25 @@ public class ExitNode extends IPNode {
     public CallSite lastCall;
     public List<IPNode> returnStmtNodes;
     public ContextSensitiveValue ret;
+    boolean isRemote;
+
+    EnterNode enterNode;
+
+    public boolean isRemote() {
+        return isRemote;
+    }
+
+    public void setRemote(boolean isRemote) {
+        this.isRemote = isRemote;
+    }
+
+    public EnterNode getEnterNode() {
+        return enterNode;
+    }
+
+    public void setEnterNode(EnterNode enterNode) {
+        this.enterNode = enterNode;
+    }
 
     public List<IPNode> getReturnStmtNodes() {
         return returnStmtNodes;
@@ -60,6 +79,7 @@ public class ExitNode extends IPNode {
         List<CallSite> ctrace = context.getCtrace();
         lastCall = ctrace.get(ctrace.size() - 1);
         this.type = "exit";
+        isRemote = false;
         // List<Stmt> rets = new ArrayList<>();
         // this.ret = ret;
     }
@@ -78,6 +98,33 @@ public class ExitNode extends IPNode {
     public void flow(IPFlowInfo out) {
         // ExitNode enode = (ExitNode) node;
         ContextSensitiveValue cvcaller = getRet();
+
+        if (isRemote) {
+            for (UniqueName un : out.getCurrMapping().keySet()) {
+                Context original = un.getBase().getContext();
+                boolean modified = false;
+
+                if (!this.context.parentOf(original)) {
+
+                    for (Definition def : out.getCurrMapping().get(un)) {
+                        if (def.getDefinedLocation() != null) {
+                            if (this.context.strictParentOf(def.getDefinedLocation().getContext())) {
+                                modified = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (modified) {
+
+                        App.p("Warning: overwritting!!!!");
+                        App.p(un + ", " + out.getCurrMapping().get(un));
+                        App.p(this.context + ", " + original);
+                        App.panicni();
+                    }
+                }
+            }
+        }
+
         if (cvcaller != null) {
             for (IPNode retNode : getReturnStmtNodes()) {
                 Stmt stmt = retNode.getStmt();
@@ -105,5 +152,6 @@ public class ExitNode extends IPNode {
                 }
             }
         }
+
     }
 }

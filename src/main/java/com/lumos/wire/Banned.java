@@ -11,6 +11,8 @@ public class Banned {
         if (banned == null) {
             banned = new ArrayList<>();
             addBanned("Repository");
+            addBanned("RestTemplate");
+            addBanned("StringBuilder");
         }
         for (int i = 0; i < banned.size(); i++) {
             List<String> name = banned.get(i);

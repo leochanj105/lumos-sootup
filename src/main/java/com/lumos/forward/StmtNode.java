@@ -10,12 +10,14 @@ import soot.RefLikeType;
 import soot.Value;
 import soot.ValueBox;
 import soot.jimple.Constant;
+import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
 import soot.jimple.internal.JIdentityStmt;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JReturnStmt;
+import soot.jimple.internal.JStaticInvokeExpr;
 
 public class StmtNode extends IPNode {
     // Context context;
@@ -69,7 +71,8 @@ public class StmtNode extends IPNode {
             ContextSensitiveValue cvrop = ContextSensitiveValue.getCValue(getContext(), rop);
 
             Set<Definition> defs = new HashSet<>();
-            if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)) {
+            if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)
+                    || (rop instanceof StaticFieldRef)) {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
             } else {
                 defs.add(Definition.getDefinition(new UniqueName(cvlop), this));
