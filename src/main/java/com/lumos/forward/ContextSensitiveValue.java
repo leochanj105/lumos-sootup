@@ -6,6 +6,7 @@ import java.util.Map;
 import com.lumos.App;
 
 import soot.Value;
+import soot.jimple.StaticFieldRef;
 
 public class ContextSensitiveValue {
     public Context context;
@@ -57,8 +58,15 @@ public class ContextSensitiveValue {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        // int valHash = 0;
+
         result = prime * result + ((context == null) ? 0 : context.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        if (value instanceof StaticFieldRef) {
+            result = prime * result + ((value == null) ? 0 : ((StaticFieldRef) value).getFieldRef().hashCode());
+        } else {
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            // valHash =
+        }
         return result;
     }
 
@@ -79,8 +87,13 @@ public class ContextSensitiveValue {
         if (value == null) {
             if (other.value != null)
                 return false;
-        } else if (!value.equals(other.value))
-            return false;
+        } else {
+            if (value instanceof StaticFieldRef && other.value instanceof StaticFieldRef) {
+                return ((StaticFieldRef) value).getFieldRef().equals(((StaticFieldRef) other.value).getFieldRef());
+            }
+            if (!value.equals(other.value))
+                return false;
+        }
         return true;
     }
 

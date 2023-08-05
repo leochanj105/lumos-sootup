@@ -4,7 +4,7 @@ import java.util.List;
 
 import soot.jimple.InvokeExpr;
 
-public class HTTPRequestWirePoint {
+public class RequestWirePoint {
     // public InvokeExpr iexpr;
     public String reqMethod;
     public int lineNum;
@@ -13,7 +13,7 @@ public class HTTPRequestWirePoint {
     // public List<Integer> sendParamIndices;
     // public List<Integer> recvParamIndices;
 
-    public HTTPRequestWirePoint(String reqMethod, int lineNum) {
+    public RequestWirePoint(String reqMethod, int lineNum) {
         this.reqMethod = reqMethod;
         this.lineNum = lineNum;
         // this.targetMethod = targetMethod;
@@ -43,7 +43,7 @@ public class HTTPRequestWirePoint {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        HTTPRequestWirePoint other = (HTTPRequestWirePoint) obj;
+        RequestWirePoint other = (RequestWirePoint) obj;
         if (reqMethod == null) {
             if (other.reqMethod != null)
                 return false;

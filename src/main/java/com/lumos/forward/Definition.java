@@ -3,6 +3,8 @@ package com.lumos.forward;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.lumos.App;
+
 // import soot.Value;
 
 public class Definition {
@@ -11,13 +13,14 @@ public class Definition {
 
     public static Map<UniqueName, Map<IPNode, Definition>> cache = new HashMap<>();
 
-    public Definition(UniqueName definedValue, IPNode definedLocation) {
+    private Definition(UniqueName definedValue, IPNode definedLocation) {
         this.definedValue = definedValue;
         this.definedLocation = definedLocation;
     }
 
     @Override
     public String toString() {
+        // return d();
         return definedValue + "";
     }
 
@@ -34,6 +37,10 @@ public class Definition {
             map1 = new HashMap<>();
             cache.put(un, map1);
         }
+        // if (node == null && un.toString().contains("info")) {
+        // App.p(un);
+        // App.panicni();
+        // }
         if (node == null || !map1.containsKey(node)) {
             Definition def = new Definition(un, node);
             map1.put(node, def);
@@ -85,6 +92,9 @@ public class Definition {
     }
 
     public void setDefinedLocation(IPNode definedLocation) {
+        if (definedLocation == null) {
+            App.panicni();
+        }
         this.definedLocation = definedLocation;
     }
 

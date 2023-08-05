@@ -262,6 +262,8 @@ public class CompileUtils {
             // ByteArrayInputStream binput = new
             // ByteArrayInputStream(bstream.toByteArray());
             // FileInputStream finput = new FileInputStream(file);
+            if (!App.compileClass)
+                return;
 
             BafASMBackend backend = new BafASMBackend(cl, 52);
             // PackManager.v().createASMBackend(cl);

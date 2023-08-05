@@ -47,14 +47,21 @@ public class IdentityNode extends IPNode {
             }
         } else {
             if (iexpr instanceof StaticInvokeExpr) {
-                cvuses.add(ContextSensitiveValue.getCValue(context, iexpr));
+                // cvuses.add(ContextSensitiveValue.getCValue(context, iexpr));
             } else {
                 cvuses.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
             }
         }
 
         if (!(stmt instanceof JAssignStmt)) {
-            cvdefs.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
+            // App.p(stmt);
+            if (iexpr instanceof StaticInvokeExpr) {
+                if (iexpr.getArgs().size() > 0) {
+                    cvdefs.add(ContextSensitiveValue.getCValue(context, iexpr.getArg(0)));
+                }
+            } else {
+                cvdefs.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
+            }
         } else {
             cvdefs.add(ContextSensitiveValue.getCValue(context, ((JAssignStmt) stmt).getLeftOp()));
         }
@@ -66,43 +73,54 @@ public class IdentityNode extends IPNode {
     @Override
     public void flow(IPFlowInfo out) {
         // EnterNode enode = (EnterNode) node;
+        String stmtStr = this.stmt.getInvokeExpr().toString();
+        if (stmtStr.contains("Object: void <init>")) {
+            // App.p("!!!!!!!!!!!!!!!!!!1");
+            return;
+        }
+
+        if (stmtStr.contains("javax.servlet.http.Cookie: java.lang.String getValue()>")) {
+            return;
+        }
+
         if ((!visible) && cvuses.size() > 1) {
             App.panicni();
         }
 
         for (ContextSensitiveValue cvlop : cvdefs) {
             UniqueName un = new UniqueName(cvlop);
-            if (out.getCurrMapping().containsKey(un)) {
-                out.clearDefinition(un);
-            }
-            if (cvuses.size() > 1) {
+            // if (out.getCurrMapping().containsKey(un)) {
+            out.clearDefinition(cvlop);
+            // }
+            if (cvuses.size() > 1 || cvuses.size() == 0) {
                 // if (this.toString().contains("compareTo")) {
                 // App.p("!!!!! " + cvlop);
                 // }
                 // out.clearDefinition(cvlop);
-                out.clearDefinition(cvlop);
+                // out.clearDefinition(cvlop);
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
             } else {
                 for (ContextSensitiveValue cvrop : cvuses) {
                     Set<Definition> defs = out.getDefinitionsByCV(cvrop);
-                    if (!visible) {
-                        out.clearDefinition(cvlop);
-                        out.putDefinition(cvlop, defs);
-                    } else {
-                        Set<Definition> newdefs = new HashSet<>();
-                        for (Definition def : defs) {
-                            // if (this.toString().contains("compareTo")) {
-                            // App.p("!!!!! " + def);
+                    Set<Definition> newdefs = new HashSet<>();
+                    for (Definition def : defs) {
+                        if (!visible) {
+                            // if (def.getDefinedLocation() == null) {
+                            // newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
+                            // } else {
+                            newdefs.add(def);
                             // }
+                        } else {
                             newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
-                        }
-                        out.clearDefinition(cvlop);
-                        out.putDefinition(cvlop, newdefs);
-                    }
 
+                        }
+                    }
+                    out.putDefinition(cvlop, newdefs);
                 }
+
             }
         }
+
     }
 
     @Override

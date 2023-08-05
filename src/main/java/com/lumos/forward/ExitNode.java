@@ -14,6 +14,8 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.InvokeExpr;
+import soot.jimple.NullConstant;
+import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
@@ -105,7 +107,6 @@ public class ExitNode extends IPNode {
                 boolean modified = false;
 
                 if (!this.context.parentOf(original)) {
-
                     for (Definition def : out.getCurrMapping().get(un)) {
                         if (def.getDefinedLocation() != null) {
                             if (this.context.strictParentOf(def.getDefinedLocation().getContext())) {
@@ -115,9 +116,12 @@ public class ExitNode extends IPNode {
                         }
                     }
                     if (modified) {
-
                         App.p("Warning: overwritting!!!!");
                         App.p(un + ", " + out.getCurrMapping().get(un));
+                        if (un.getBase().getValue() instanceof StaticFieldRef) {
+                            continue;
+                        }
+
                         App.p(this.context + ", " + original);
                         App.panicni();
                     }
@@ -132,23 +136,29 @@ public class ExitNode extends IPNode {
                     // Value vv = ((JReturnStmt) stmt).getOp();
                     ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(retNode.getContext(),
                             ((JReturnStmt) stmt).getOp());
-                    if (!cvcallee.getValue().toString().contains("null")) {
-                        // for (UniqueName un : out.getUniqueNames().get(cvcallee)) {
-                        // out.putUname(cvcaller, un);
+                    // if (!cvcallee.getValue().toString().contains("null")) {
+                    // for (UniqueName un : out.getUniqueNames().get(cvcallee)) {
+                    // out.putUname(cvcaller, un);
+                    // }
+                    Set<Definition> defs = out.getDefinitionsByCV(cvcallee);
+                    Set<Definition> retdefs = new HashSet<>();
+                    // if (cvcallee.getValue().toString().contains("$r1")) {
+
+                    if (cvcallee.getValue() instanceof NullConstant) {
+                        out.putDefinition(cvcallee, Definition.getDefinition(new UniqueName(cvcallee), retNode));
+                        // App.p(cvcallee + ", " + retNode);
+                        // App.panicni();
                         // }
-                        Set<Definition> defs = out.getDefinitionsByCV(cvcallee);
-                        Set<Definition> retdefs = new HashSet<>();
-                        // if (cvcallee.getValue().toString().contains("$r1")) {
                         // App.p("!!!!!!!! " + defs);
-                        // }
-                        for (Definition def : defs) {
-                            retdefs.add(Definition.getDefinition(def.definedValue, retNode));
-                            // retdefs.add(Definition.getDefinition(def.definedValue, this));
-                        }
-                        out.putDefinition(cvcaller, retdefs);
-                        // out.putDefinition(cvcaller, retdefs);
-                        // App.p("!!! " + cvcaller + ", " + cvcallee);
                     }
+                    for (Definition def : defs) {
+                        retdefs.add(Definition.getDefinition(def.definedValue, retNode));
+                        // retdefs.add(Definition.getDefinition(def.definedValue, this));
+                    }
+                    out.putDefinition(cvcaller, retdefs);
+                    // out.putDefinition(cvcaller, retdefs);
+                    // App.p("!!! " + cvcaller + ", " + cvcallee);
+                    // }
                 }
             }
         }

@@ -1,6 +1,7 @@
 package com.lumos.forward;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.lumos.analysis.MethodInfo;
@@ -13,13 +14,17 @@ public class Context {
 
     public List<CallSite> ctrace;
 
+    public static Context emptyContext = new Context(Collections.emptyList());
+
     @Override
     public String toString() {
         String result = "";
         for (CallSite cs : ctrace) {
             result += cs.getMinfo().sm.getName() + ",";
         }
-        result = result.substring(0, result.length() - 1);
+        if (!ctrace.isEmpty()) {
+            result = result.substring(0, result.length() - 1);
+        }
         return result;
     }
 
@@ -84,6 +89,37 @@ public class Context {
         return cs.minfo;
     }
 
+    public MethodInfo getStackSecondToLast() {
+        if (ctrace.size() < 2) {
+            return null;
+        }
+        CallSite cs = ctrace.get(ctrace.size() - 2);
+        return cs.minfo;
+    }
+
+    public Stmt getCallingStmt() {
+        if (ctrace.size() == 0) {
+            return null;
+        }
+        CallSite cs = ctrace.get(ctrace.size() - 1);
+        return cs.getCallingStmt();
+    }
+
+    public CallSite getLastCallSite() {
+        if (ctrace.size() == 0) {
+            return null;
+        }
+        CallSite cs = ctrace.get(ctrace.size() - 1);
+        return cs;
+    }
+
+    public Context popLast() {
+        List<CallSite> newsite = new ArrayList<>(this.ctrace);
+        newsite.remove(newsite.size() - 1);
+        Context c = new Context(newsite);
+        return c;
+    }
+
     public boolean parentOf(Context other) {
         if (other.getCtrace().size() < this.getCtrace().size()) {
             return false;
@@ -108,5 +144,9 @@ public class Context {
             }
         }
         return true;
+    }
+
+    public static Context emptyContext() {
+        return emptyContext;
     }
 }

@@ -11,39 +11,101 @@ import java.util.Set;
 import com.lumos.App;
 
 public class WireHTTP {
-    private static Map<HTTPRequestWirePoint, HTTPReceiveWirePoint> wps = null;
+        private static Map<RequestWirePoint, HTTPReceiveWirePoint> wps = null;
 
-    public static HTTPReceiveWirePoint get(String reqMethod, int lineNum) {
-        if (wps == null) {
-            wps = new HashMap<>();
-            add("java.util.concurrent.Future sendInsidePayment", 99,
-                    "inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)",
-                    new String[] { "$u0" }, new String[] { "info" }, "$stack29");
-            add("boolean pay", 50,
-                    "other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById",
-                    new String[] { "$stack17" }, new String[] { "info" }, "$stack84");
-            add("boolean pay", 46, "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById",
-                    new String[] { "$stack17" }, new String[] { "info" }, "$stack23");
+        public static HTTPReceiveWirePoint get(String reqMethod, int lineNum) {
+                if (wps == null) {
+                        wps = new HashMap<>();
+                        add("java.util.concurrent.Future sendInsidePayment", 99,
+                                        "inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)",
+                                        new String[] { "$u0", "loginId" }, new String[] { "info", "$stack16" },
+                                        "$stack29");
+                        add("boolean pay", 50,
+                                        "other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById",
+                                        new String[] { "$stack17" }, new String[] { "info" }, "$stack84");
+                        add("boolean pay", 46,
+                                        "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById",
+                                        new String[] { "$stack17" }, new String[] { "info" }, "$stack23");
+                        add("inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)",
+                                        95,
+                                        "com.trainticket.service.PaymentServiceImpl: boolean pay(com.trainticket.domain.PaymentInfo)",
+                                        new String[] { "$stack64" }, new String[] { "info" }, "$stack70");
+                        add("java.util.concurrent.Future sendOrderCancel",
+                                        115,
+                                        // "cancel.service.CancelServiceImpl: cancel.domain.CancelOrderResult
+                                        // cancelOrder(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)",
+                                        "cancel.controller.CancelController: cancel.domain.CancelOrderResult cancelTicket(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)",
+                                        new String[] { "$u0", "loginId", "loginToken" },
+                                        new String[] { "info", "loginId", "loginToken" },
+                                        "$stack25");
+                        add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult getOrderByIdFromOrderOther",
+                                        340,
+                                        "other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById(other.domain.GetOrderByIdInfo)",
+                                        new String[] { "info" },
+                                        new String[] { "info" },
+                                        "$stack6");
+                        add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult getOrderByIdFromOrder", 332,
+                                        "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById(order.domain.GetOrderByIdInfo)",
+                                        new String[] { "info" },
+                                        new String[] { "info" },
+                                        "$stack6");
+                        add("cancel.service.CancelServiceImpl: cancel.domain.ChangeOrderResult cancelFromOrder", 282,
+                                        "order.controller.OrderController: order.domain.ChangeOrderResult saveOrderInfo(order.domain.ChangeOrderInfo)",
+                                        new String[] { "info" },
+                                        new String[] { "orderInfo" },
+                                        "$stack6");
+
+                        add("cancel.service.CancelServiceImpl: boolean drawbackMoney(java.lang.String,java.lang.String)",
+                                        312,
+                                        "inside_payment.service.InsidePaymentServiceImpl: boolean drawBack(inside_payment.domain.DrawBackInfo)",
+                                        new String[] { "$stack6" },
+                                        new String[] { "info" },
+                                        "$stack9");
+                        add("cancel.service.CancelServiceImpl: cancel.domain.GetAccountByIdResult getAccount(cancel.domain.GetAccountByIdInfo)",
+                                        322,
+                                        "sso.service.AccountSsoServiceImpl: sso.domain.GetAccountByIdResult getAccountById(sso.domain.GetAccountByIdInfo)",
+                                        new String[] { "info" },
+                                        new String[] { "info" },
+                                        "$stack6");
+                        add("cancel.controller.CancelController: cancel.domain.VerifyResult verifySsoLogin(java.lang.String)",
+                                        64,
+                                        "sso.service.AccountSsoServiceImpl: sso.domain.VerifyResult verifyLoginToken(java.lang.String)",
+                                        new String[] { "loginToken" },
+                                        new String[] { "verifyToken" },
+                                        "$stack9");
+                        add("cancel.queue.MsgSendingBean: void sendCancelInfoToOrderOther(cancel.domain.ChangeOrderInfo)",
+                                        27, "other.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)",
+                                        new String[] { "changeOrderInfo" },
+                                        new String[] { "changeOrderInfo" }, "");
+                        add("other.queue.MsgSendingBean: void sendLoginInfoToSso(other.domain.ChangeOrderResult)",
+                                        27, "cancel.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)",
+                                        new String[] { "changeOrderResult" },
+                                        new String[] { "changeOrderResult" }, "");
+
+                }
+                // System.out.println(reqMethod + ", " + lineNum);
+                // if (reqMethod.contains("sendOrderCancel")) {
+                // App.p("!!!!! " + reqMethod + ", " + lineNum);
+                // }
+                for (RequestWirePoint wp : wps.keySet()) {
+
+                        if (reqMethod.contains(wp.reqMethod) && lineNum == wp.lineNum) {
+                                // App.p("!!! " + reqMethod + ", " + wps.get(wp));
+                                return wps.get(wp);
+                        }
+                }
+                // return wps.get(new HTTPRequestWirePoint(reqMethod, lineNum));
+                return null;
         }
-        // System.out.println(reqMethod + ", " + lineNum);
-        for (HTTPRequestWirePoint wp : wps.keySet()) {
 
-            if (reqMethod.contains(wp.reqMethod) && lineNum == wp.lineNum) {
-                // App.p("!!!" + wp + ", " + reqMethod + ", " + wps.get(wp));
-                return wps.get(wp);
-            }
+        public static void add(String reqMethod, int lineNum, String recvMethod, String[] reqParams,
+                        String[] recvParams,
+                        String retWireName) {
+                RequestWirePoint reqp = new RequestWirePoint(reqMethod, lineNum);
+                List<String> reqarr = Arrays.asList(reqParams);
+
+                List<String> recvarr = Arrays.asList(recvParams);
+                HTTPReceiveWirePoint recvp = new HTTPReceiveWirePoint(recvMethod, reqarr, recvarr, retWireName);
+                wps.put(reqp, recvp);
         }
-        // return wps.get(new HTTPRequestWirePoint(reqMethod, lineNum));
-        return null;
-    }
-
-    public static void add(String reqMethod, int lineNum, String recvMethod, String[] reqParams, String[] recvParams,
-            String retWireName) {
-        HTTPRequestWirePoint reqp = new HTTPRequestWirePoint(reqMethod, lineNum);
-        List<String> reqarr = Arrays.asList(reqParams);
-
-        List<String> recvarr = Arrays.asList(recvParams);
-        HTTPReceiveWirePoint recvp = new HTTPReceiveWirePoint(recvMethod, reqarr, recvarr, retWireName);
-        wps.put(reqp, recvp);
-    }
 }

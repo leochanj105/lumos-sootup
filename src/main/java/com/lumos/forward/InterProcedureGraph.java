@@ -11,9 +11,11 @@ import java.util.Set;
 
 import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
+import com.lumos.wire.Banned;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.IdentityWire;
 import com.lumos.wire.WireHTTP;
+import com.lumos.wire.WireInterface;
 
 import heros.flowfunc.Identity;
 import soot.Local;
@@ -26,6 +28,7 @@ import soot.jimple.ReturnVoidStmt;
 import soot.jimple.Stmt;
 import soot.jimple.internal.AbstractInstanceInvokeExpr;
 import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JGotoStmt;
 import soot.toolkits.graph.BriefUnitGraph;
 
 public class InterProcedureGraph {
@@ -59,12 +62,13 @@ public class InterProcedureGraph {
             // }
             boolean match = true;
             for (String s : str) {
+                // node.stmt.
                 if (!node.getDescription().contains(s)) {
                     match = false;
                     break;
                 }
             }
-            if (match) {
+            if (match && !(node.stmt.toString().contains(App.exclude))) {
                 return node;
             }
         }
@@ -93,8 +97,10 @@ public class InterProcedureGraph {
         // App.p(context + ", " + stmt);
         ResolveResult result = new ResolveResult();
         minfo = methodMap.get(sm.getSignature());
-        if (minfo == null) {
-            String lastMethod = context.getStackLast().sm.getSignature();
+        String mname = sm.getSignature().toString();
+        String lastMethod = context.getStackLast().sm.getSignature();
+        if (minfo == null && (mname.contains("exchange") || mname.contains("ForObject") ||
+                mname.contains("boolean send(org.springframework.messaging.Message)"))) {
             HTTPReceiveWirePoint hwire = WireHTTP.get(lastMethod,
                     stmt.getJavaSourceStartLineNumber());
             // if (stmt.toString().contains("exchange")) {
@@ -105,12 +111,21 @@ public class InterProcedureGraph {
                 String target = hwire.targetMethod;
                 minfo = searchMethod(target);
                 if (minfo != null) {
-                    App.p("wired " + target);
+                    App.p("wired remote " + target);
                 }
                 result.setHwire(hwire);
             } else {
 
-                // App.p(stmt + " at " + stmt.getJavaSourceStartLineNumber() + " not found");
+            }
+        }
+
+        if (minfo == null) {
+            String target = WireInterface.get(lastMethod, stmt.getJavaSourceStartLineNumber());
+            if (target != null) {
+                minfo = searchMethod(target);
+            }
+            if (minfo != null) {
+                App.p("wired interface " + minfo.sm.getName());
             }
         }
 
@@ -135,14 +150,6 @@ public class InterProcedureGraph {
         BriefUnitGraph cfg = minfo.cfg;
 
         ContextSensitiveInfo cinfo = new ContextSensitiveInfo();
-        // if (minfo.sm.getName().contains("pay")) {
-        // Value v = minfo.localMap.get("info");
-        // App.p("!!!!! " + v + ", " + v.getType());
-        // }
-        // if (minfo.sm.getName().contains("sendInsidePayment")) {
-        // Value v = minfo.localMap.get("$u0");
-        // App.p("!!!!! " + v + ", " + v.getType());
-        // }
 
         for (Unit unit : cfg) {
             if (!(unit instanceof Stmt)) {
@@ -169,11 +176,6 @@ public class InterProcedureGraph {
             for (Unit u : cfg.getSuccsOf(snode.getStmt())) {
                 Stmt succ = (Stmt) u;
                 IPNode succNode = getIPNode(context, succ);
-                // if (stmt.toString().contains("specialinvoke this.<java.lang.Object: void
-                // <init>()>()") &&
-                // context.ctrace.size() < 3) {
-                // App.p("()()" + succ + ", " + succNode);
-                // }
                 if (succNode instanceof WrapperNode) {
                     WrapperNode wn = (WrapperNode) succNode;
                     succNodes.add(wn.getEnter());
@@ -181,15 +183,8 @@ public class InterProcedureGraph {
                     succNodes.add(succNode);
                 }
             }
-            // if (stmt.toString().contains("specialinvoke this.<java.lang.Object: void
-            // <init>()>()") &&
-            // context.ctrace.size() < 3) {
-            // App.p("----!!! " + context);
-            // App.p(cfg.getSuccsOf(stmt));
-            // App.p(succNodes);
-            // }
 
-            if (cfg.getPredsOf(stmt).isEmpty()) {
+            if (cfg.getPredsOf(stmt).isEmpty() && !(stmt.toString().contains("caughtexception"))) {
                 cinfo.setFirstNode(snode);
             }
 
@@ -236,10 +231,6 @@ public class InterProcedureGraph {
         return new Context(new ArrayList<>());
     }
 
-    // public IPNode getIPNode(Stmt stmt) {
-    // return getIPNode(emptyContext(), stmt);
-    // }
-
     public IPNode getIPNode(Context context, Stmt stmt) {
         Map<Unit, IPNode> umap;
         if (!stmtMap.containsKey(context)) {
@@ -259,17 +250,8 @@ public class InterProcedureGraph {
                 MethodInfo calleeinfo = result.getMinfo();
 
                 if (calleeinfo == null) {
-                    // App.p(sm + " not found!");
-                    // int identityRes = IdentityWire.findWire(iexpr.toString());
-                    // if (identityRes >= 0) {
-                    // App.p("!!!! " + identityRes + ", " + stmt);
                     snode = new IdentityNode(context, stmt);
-                    // } else {
-                    // snode = new NoopNode(context, stmt);
-                    // }
                 } else {
-                    // App.p("Enter " + calleeinfo.sm.getName() + " from " +
-                    // callerinfo.sm.getName());
                     nctx.append(stmt, calleeinfo);
                     // App.p(nctx);
                     // App.p(stmt);
@@ -309,38 +291,16 @@ public class InterProcedureGraph {
                             String s2 = recvParams.get(i);
                             Value v1 = callerinfo.getLocal(s1);
                             Value v2 = calleeinfo.getLocal(s2);
-                            // App.p("Added aliasing pairs: " + s1 + " in " + callerinfo.sm + " and " + s2 +
-                            // " in "
-                            // + calleeinfo.sm);
+
                             if (v1 == null || v2 == null) {
                                 App.p("Wiring null values!");
                                 App.panicni();
                             }
                             ContextSensitiveValue cv1 = ContextSensitiveValue.getCValue(context, v1);
                             ContextSensitiveValue cv2 = ContextSensitiveValue.getCValue(nctx, v2);
-
-                            // if (cv2.toString().contains("info")) {
-                            // for (UniqueName unn : out.currMapping.keySet()) {
-                            // if (unn.toString().contains("info")) {
-                            // App.p(unn + ", " + out.currMapping.get(unn) + ", " + unn.getBase().hashCode()
-                            // + ", "
-                            // + ((Local) cv2.get).equivHashCode() + ", "
-                            // + ((Local) unn.getBase().getValue()).getName() + ", " +
-                            // ((Local) unn.getBase().getValue()).getType());
-                            // }
-                            // }
-                            // }
                             enter.addAlising(cv1, cv2);
                             enter.setRemote(true);
                             exit.setRemote(true);
-                            // App.p("Added aliasing pairs: " + v1 + " in " + callerinfo.sm + " and " + v2 +
-                            // " in "
-                            // + calleeinfo.sm);
-                            // ret = callerinfo.getLocal(hwire.getRetWireName());
-                            // if (ret == null) {
-                            // App.p("Wiring null return value!");
-                            // App.panicni();
-                            // }
                         }
                     } else {
                         // If normal method, just connect params with args
@@ -350,6 +310,8 @@ public class InterProcedureGraph {
                             Value calleethis = calleesm.getActiveBody().getThisLocal();
                             ContextSensitiveValue cvbase = ContextSensitiveValue.getCValue(context, base);
                             ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(nctx, calleethis);
+                            // if(calleesm.toString().contains("sen"))
+
                             enter.addAlising(cvbase, cvcallee);
                         }
                         for (int i = 0; i < calleesm.getParameterCount(); i++) {
@@ -364,7 +326,13 @@ public class InterProcedureGraph {
                     snode = new WrapperNode(context, enter, exit, stmt);
                 }
             } else {
-                snode = new StmtNode(context, stmt);
+                String stmtname = context.getStackLast().sm.toString() + " " + stmt.toString();
+                if (Banned.isStmtBanned(stmtname)) {
+                    App.p("Banned stmt: " + stmtname);
+                    snode = new NoopNode(context, stmt);
+                } else {
+                    snode = new StmtNode(context, stmt);
+                }
             }
             umap.put(stmt, snode);
             if (snode instanceof WrapperNode) {

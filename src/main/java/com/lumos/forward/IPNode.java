@@ -62,7 +62,8 @@ public abstract class IPNode {
     }
 
     public String getDescription() {
-        return this.context.toString() + ", " + this.stmt.toString() + ", " + this.type;
+        return this.context.toString() + ", " + this.stmt.toString() + ", " + this.type + ", "
+                + this.stmt.getJavaSourceStartLineNumber();
     }
 
     public abstract void flow(IPFlowInfo out);

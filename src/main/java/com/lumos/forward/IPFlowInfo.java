@@ -16,6 +16,7 @@ import soot.Local;
 import soot.RefLikeType;
 import soot.Value;
 import soot.jimple.Jimple;
+import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JInstanceFieldRef;
 
 public class IPFlowInfo {
@@ -92,20 +93,19 @@ public class IPFlowInfo {
     public Set<UniqueName> getUniqueNamesForRef(ContextSensitiveValue cv) {
         JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
         Set<Definition> baseDefs = getDefinitionsByCV(cv.getContext(), ref.getBase());
-        if (baseDefs == null) {
-            App.p(cv);
-            App.panicni();
-        }
+        // if (cv.getContext().toString().contains("sendOrderCancel,<init>")) {
+        // App.p("!!!! " + cv + ", " + baseDefs);
+        // }
 
         Set<UniqueName> unames = new HashSet<>();
 
         for (Definition def : baseDefs) {
             UniqueName unref = null;
-            if (def.getDefinedValue().getBase().toString().equals("null")) {
-                unref = new UniqueName(def.getDefinedValue(), null);
-            } else {
-                unref = new UniqueName(def.getDefinedValue(), ref.getFieldRef());
-            }
+            // if (def.getDefinedValue().getBase().toString().equals("null")) {
+            // unref = new UniqueName(def.getDefinedValue(), null);
+            // } else {
+            unref = new UniqueName(def.getDefinedValue(), ref.getFieldRef());
+            // }
             unames.add(unref);
         }
         return unames;
@@ -128,24 +128,31 @@ public class IPFlowInfo {
                 // }
                 resultDefs.addAll(definitions);
             }
-        } else {
-            UniqueName un = new UniqueName(cv);
-            Set<Definition> defs = currMapping.get(un);
-            if (defs == null || defs.isEmpty()) {
-                // if (v.getValue().getType() instanceof RefLikeType) {
-                // UniqueName u = new UniqueName(cv);
-                currMapping.put(un, new HashSet<>());
-                resultDefs.add(Definition.getDefinition(un, null));
-                // }
-            } else {
-                resultDefs.addAll(defs);
-            }
+            return resultDefs;
         }
+        UniqueName un = new UniqueName(cv);
+
+        if (cv.getValue() instanceof StaticFieldRef) {
+            un = new UniqueName(ContextSensitiveValue.getCValue(Context.emptyContext(), cv.getValue()));
+        }
+
+        Set<Definition> defs = currMapping.get(un);
+        if (defs == null || defs.isEmpty()) {
+            // if (v.getValue().getType() instanceof RefLikeType) {
+            // UniqueName u = new UniqueName(cv);
+            currMapping.put(un, new HashSet<>());
+            resultDefs.add(Definition.getDefinition(un, null));
+            // }
+        } else {
+            resultDefs.addAll(defs);
+        }
+
         // if (resultNames.isEmpty()) {
         // App.p("!!!!!!!! " + cv + ", " + cv.getValue().getClass() + ", "
         // + (cv.getValue().getType() instanceof RefLikeType));
         // }
         return resultDefs;
+
     }
 
     public void clearDefinition(UniqueName un) {
@@ -234,6 +241,26 @@ public class IPFlowInfo {
         for (UniqueName un : currMapping.keySet()) {
             result += un + ": " + currMapping.get(un);
             result += "\n";
+        }
+        // [uniqueNames=" + uniqueNames + ", currMapping=" + currMapping + "]";
+        return result;
+    }
+
+    // @Override
+    public String ssimple(String target) {
+        String result = "";
+        result += "IPFlowInfo: \n";
+        // result += "UniqueNames:\n";
+        // for (ContextSensitiveValue cv : uniqueNames.keySet()) {
+        // result += cv + ": " + uniqueNames.get(cv);
+        // result += "\n";
+        // }
+        result += "\nMapping:\n";
+        for (UniqueName un : currMapping.keySet()) {
+            if (un.toString().contains(target)) {
+                result += un + ": " + currMapping.get(un);
+                result += "\n";
+            }
         }
         // [uniqueNames=" + uniqueNames + ", currMapping=" + currMapping + "]";
         return result;

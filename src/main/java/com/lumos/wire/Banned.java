@@ -5,17 +5,19 @@ import java.util.List;
 
 public class Banned {
 
-    public static List<List<String>> banned;
+    public static List<List<String>> bannedTypes;
+    public static List<List<String>> bannedStmts;
 
-    public static boolean isBanned(String query) {
-        if (banned == null) {
-            banned = new ArrayList<>();
-            addBanned("Repository");
-            addBanned("RestTemplate");
-            addBanned("StringBuilder");
+    public static boolean isTypeBanned(String query) {
+        if (bannedTypes == null) {
+            bannedTypes = new ArrayList<>();
+            addBannedType("Repository");
+            addBannedType("RestTemplate");
+            addBannedType("StringBuilder");
+
         }
-        for (int i = 0; i < banned.size(); i++) {
-            List<String> name = banned.get(i);
+        for (int i = 0; i < bannedTypes.size(); i++) {
+            List<String> name = bannedTypes.get(i);
             boolean matched = true;
             for (String n : name) {
                 if (!query.contains(n)) {
@@ -31,12 +33,45 @@ public class Banned {
 
     }
 
-    public static void addBanned(String... strs) {
+    public static boolean isStmtBanned(String query) {
+        if (bannedStmts == null) {
+            bannedStmts = new ArrayList<>();
+            addBannedStmt("changeOrderResult = (cancel.domain.ChangeOrderResult) $stack11",
+                    "cancel.queue.MsgReveiceBean");
+            addBannedStmt("changeOrderInfo = (other.domain.ChangeOrderInfo) $stack11",
+                    "other.queue.MsgReveiceBean");
+        }
+        for (int i = 0; i < bannedStmts.size(); i++) {
+            List<String> name = bannedStmts.get(i);
+            boolean matched = true;
+            for (String n : name) {
+                if (!query.contains(n)) {
+                    matched = false;
+                }
+            }
+            if (matched) {
+                return true;
+            }
+
+        }
+        return false;
+
+    }
+
+    public static void addBannedStmt(String... strs) {
         List<String> nlist = new ArrayList<>();
         for (String str : strs) {
             nlist.add(str);
         }
-        banned.add(nlist);
+        bannedStmts.add(nlist);
+    }
+
+    public static void addBannedType(String... strs) {
+        List<String> nlist = new ArrayList<>();
+        for (String str : strs) {
+            nlist.add(str);
+        }
+        bannedTypes.add(nlist);
     }
 
 }

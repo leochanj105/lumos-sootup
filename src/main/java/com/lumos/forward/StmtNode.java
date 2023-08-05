@@ -67,19 +67,34 @@ public class StmtNode extends IPNode {
             if (rop instanceof JCastExpr) {
                 rop = ((JCastExpr) rop).getOp();
             }
-            ContextSensitiveValue cvlop = ContextSensitiveValue.getCValue(getContext(), lop);
-            ContextSensitiveValue cvrop = ContextSensitiveValue.getCValue(getContext(), rop);
+            ContextSensitiveValue cvlop = null;
+            ContextSensitiveValue cvrop = null;
+            if (lop instanceof StaticFieldRef) {
+                cvlop = ContextSensitiveValue.getCValue(Context.emptyContext(), lop);
+                // Value xx = ((StaticFieldRef) lop).getField();
+            } else {
+                cvlop = ContextSensitiveValue.getCValue(getContext(), lop);
+            }
+
+            if (rop instanceof StaticFieldRef) {
+                cvrop = ContextSensitiveValue.getCValue(Context.emptyContext(), rop);
+            } else {
+                cvrop = ContextSensitiveValue.getCValue(getContext(), rop);
+            }
+            // ContextSensitiveValue cvrop = ContextSensitiveValue.getCValue(getContext(),
+            // rop);
 
             Set<Definition> defs = new HashSet<>();
             if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)
                     || (rop instanceof StaticFieldRef)) {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
             } else {
-                defs.add(Definition.getDefinition(new UniqueName(cvlop), this));
+                defs.add(Definition.getDefinition(new UniqueName(cvrop), this));
             }
             // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
-            if (lop instanceof Local) {
+            if ((lop instanceof Local) || (lop instanceof StaticFieldRef)) {
                 // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
+
                 if (defs.isEmpty()) {
                     if (lop.getType() instanceof RefLikeType) {
                         App.p("This is not possible...");
@@ -106,7 +121,11 @@ public class StmtNode extends IPNode {
                 // }
             } else if (lop instanceof JInstanceFieldRef) {
                 Set<UniqueName> unames = out.getUniqueNamesForRef(cvlop);
+
                 Set<Definition> possibleDefinitions = out.getDefinitionsByCV(cvrop);
+                // if (context.toString().contains("doErrorQueue,sendOrderCancel,<init>")) {
+                // App.p("!!! " + cvlop + ", " + unames);
+                // }
                 if (unames == null || unames.isEmpty()) {
                     App.p("This can't be unresolved");
                 }
@@ -125,9 +144,8 @@ public class StmtNode extends IPNode {
                         out.getCurrMapping().get(uname).addAll(currDefs);
                     }
                 }
-            }
-
-            else {
+            } else {
+                App.p(stmt);
                 App.panicni();
             }
         }

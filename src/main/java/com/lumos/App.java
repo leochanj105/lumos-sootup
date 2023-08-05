@@ -33,7 +33,7 @@ import com.lumos.common.InstrumentPoint;
 import com.lumos.common.Provenance;
 import com.lumos.common.Query;
 import com.lumos.common.RefSeq;
-import com.lumos.common.TracePoint;
+// import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
 import com.lumos.forward.CallSite;
@@ -47,6 +47,7 @@ import com.lumos.forward.IPFlowInfo;
 import com.lumos.forward.IPNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.StmtNode;
+import com.lumos.forward.TracePoint;
 import com.lumos.forward.UniqueName;
 import com.lumos.wire.Banned;
 import com.lumos.wire.HTTPReceiveWirePoint;
@@ -81,6 +82,8 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Jimple;
 import soot.jimple.JimpleBody;
+import soot.jimple.NullConstant;
+import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.AbstractInstanceInvokeExpr;
@@ -117,6 +120,9 @@ public class App {
     public static String outputFormat = "class";
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
+    public static boolean compileJimple = false;
+    public static boolean compileClass = false;
+
     public static boolean showRound = false;
     public static boolean showLineNum = true;
 
@@ -124,13 +130,18 @@ public class App {
 
     public static Map<String, SootClass> classMap = new HashMap<>();
 
+    public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
+
     public static void main(String[] args) {
         // readParams();
         String[] services = new String[] {
                 "ts-launcher",
                 "ts-inside-payment-service",
                 "ts-order-other-service",
-                "ts-order-service"
+                "ts-order-service",
+                "ts-payment-service",
+                "ts-cancel-service",
+                "ts-sso-service"
         };
         methodMap = new HashMap<>();
         // analyzePath("C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code");
@@ -141,7 +152,9 @@ public class App {
             String complete = base + str + suffix;
             analyzePath(complete);
         }
-        //
+
+        if (compileJimple)
+            return;
 
         // if (true)
         // return;
@@ -155,8 +168,36 @@ public class App {
         // "pay(");
         // p(cinfo.getFirstNode());
 
-        // long start = System.currentTimeMillis();
+        // int cc = 0;
+        // Set<MethodInfo> mfs = new HashSet<>();
+        // for (IPNode node : igraph.nodes) {
+        // mfs.add(node.getContext().getStackLast());
+        // }
+
+        // for (MethodInfo mi : mfs) {
+        // for (Unit unit : mi.sm.getActiveBody().getUnits()) {
+        // Stmt stmt = (Stmt) unit;
+        // for (ValueBox vb : stmt.getUseBoxes()) {
+        // Value vv = vb.getValue();
+        // if (vv instanceof Local || vv instanceof JInstanceFieldRef || vv instanceof
+        // StaticFieldRef
+        // || vv instanceof Constant) {
+        // if (stmt.getJavaSourceStartLineNumber() >= 52 &&
+        // !mi.sm.toString().contains("doErrorQueue")) {
+        // cc += 1;
+        // }
+        // }
+        // }
+        // }
+        // }
+        // System.out.println(String.valueOf(cc));
+
+        // App.panicni();
+
+        long start = System.currentTimeMillis();
+
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
+        long analysisDuration = System.currentTimeMillis() - start;
         // p(igraph.getLastNode());
         // IPNode ipnode = igraph
         // .searchNode("$stack29 = virtualinvoke $stack28.<java.lang.Boolean:
@@ -165,8 +206,27 @@ public class App {
         IPNode ipnode = igraph.searchNode(
                 "$stack66 = $stack62 & $stack68",
                 "stmt");
+        p(ipnode.stmt.toString());
+        // p(ipnode + ", " + ipnode.getContext());
 
-        p(ipnode);
+        // IPNode ndd = igraph.searchNode(
+        // "l4 = 0",
+        // "stmt").successors.get(0);
+        // App.p(ndd);
+        // IPFlowInfo cdd = fia.getBefore(ndd);
+        // App.p(cdd);
+        // App.p(".............................................");
+        // App.p(".............................................");
+        // App.p(".............................................");
+        // App.p(".............................................");
+        // // IPNode ndd2 = igraph.searchNode(
+        // // "goto ",
+        // // "ReadCookieMap", "50");
+        // IPFlowInfo cdd2 = fia.getAfter(ndd);
+        // App.p(cdd2);
+        // App.p(ndd);
+        // panicni();
+
         // p(igraph.initialNode);
         // if (true)
         // return;
@@ -206,6 +266,9 @@ public class App {
 
         // unresolvedCVs.add(cvalue);
 
+        // int provCount = 0;
+        Set<TracePoint> tps = new HashSet<>();
+        start = System.currentTimeMillis();
         while (!unresolvedNodes.isEmpty()) {
             IPNode node = unresolvedNodes.iterator().next();
 
@@ -224,7 +287,7 @@ public class App {
             // } else {
             minfo = node.getContext().getStackLast();
             // }
-            // p(minfo.cfDependency + ", " + minfo.sm.getName());
+            // p(node.getContext() + ", " + stmt);
             // minfo.cfg.getBody().
             for (Stmt cfstmt : minfo.cfDependency.get(stmt)) {
                 // Context context = null;
@@ -232,92 +295,120 @@ public class App {
                 IPNode cfnode = igraph.getIPNode(node.getContext(), cfstmt);
                 unresolvedNodes.add(cfnode);
             }
+            CallSite csite = node.getContext().getLastCallSite();
+            // App.p("???? " + csite.getCallingStmt());
+            // App.p("???? " + csite.minfo.sm);
+            if (csite.getCallingStmt() != null) {
+                for (Stmt cfstmt : node.getContext().getStackSecondToLast().cfDependency
+                        .get(csite.getCallingStmt())) {
+                    IPNode cfnode = igraph.getIPNode(node.getContext().popLast(), cfstmt);
+                    // App.p("!!!! " + cfnode + ", " + node.getContext().popLast() + ", " +
+                    // csite.getCallingStmt());
+                    unresolvedNodes.add(cfnode);
+                }
+            }
 
             for (ContextSensitiveValue cv : node.getUsed()) {
-                Set<Definition> satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
 
-                App.p("Potential Provenance value: " + cv);
-                if (Banned.isBanned(cv.getValue().getType().toString())) {
+                Set<Definition> satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
+                // if (cv.toString().contains("this.<launcher.domain.CancelOrderResult: boolean
+                // status>")
+                // && node.getStmt().toString()
+                // .contains("this.<launcher.domain.CancelOrderResult: boolean status>")
+                // && node.getStmt().getJavaSourceStartLineNumber() == 14) {
+                // App.p("!!!!");
+                // App.p(cv);
+
+                // for (Definition def : satisfiedDefs) {
+                // if (def.getDefinedValue().getSuffix().size() > 0) {
+                // App.p(def.getDefinedValue().getBase());
+                // }
+
+                // }
+                // panicni();
+                // }
+                if (Banned.isTypeBanned(cv.getValue().getType().toString())) {
                     p("Not tracking banned type: " + cv.getValue().getType());
                     continue;
                 }
+                App.p("Potential Provenance value: " + cv);
+                tps.add(new TracePoint(node.getStmt(), cv.getValue()));
                 // App.p(cv.getValue().getClass());
 
                 boolean unresolved = true;
                 List<Value> constants = new ArrayList<>();
+
+                Set<Definition> unresolves = new HashSet<>();
                 for (Definition satdef : satisfiedDefs) {
                     if (satdef.getDefinedLocation() != null) {
-                        unresolved = false;
+                        // unresolved = false;
                         unresolvedNodes.add(satdef.getDefinedLocation());
-
-                    } else {
-                        Value defval = satdef.getDefinedValue().getBase().getValue();
-                        if (defval instanceof Constant) {
-                            constants.add(defval);
+                        if (satdef.d().toString().contains("login")) {
+                            App.p("Solved def for " + cv + " :  " + satdef.d());
                         }
+                    } else {
+                        if (satdef.d().toString().contains("login")) {
+                            App.p("UnSolved def for " + cv + " :  " + satdef.d());
+                        }
+                        unresolves.add(satdef);
+                        // Value defval = satdef.getDefinedValue().getBase().getValue();
+                        // if ((defval instanceof Constant) && (defval instanceof NullConstant)) {
+                        // constants.add(defval);
+                        // }
                     }
                 }
-                if (unresolved) {
-                    if (!constants.isEmpty() && constants.size() == satisfiedDefs.size()) {
-                        p("Not tracking constant: " + cv + " with constant value " + constants);
-                        continue;
-                    }
 
-                    App.p(">>>>>\nUnresolved " + cv + " with:");
-                    for (Definition satdef : satisfiedDefs) {
+                if (!unresolves.isEmpty()) {
+
+                    // App.p(">>>>>\nUnresolved " + cv + " with:");
+
+                    for (Definition satdef : unresolves) {
+                        App.p(">>>>>Unresolved " + cv + " with " + satdef);
+                        Value defVal = satdef.getDefinedValue().getBase().getValue();
+                        if ((defVal instanceof Constant) && !(defVal instanceof NullConstant)) {
+                            p("Not tracking constant: " + cv + " with constant value " + defVal);
+                            continue;
+                        }
                         App.p(satdef.getDefinedValue());
                         UniqueName cvun = satdef.getDefinedValue();
-                        if (!cvun.getBase().toString().contains("null")) {
-                            App.p("Try resolving base:");
-                            ContextSensitiveValue cvbase = cvun.getBase();
-                            Set<Definition> resbasedefs = fia.getBefore(node).getDefinitionsByCV(cvbase);
-                            App.p(resbasedefs);
+                        // if (!cvun.getBase().toString().contains("null")) {
+                        App.p("Try resolving base:");
+                        ContextSensitiveValue cvbase = cvun.getBase();
+                        Set<Definition> resbasedefs = fia.getBefore(node).getDefinitionsByCV(cvbase);
+                        App.p(resbasedefs);
 
-                            // if (resbasedefs.size() == 1) {
-                            // Definition bdef = resbasedefs.iterator().next();
-                            // if (bdef.getDefinedLocation() instanceof EnterNode) {
-                            // // if (bdef.getDefinedLocation() instanceof EnterNode) {
-                            // App.p("Traslated cross-service aliasing for " + cvbase);
-                            // ContextSensitiveValue translated = ((EnterNode) bdef.getDefinedLocation())
-                            // .getAlias(cvbase);
-                            // // ContextSensitiveValue realName =
-                            // UniqueName newun = new UniqueName(translated, cvun.getSuffix());
-                            // for (Definition def : fia.getBefore(node).getCurrMapping().get(newun)) {
-                            // if (def.getDefinedLocation() != null) {
-                            // unresolvedNodes.add(def.getDefinedLocation());
-                            // }
-                            // }
-                            // continue;
-                            // // }
-                            // }
-                            // }
+                        boolean alternative = false;
+                        if (!resbasedefs.isEmpty()) {
+                            for (Definition bdef : resbasedefs) {
+                                App.p(bdef.getDefinedLocation());
+                                if (bdef.getDefinedLocation() != null) {
 
-                            boolean alternative = false;
-                            if (!resbasedefs.isEmpty()) {
-                                for (Definition bdef : resbasedefs) {
-                                    App.p(bdef.getDefinedLocation());
-                                    if (bdef.getDefinedLocation() != null) {
+                                    alternative = true;
 
-                                        alternative = true;
-
-                                        App.p("New Provenance due to field: " + cvun + " at "
-                                                + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
-                                        unresolvedNodes.add(bdef.getDefinedLocation());
-                                    }
+                                    App.p("New Provenance due to field: " + cvun + " at "
+                                            + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
+                                    unresolvedNodes.add(bdef.getDefinedLocation());
+                                    tps.add(new TracePoint(stmt, defVal, cvun.getSuffix()));
                                 }
                             }
-                            if (!alternative) {
-                                App.p("Can't resolve " + cvun + " at all");
-                            }
                         }
+                        if (!alternative) {
+                            App.p("Can't resolve " + cvun + " at all");
+                        }
+                        // }
                     }
-                    App.p("<<<<<\n");
+                    // App.p("<<<<<\n");
 
                 }
 
             }
 
         }
+
+        long backtrackDuration = System.currentTimeMillis()
+                - start;
+        p2("Analysis time: " + analysisDuration + ",  backtrack time: " + backtrackDuration);
+        p2("#TPs: " + tps.size());
     }
 
     public static void play() {
@@ -429,14 +520,19 @@ public class App {
                 sm.retrieveActiveBody();
 
                 MethodInfo minfo = new MethodInfo(sm);
-                Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
+                // Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
                 minfo.buildPostDominanceFrontier();
                 methodMap.put(sm.getSignature(), minfo);
-                CompileUtils.bodyMap.put(sm.getSignature(), ((Body) sm.getActiveBody().clone()));
+                // CompileUtils.bodyMap.put(sm.getSignature(), ((Body)
+                // sm.getActiveBody().clone()));
+                // if (sm.toString().contains("cancelOrder")) {
+                // App.p("!!! " + sm);
+                // }
             }
             classMap.put(cls.toString(), cls);
-
-            // CompileUtils.outputJimple(cls, "AAA");
+            if (compileJimple) {
+                CompileUtils.outputJimple(cls, "joutput");
+            }
             // PackManager.v().
             // PackManager.v().runPacks();
 
@@ -610,6 +706,10 @@ public class App {
     }
 
     public static void p(Object s) {
+        System.out.println(s);
+    }
+
+    public static void p2(Object s) {
         System.out.println(s);
     }
 

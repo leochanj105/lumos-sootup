@@ -47,6 +47,7 @@ public class IdentityWire {
         if (specials == null) {
             specials = new ArrayList<>();
             addSpecial("java.util.Iterator", "boolean hasNext");
+            addSpecial("Object", "void <init>");
         }
         for (int i = 0; i < specials.size(); i++) {
             List<String> name = specials.get(i);

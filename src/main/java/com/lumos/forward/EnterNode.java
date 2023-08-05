@@ -109,7 +109,7 @@ public class EnterNode extends IPNode {
         for (List<ContextSensitiveValue> aliasp : getAliasPairs()) {
             ContextSensitiveValue cv1 = aliasp.get(0);
             ContextSensitiveValue cv2 = aliasp.get(1);
-            out.clearDefinition(cv2);
+
             // if (!isRemote()) {
             // if (true) {
             Set<Definition> defs = out.getDefinitionsByCV(cv1);
@@ -125,12 +125,15 @@ public class EnterNode extends IPNode {
             // }
             // }
             // }
+            out.clearDefinition(cv2);
             out.putDefinition(cv2, defs);
-            // if (cv2.toString().contains("info")) {
-            // // for (Definition def : defs) {
-            // App.p("!!!! " + cv2 + ", " + cv1 + "," + defs);
 
-            // }
+            if (cv2.toString().contains("login")) {
+                for (Definition def : defs) {
+                    // App.p("Enter: " + cv1 + ", " + cv2 + ", " + def.d());
+                }
+                // App.panicni();
+            }
 
             // } else {
 
@@ -152,6 +155,6 @@ public class EnterNode extends IPNode {
 
     @Override
     public String toString() {
-        return "EnterNode [" + sm.getName() + ", " + lastCall + "]";
+        return "EnterNode [" + sm.getName() + ", " + context + "]";
     }
 }
