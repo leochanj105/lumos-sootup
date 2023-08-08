@@ -34,6 +34,7 @@ import soot.SootFieldRef;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.ValueBox;
 import soot.baf.BafASMBackend;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
@@ -43,6 +44,7 @@ import soot.jimple.JimpleBody;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JInstanceFieldRef;
 import soot.options.Options;
 
 public class CompileUtils {
@@ -127,7 +129,7 @@ public class CompileUtils {
         // body.validate();
     }
 
-    public static List<Stmt> generateTPStmts(Body body, UniqueName un) {
+    public static List<Stmt> generateTPStmts(Body body, Value v, List<SootFieldRef> suffix) {
         Local tpLocal = Jimple.v().newLocal("tpLocal", RefType.v("java.io.PrintStream"));
         if (getLocal(body, tpLocal) == null) {
             body.getLocals().add(tpLocal);
@@ -154,11 +156,12 @@ public class CompileUtils {
         List<Stmt> stlist = new ArrayList<>();
 
         Value val = null;
-        Value baseval = un.getBase().getValue();
-        if (un.getSuffix().isEmpty()) {
-            // App.p(baseval.getClass());
+        Value baseval = v;
+        if (suffix.isEmpty()) {
             if (baseval instanceof Constant) {
                 val = baseval;
+            } else if (baseval instanceof JInstanceFieldRef) {
+
             } else {
                 // App.p(baseval instanceof Constant);
                 val = getLocal(body, baseval);
@@ -166,7 +169,7 @@ public class CompileUtils {
         } else {
             Value curr = getLocal(body, baseval);
             List<Local> locallist = new ArrayList<>();
-            for (SootFieldRef ref : un.getSuffix()) {
+            for (SootFieldRef ref : suffix) {
                 Local tmp = Jimple.v().newLocal("tmpLocal" + (id++), ref.declaringClass().getType());
                 body.getLocals().add(tmp);
                 body.validate();
@@ -200,6 +203,26 @@ public class CompileUtils {
                 .newInvokeStmt(Jimple.v().newVirtualInvokeExpr(tpLocal, toCall.makeRef(), tmpString1));
         stlist.add(printStmt);
         return stlist;
+    }
+
+    public static Stmt searchStmt(Body b, String stmtStr, int linenum) {
+        for (Unit unit : b.getUnits()) {
+            Stmt stmt = (Stmt) unit;
+            if (stmt.toString().equals(stmtStr) && linenum == stmt.getJavaSourceStartLineNumber()) {
+                return stmt;
+            }
+        }
+        return null;
+    }
+
+    public static Value findLocal(Stmt stmt, String local) {
+        for (ValueBox vb : stmt.getUseAndDefBoxes()) {
+            Value v = vb.getValue();
+            if (v.toString().equals(local)) {
+                return v;
+            }
+        }
+        return null;
     }
 
     public static Local getLocal(Body b, Value v) {

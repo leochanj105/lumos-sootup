@@ -37,6 +37,7 @@ public class InterProcedureGraph {
     public Map<Context, Map<Unit, IPNode>> stmtMap;
 
     public Set<IPNode> nodes = new HashSet<>();
+    // public Set<IPNode> TrapNodes = new HashSet<>();
 
     public IPNode initialNode;
 
@@ -172,7 +173,7 @@ public class InterProcedureGraph {
                 }
 
             }
-
+            // minfo.sm.getActiveBody().
             for (Unit u : cfg.getSuccsOf(snode.getStmt())) {
                 Stmt succ = (Stmt) u;
                 IPNode succNode = getIPNode(context, succ);

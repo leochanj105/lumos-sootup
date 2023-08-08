@@ -89,7 +89,7 @@ public class StmtNode extends IPNode {
                     || (rop instanceof StaticFieldRef)) {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
             } else {
-                defs.add(Definition.getDefinition(new UniqueName(cvrop), this));
+                defs.add(Definition.getDefinition(new UniqueName(cvlop), this));
             }
             // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
             if ((lop instanceof Local) || (lop instanceof StaticFieldRef)) {

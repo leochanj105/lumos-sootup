@@ -19,6 +19,9 @@ public class WireInterface {
             add("cancel.controller.CancelController: cancel.domain.CancelOrderResult cancelTicket(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)",
                     53,
                     "cancel.service.CancelServiceImpl: cancel.domain.CancelOrderResult cancelOrder(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)");
+            add("other.queue.AsyncTask: void putResultIntoReturnQueue(other.domain.ChangeOrderInfo)", 23,
+                    "other.service.OrderOtherServiceImpl: other.domain.ChangeOrderResult saveChanges(other.domain.Order)");
+
             // add("other.controller.OrderOtherController: order.domain.ChangeOrderResult
             // saveOrderInfo(order.domain.ChangeOrderInfo)",
             // 120,

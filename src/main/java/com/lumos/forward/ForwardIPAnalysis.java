@@ -37,7 +37,7 @@ public class ForwardIPAnalysis {
     public final Map<IPNode, IPFlowInfo> liveIn = new HashMap<>();
     public final Map<IPNode, IPFlowInfo> liveOut = new HashMap<>();
 
-    public ForwardIPAnalysis(InterProcedureGraph igraph) {
+    public ForwardIPAnalysis(InterProcedureGraph igraph, IPNode firstNode) {
         Set<IPNode> workList = new HashSet<>();
         for (IPNode node : igraph.nodes) {
             // Unit unit = it.next();
@@ -47,19 +47,35 @@ public class ForwardIPAnalysis {
             // App.p(((WrapperNode) node).getEnter());
             // }
             // if (node.getPredecesors().isEmpty()) {
-            workList.add(node);
+            if (node.equals(firstNode))
+                workList.add(node);
             // App.p(node);
             // }
         }
+
+        Set<IPNode> unreacheableNodes = new HashSet<>();
+
+        for (IPNode node : igraph.nodes) {
+            for (IPNode pred : node.getPredecesors()) {
+                if (!canReach(firstNode, pred)) {
+                    // App.p("!!!!!!! " + node + ", " + pred);
+                    unreacheableNodes.add(node);
+                }
+            }
+        }
+
         int round = 0;
 
         // boolean fixed = false;
+
+        Set<IPNode> visited = new HashSet<>();
         while (!workList.isEmpty()) {
             // fixed = true;
             round += 1;
             if (App.showRound) {
                 App.p("Round " + round);
             }
+
             // fixed = true;
             // Deque<IPNode> queue = new ArrayDeque<>(startingNodes);
             // HashSet<IPNode> visitedNodes = new HashSet<>();
@@ -67,6 +83,26 @@ public class ForwardIPAnalysis {
             IPNode node = workList.iterator().next();
 
             workList.remove(node);
+            if (!node.equals(firstNode)) {
+                boolean isReady = true;
+                for (IPNode pred : node.getPredecesors()) {
+                    if (!visited.contains(pred) && !(canReach(node, pred))
+                    // && !pred.getStmt().toString().contains("<java.lang.Exception: void
+                    // printStackTrace()>")
+                            && !unreacheableNodes.contains(pred)) {
+                        if (!(pred.stmt.toString().contains("if") || pred.stmt.toString().contains("goto")
+                                || pred.stmt.toString().contains("return"))) {
+                            // App.p("!!!!!!!!! " + node + ", " + pred);
+                        }
+                        isReady = false;
+                        break;
+                    }
+                }
+                if (!isReady) {
+                    continue;
+                }
+            }
+            visited.add(node);
             // if (workList.size() < 50) {
             // for (IPNode nd : workList) {
             // // App.p(nd + ", " + nd.getContext());
@@ -116,6 +152,29 @@ public class ForwardIPAnalysis {
             // }
         }
 
+    }
+
+    public boolean canReach(IPNode node1, IPNode node2) {
+        Set<IPNode> visited = new HashSet<>();
+        Deque<IPNode> queue = new ArrayDeque<>();
+        queue.add(node1);
+
+        while (!queue.isEmpty()) {
+            IPNode node = queue.pop();
+            if (visited.contains(node)) {
+                continue;
+            }
+            visited.add(node);
+            if (node.equals(node2)) {
+                return true;
+            }
+
+            for (IPNode succ : node.getSuccessors()) {
+                queue.add(succ);
+            }
+        }
+
+        return false;
     }
 
     public IPFlowInfo copy(IPFlowInfo original) {

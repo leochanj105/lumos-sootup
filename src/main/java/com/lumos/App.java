@@ -6,7 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Scanner;
 import java.util.Set;
+
+import javax.swing.text.AbstractDocument.Content;
 
 import org.glassfish.jaxb.runtime.v2.runtime.reflect.Lister.Pack;
 
@@ -14,6 +17,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,6 +72,7 @@ import soot.PatchingChain;
 import soot.RefType;
 import soot.Scene;
 import soot.SootClass;
+import soot.SootField;
 import soot.SootFieldRef;
 import soot.SootMethod;
 import soot.Unit;
@@ -98,6 +103,15 @@ import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.options.Options;
 import soot.util.Cons;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -118,6 +132,7 @@ public class App {
     public static boolean showMethod = true;
     public static boolean showUnit = false;
     public static String outputFormat = "class";
+
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
     public static boolean compileJimple = false;
@@ -129,6 +144,8 @@ public class App {
     public static Map<String, MethodInfo> methodMap;
 
     public static Map<String, SootClass> classMap = new HashMap<>();
+
+    public static Map<String, String> serviceMap = new HashMap<>();
 
     public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
 
@@ -150,53 +167,32 @@ public class App {
 
         for (String str : services) {
             String complete = base + str + suffix;
-            analyzePath(complete);
+            analyzePath(complete, str);
         }
 
         if (compileJimple)
             return;
 
-        // if (true)
-        // return;
+        // List<TracePoint> readtps = (List<TracePoint>) readObj("TP", "tps");
+        // for (TracePoint tp : readtps) {
+        // // for (TracePoint tp : tps) {
+        // System.err.println(tp.sm + ": " + tp.s + ", " + tp.v + "." + tp.suffix);
+        // // }
+        // }
+        readTPs("TP", "tps");
+        if (true)
+            return;
 
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
         // // igraph.build(services);
         // MethodInfo minfo = searchMethod("sendInsidePayment");
         // ContextSensitiveInfo cinfo = igraph.build("sendInsidePayment");
         ContextSensitiveInfo cinfo = igraph.build("doErrorQueue(");
-        // ContextSensitiveInfo cinfo = igraph.build("InsidePaymentServiceImpl",
-        // "pay(");
-        // p(cinfo.getFirstNode());
-
-        // int cc = 0;
-        // Set<MethodInfo> mfs = new HashSet<>();
-        // for (IPNode node : igraph.nodes) {
-        // mfs.add(node.getContext().getStackLast());
-        // }
-
-        // for (MethodInfo mi : mfs) {
-        // for (Unit unit : mi.sm.getActiveBody().getUnits()) {
-        // Stmt stmt = (Stmt) unit;
-        // for (ValueBox vb : stmt.getUseBoxes()) {
-        // Value vv = vb.getValue();
-        // if (vv instanceof Local || vv instanceof JInstanceFieldRef || vv instanceof
-        // StaticFieldRef
-        // || vv instanceof Constant) {
-        // if (stmt.getJavaSourceStartLineNumber() >= 52 &&
-        // !mi.sm.toString().contains("doErrorQueue")) {
-        // cc += 1;
-        // }
-        // }
-        // }
-        // }
-        // }
-        // System.out.println(String.valueOf(cc));
-
-        // App.panicni();
 
         long start = System.currentTimeMillis();
-
-        ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph);
+        IPNode firstNode = igraph.searchNode("$stack16 = new launcher.domain.RegisterInfo");
+        ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
+        // App.p(cinfo.getFirstNode().context.getStackLast().sm.);
         long analysisDuration = System.currentTimeMillis() - start;
         // p(igraph.getLastNode());
         // IPNode ipnode = igraph
@@ -207,47 +203,10 @@ public class App {
                 "$stack66 = $stack62 & $stack68",
                 "stmt");
         p(ipnode.stmt.toString());
-        // p(ipnode + ", " + ipnode.getContext());
-
-        // IPNode ndd = igraph.searchNode(
-        // "l4 = 0",
-        // "stmt").successors.get(0);
-        // App.p(ndd);
-        // IPFlowInfo cdd = fia.getBefore(ndd);
-        // App.p(cdd);
-        // App.p(".............................................");
-        // App.p(".............................................");
-        // App.p(".............................................");
-        // App.p(".............................................");
-        // // IPNode ndd2 = igraph.searchNode(
-        // // "goto ",
-        // // "ReadCookieMap", "50");
-        // IPFlowInfo cdd2 = fia.getAfter(ndd);
-        // App.p(cdd2);
-        // App.p(ndd);
-        // panicni();
-
-        // p(igraph.initialNode);
-        // if (true)
-        // return;
-        // p(ipnode.getContext().getStackLast().cfDependency.get(ipnode.getStmt()));
         IPFlowInfo cmap = fia.getAfter(ipnode);
         ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(),
                 ((JAssignStmt) ipnode.getStmt()).getLeftOp());
-        // App.p("Starting to query provenance for " + cvalue);
-        // ipnode.getContext().getStackLast().sm.getActiveBody().validate();
-        // App.p("!!! " +
-        // cmap.getDefinitionsByCV(cvalue).iterator().next().getDefinedValue());
-        // App.p();
 
-        // Body by = ipnode.getContext().getStackLast().sm.getActiveBody();
-        // List<Stmt> toinsert = play(by, cvalue.getValue());
-        // CompileUtils.insertAt(by, ipnode.getStmt(), toinsert, false);
-
-        // CompileUtils.outputJimple(classMap.get(ipnode.getMethodInfo().sm.getDeclaringClass().toString()),
-        // "ZZZ");
-        // if (true)
-        // return;
         Set<IPNode> unresolvedNodes = new HashSet<>();
         Set<ContextSensitiveValue> visitedCVs = new HashSet<>();
         Set<IPNode> visitedNodes = new HashSet<>();
@@ -309,30 +268,23 @@ public class App {
             }
 
             for (ContextSensitiveValue cv : node.getUsed()) {
-
                 Set<Definition> satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
-                // if (cv.toString().contains("this.<launcher.domain.CancelOrderResult: boolean
-                // status>")
-                // && node.getStmt().toString()
-                // .contains("this.<launcher.domain.CancelOrderResult: boolean status>")
-                // && node.getStmt().getJavaSourceStartLineNumber() == 14) {
-                // App.p("!!!!");
-                // App.p(cv);
-
-                // for (Definition def : satisfiedDefs) {
-                // if (def.getDefinedValue().getSuffix().size() > 0) {
-                // App.p(def.getDefinedValue().getBase());
-                // }
-
-                // }
-                // panicni();
-                // }
                 if (Banned.isTypeBanned(cv.getValue().getType().toString())) {
                     p("Not tracking banned type: " + cv.getValue().getType());
                     continue;
                 }
-                App.p("Potential Provenance value: " + cv);
-                tps.add(new TracePoint(node.getStmt(), cv.getValue()));
+                if (!cv.getValue().toString().equals("null")) {
+                    App.p("Potential Provenance value: " + cv);
+                    // ContextSensitiveValue trasnformedCV = ne
+                    if (cv.getValue() instanceof JInstanceFieldRef) {
+                        JInstanceFieldRef cvref = ((JInstanceFieldRef) cv.getValue());
+                        Value vbase = cvref.getBase();
+                        List<SootFieldRef> suf = Collections.singletonList(cvref.getFieldRef());
+                        tps.add(new TracePoint(node.getStmt(), vbase, node.getMethodInfo().sm, suf));
+                    } else {
+                        tps.add(new TracePoint(node.getStmt(), cv.getValue(), node.getMethodInfo().sm));
+                    }
+                }
                 // App.p(cv.getValue().getClass());
 
                 boolean unresolved = true;
@@ -384,11 +336,14 @@ public class App {
                                 if (bdef.getDefinedLocation() != null) {
 
                                     alternative = true;
-
-                                    App.p("New Provenance due to field: " + cvun + " at "
-                                            + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
                                     unresolvedNodes.add(bdef.getDefinedLocation());
-                                    tps.add(new TracePoint(stmt, defVal, cvun.getSuffix()));
+                                    if (!bdef.getDefinedValue().getBase().getValue().toString().equals("null")) {
+                                        App.p("New Provenance due to field: " + cvun + " at "
+                                                + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
+                                        tps.add(new TracePoint(bdef.getDefinedLocation().getStmt(),
+                                                bdef.getDefinedValue().getBase().getValue(),
+                                                bdef.getDefinedLocation().getMethodInfo().sm, cvun.getSuffix()));
+                                    }
                                 }
                             }
                         }
@@ -409,6 +364,174 @@ public class App {
                 - start;
         p2("Analysis time: " + analysisDuration + ",  backtrack time: " + backtrackDuration);
         p2("#TPs: " + tps.size());
+        // for (TracePoint tp : tps) {
+        // System.err.println(tp.sm + ": " + tp.s + ", " + tp.v + "." + tp.suffix);
+        // }
+
+        // saveObj(tps, "TP", "tps");
+        writeTPs(tps, "TP", "tps");
+    }
+
+    public static void readTPs(String path, String name) {
+        File file = new File(path + File.separator + name);
+        try {
+            Scanner myReader = new Scanner(file);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                // System.out.println(data);
+
+                String[] fields = data.split(",{2}");
+                String serviceName = fields[0];
+                String methodName = fields[1];
+                SootMethod sm = methodMap.get(methodName).sm;
+                int lineNum = Integer.parseInt(fields[2]);
+                String stmtStr = fields[3];
+                Stmt stmt = CompileUtils.searchStmt(sm.getActiveBody(), stmtStr, lineNum);
+                String baseStr = fields[4];
+                Value base = CompileUtils.findLocal(stmt, baseStr);
+                if (base.getType().toString().contains("List")) {
+                    continue;
+                }
+                String suffix = fields[5];
+                suffix = suffix.substring(1, suffix.length() - 1);
+                // App.p(suffix.length());
+                String[] refs = suffix.split(",");
+
+                // p(sm);
+                // String stmt =
+                // "".concat(baseStr)
+                Value curr = base;
+                // for (String field : refs) {
+                // field = field.strip();
+                // }
+
+                for (String field : refs) {
+                    p2(curr);
+                    if (field.isEmpty())
+                        continue;
+                    p2(curr.getType());
+                    String actual = field.strip();
+                    p2(actual);
+
+                    // if(curr.getType() != )
+                    SootClass sc = classMap.get(curr.getType().toString());
+                    // Scene.v().getSootClass();
+                    App.p(sc);
+                    // App.p(sc.getFieldByName(field));
+                    SootField sf = null;
+                    for (SootField f : sc.getFields()) {
+                        // App.p(f);
+                        if (f.getName().contains(actual)) {
+                            sf = f;
+                            break;
+                        }
+                        // App.p(f);
+                    }
+                    // sf.getSub
+                    App.p(sf.getDeclaringClass());
+                    // boolean
+                    SootMethod getter = null;
+                    if (sf.isPrivate()) {
+
+                        for (SootMethod method : sc.getMethods()) {
+                            String fname = sf.getName();
+                            String prefix = sf.getType().toString().equals("boolean") ? "is" : "get";
+                            String cand = prefix + fname.substring(0, 1).toUpperCase() + fname.substring(1);
+                            if (method.getName().equals(cand)) {
+                                getter = method;
+                                break;
+
+                            }
+                        }
+                        App.p(getter);
+                    }
+                    Local actualBase = null;
+                    if (!(curr instanceof Local)) {
+                        Local tmp = Jimple.v().newLocal("tp" + field, RefType.v(curr.getType().toString()));
+                        Stmt st = Jimple.v().newAssignStmt(tmp, curr);
+                        App.p(st);
+                        actualBase = tmp;
+                    } else {
+                        actualBase = (Local) curr;
+                    }
+                    if (sf.isPrivate()) {
+                        Local tmp = Jimple.v().newLocal("tpget" + field, RefType.v(sf.getType().toString()));
+                        Stmt st = Jimple.v().newAssignStmt(tmp,
+                                Jimple.v().newVirtualInvokeExpr(actualBase, getter.makeRef()));
+                        App.p(st);
+                        curr = tmp;
+                    } else {
+                        curr = Jimple.v().newInstanceFieldRef(actualBase, sf.makeRef());
+                    }
+                }
+                p2("---");
+            }
+            myReader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void writeTPs(Set<TracePoint> tps, String path, String name) {
+        File outputDir = new File(path);
+        if (!outputDir.exists()) {
+            outputDir.mkdir();
+        }
+        File file = new File(outputDir + File.separator + name);
+        try {
+            // FileOutputStream fileOut = new FileOutputStream(file);
+            FileWriter fileWriter = new FileWriter(file);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            for (TracePoint tp : tps) {
+                printWriter.println(tp.d(",,"));
+            }
+            // ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            // out.writeObject(obj);
+            // out.close();
+            printWriter.close();
+            // fileOut.close();
+            System.out.printf("TP data is saved in " + file.getAbsolutePath());
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    public static Object readObj(String path, String name) {
+        File file = new File(path + File.separator + name);
+        try {
+            FileInputStream fileIn = new FileInputStream(file);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            Object o = in.readObject();
+            in.close();
+            fileIn.close();
+            return o;
+        } catch (IOException i) {
+            i.printStackTrace();
+            // return null;
+        } catch (ClassNotFoundException c) {
+            System.out.println("Employee class not found");
+            c.printStackTrace();
+            // return null;
+        }
+        return null;
+    }
+
+    public static void saveObj(Object obj, String path, String name) {
+        File outputDir = new File(path);
+        if (!outputDir.exists()) {
+            outputDir.mkdir();
+        }
+        File file = new File(outputDir + File.separator + name);
+        try {
+            FileOutputStream fileOut = new FileOutputStream(file);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(obj);
+            out.close();
+            fileOut.close();
+            System.out.printf("Serialized data is saved in " + file.getAbsolutePath());
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
     }
 
     public static void play() {
@@ -502,7 +625,7 @@ public class App {
 
     }
 
-    public static void analyzePath(String path) {
+    public static void analyzePath(String path, String serviceName) {
         // Options.v().set
         p("Analyzing " + path);
         setupSoot(path);
@@ -523,8 +646,8 @@ public class App {
                 // Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
                 minfo.buildPostDominanceFrontier();
                 methodMap.put(sm.getSignature(), minfo);
-                // CompileUtils.bodyMap.put(sm.getSignature(), ((Body)
-                // sm.getActiveBody().clone()));
+                CompileUtils.bodyMap.put(sm.getSignature(), ((Body) sm.getActiveBody().clone()));
+                serviceMap.put(sm.toString(), serviceName);
                 // if (sm.toString().contains("cancelOrder")) {
                 // App.p("!!! " + sm);
                 // }

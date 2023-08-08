@@ -81,6 +81,12 @@ public class WireHTTP {
                                         27, "cancel.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)",
                                         new String[] { "changeOrderResult" },
                                         new String[] { "changeOrderResult" }, "");
+                        add("order.controller.OrderController: order.domain.VerifyResult verifySsoLogin(java.lang.String)",
+                                        155,
+                                        "sso.service.AccountSsoServiceImpl: sso.domain.VerifyResult verifyLoginToken(java.lang.String)",
+                                        new String[] { "loginToken" },
+                                        new String[] { "verifyToken" },
+                                        "$stack9");
 
                 }
                 // System.out.println(reqMethod + ", " + lineNum);

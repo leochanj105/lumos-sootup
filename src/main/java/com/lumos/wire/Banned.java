@@ -14,6 +14,8 @@ public class Banned {
             addBannedType("Repository");
             addBannedType("RestTemplate");
             addBannedType("StringBuilder");
+            addBannedType("AsyncTask");
+            addBannedType("Service");
 
         }
         for (int i = 0; i < bannedTypes.size(); i++) {

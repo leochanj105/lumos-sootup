@@ -1,29 +1,52 @@
 package com.lumos.forward;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.lumos.App;
+
 import soot.SootField;
 import soot.SootFieldRef;
+import soot.SootMethod;
 import soot.Value;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 
-public class TracePoint {
+public class TracePoint implements Serializable {
     public Stmt s;
     public Value v;
     public List<SootFieldRef> suffix;
+    public SootMethod sm;
 
-    public TracePoint(Stmt s, Value v, List<SootFieldRef> suffix) {
+    public TracePoint(Stmt s, Value v, SootMethod sm, List<SootFieldRef> suffix) {
         this.s = s;
         this.v = v;
+        this.sm = sm;
         this.suffix = suffix;
     }
 
-    public TracePoint(Stmt s, Value v) {
-        this.s = s;
-        this.v = v;
-        this.suffix = Collections.emptyList();
+    public String d() {
+        return d(",");
+    }
+
+    public String lessSuffix() {
+        List<String> names = new ArrayList<>();
+        for (SootFieldRef sref : suffix) {
+            names.add(sref.name());
+        }
+        return names.toString();
+    }
+
+    public String d(String separator) {
+        return App.serviceMap.get(sm.toString()) + separator + sm + separator + s.getJavaSourceStartLineNumber()
+                + separator + s + separator + v + separator
+                + lessSuffix();
+    }
+
+    public TracePoint(Stmt s, Value v, SootMethod sm) {
+        this(s, v, sm, Collections.emptyList());
     }
 
     @Override
@@ -33,6 +56,7 @@ public class TracePoint {
         result = prime * result + ((s == null) ? 0 : s.hashCode());
         result = prime * result + ((v == null) ? 0 : v.hashCode());
         result = prime * result + ((suffix == null) ? 0 : suffix.hashCode());
+        result = prime * result + ((sm == null) ? 0 : sm.hashCode());
         return result;
     }
 
@@ -59,6 +83,11 @@ public class TracePoint {
             if (other.suffix != null)
                 return false;
         } else if (!suffix.equals(other.suffix))
+            return false;
+        if (sm == null) {
+            if (other.sm != null)
+                return false;
+        } else if (!sm.equals(other.sm))
             return false;
         return true;
     }
