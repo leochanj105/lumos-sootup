@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.swing.text.AbstractDocument.Content;
 
@@ -95,10 +97,13 @@ import soot.jimple.internal.AbstractInstanceInvokeExpr;
 import soot.jimple.internal.AbstractInvokeExpr;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
+import soot.jimple.internal.JGotoStmt;
 import soot.jimple.internal.JIdentityStmt;
+import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JInvokeStmt;
 import soot.jimple.internal.JReturnStmt;
+import soot.jimple.internal.JReturnVoidStmt;
 import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.options.Options;
 import soot.util.Cons;
@@ -136,7 +141,7 @@ public class App {
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
     public static boolean compileJimple = false;
-    public static boolean compileClass = false;
+    public static boolean compileClass = true;
 
     public static boolean showRound = false;
     public static boolean showLineNum = true;
@@ -146,7 +151,8 @@ public class App {
     public static Map<String, SootClass> classMap = new HashMap<>();
 
     public static Map<String, String> serviceMap = new HashMap<>();
-
+    public static Map<String, String> pathMap = new HashMap<>();
+    public static String fileSeparator = ":";
     public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
 
     public static void main(String[] args) {
@@ -164,11 +170,13 @@ public class App {
         // analyzePath("C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code");
         String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
         String suffix = "\\target\\classes";
-
+        List<String> paths = new ArrayList<>();
         for (String str : services) {
             String complete = base + str + suffix;
-            analyzePath(complete, str);
+            pathMap.put(str, complete);
+            paths.add(complete);
         }
+        analyzePath(pathMap);
 
         if (compileJimple)
             return;
@@ -374,6 +382,10 @@ public class App {
 
     public static void readTPs(String path, String name) {
         File file = new File(path + File.separator + name);
+
+        Map<String, Set<String>> smap = new HashMap<>();
+        Map<String, List<String>> mmap = new HashMap<>();
+        // Map<String, List<String>> mmap = new HashMap<>();
         try {
             Scanner myReader = new Scanner(file);
             while (myReader.hasNextLine()) {
@@ -383,90 +395,113 @@ public class App {
                 String[] fields = data.split(",{2}");
                 String serviceName = fields[0];
                 String methodName = fields[1];
-                SootMethod sm = methodMap.get(methodName).sm;
-                int lineNum = Integer.parseInt(fields[2]);
-                String stmtStr = fields[3];
-                Stmt stmt = CompileUtils.searchStmt(sm.getActiveBody(), stmtStr, lineNum);
-                String baseStr = fields[4];
-                Value base = CompileUtils.findLocal(stmt, baseStr);
-                if (base.getType().toString().contains("List")) {
-                    continue;
+                if (!smap.containsKey(serviceName)) {
+                    smap.put(serviceName, new HashSet<>());
                 }
-                String suffix = fields[5];
-                suffix = suffix.substring(1, suffix.length() - 1);
-                // App.p(suffix.length());
-                String[] refs = suffix.split(",");
-
-                // p(sm);
-                // String stmt =
-                // "".concat(baseStr)
-                Value curr = base;
-                // for (String field : refs) {
-                // field = field.strip();
-                // }
-
-                for (String field : refs) {
-                    p2(curr);
-                    if (field.isEmpty())
-                        continue;
-                    p2(curr.getType());
-                    String actual = field.strip();
-                    p2(actual);
-
-                    // if(curr.getType() != )
-                    SootClass sc = classMap.get(curr.getType().toString());
-                    // Scene.v().getSootClass();
-                    App.p(sc);
-                    // App.p(sc.getFieldByName(field));
-                    SootField sf = null;
-                    for (SootField f : sc.getFields()) {
-                        // App.p(f);
-                        if (f.getName().contains(actual)) {
-                            sf = f;
-                            break;
-                        }
-                        // App.p(f);
-                    }
-                    // sf.getSub
-                    App.p(sf.getDeclaringClass());
-                    // boolean
-                    SootMethod getter = null;
-                    if (sf.isPrivate()) {
-
-                        for (SootMethod method : sc.getMethods()) {
-                            String fname = sf.getName();
-                            String prefix = sf.getType().toString().equals("boolean") ? "is" : "get";
-                            String cand = prefix + fname.substring(0, 1).toUpperCase() + fname.substring(1);
-                            if (method.getName().equals(cand)) {
-                                getter = method;
-                                break;
-
-                            }
-                        }
-                        App.p(getter);
-                    }
-                    Local actualBase = null;
-                    if (!(curr instanceof Local)) {
-                        Local tmp = Jimple.v().newLocal("tp" + field, RefType.v(curr.getType().toString()));
-                        Stmt st = Jimple.v().newAssignStmt(tmp, curr);
-                        App.p(st);
-                        actualBase = tmp;
-                    } else {
-                        actualBase = (Local) curr;
-                    }
-                    if (sf.isPrivate()) {
-                        Local tmp = Jimple.v().newLocal("tpget" + field, RefType.v(sf.getType().toString()));
-                        Stmt st = Jimple.v().newAssignStmt(tmp,
-                                Jimple.v().newVirtualInvokeExpr(actualBase, getter.makeRef()));
-                        App.p(st);
-                        curr = tmp;
-                    } else {
-                        curr = Jimple.v().newInstanceFieldRef(actualBase, sf.makeRef());
-                    }
+                smap.get(serviceName).add(methodName);
+                if (!mmap.containsKey(methodName)) {
+                    mmap.put(methodName, new ArrayList<>());
                 }
-                p2("---");
+                mmap.get(methodName).add(data);
+
             }
             myReader.close();
+
+            for (String service : smap.keySet()) {
+                // if (!service.equals("ts-launcher"))
+                // continue;
+                setupSoot(pathMap.values(), Collections.singletonList(pathMap.get(service)));
+                setupClass(service);
+                // analyzePath(pathMap);
+                Set<SootClass> tocompile = new HashSet<>();
+
+                for (String methodName : smap.get(service)) {
+                    // String[] fields = data.split(",{2}");
+                    // String serviceName = fields[0];
+                    // String methodName = fields[1];
+
+                    SootMethod sm = methodMap.get(methodName).sm;
+                    Body usedBody = CompileUtils.bodyMap.get(sm.getSignature());
+                    PatchingChain<Unit> units = usedBody.getUnits();
+                    // App.p(sm.getDeclaringClass());
+                    // if (!sm.getDeclaringClass().toString().contains("LoginResult")) {
+                    // continue;
+                    // }
+                    List<Stmt> tostmt = new ArrayList<>();
+                    for (String mdata : mmap.get(methodName)) {
+                        String[] mfields = mdata.split(",{2}");
+                        int lineNum = Integer.parseInt(mfields[2]);
+                        String stmtStr = mfields[3];
+                        String baseStr = mfields[4];
+                        String suffix = mfields[5];
+                        Stmt stmt = CompileUtils.searchStmt(usedBody, stmtStr, lineNum);
+                        tostmt.add(stmt);
+                    }
+                    Iterator<Stmt> iter = tostmt.iterator();
+                    for (String mdata : mmap.get(methodName)) {
+                        // SootMethod sm = Scene.v().getMethod(methodName);
+                        String[] mfields = mdata.split(",{2}");
+                        int lineNum = Integer.parseInt(mfields[2]);
+                        String stmtStr = mfields[3];
+                        String baseStr = mfields[4];
+                        String suffix = mfields[5];
+
+                        // Stmt stmt = CompileUtils.searchStmt(usedBody, stmtStr, lineNum);
+
+                        Stmt stmt = iter.next();
+
+                        // for (Unit uu : usedBody.getUnits()) {
+                        if (stmt.toString().contains("if $stack72")) {
+                            App.p(stmt);
+                            App.p(((JIfStmt) stmt).getTarget());
+                            // App.panicni();
+                        }
+                        // }
+                        // App.p(stmt + "\n" + mdata);
+                        Value base = CompileUtils.findLocal(stmt, baseStr);
+                        if (base.getType().toString().contains("List")) {
+                            continue;
+                        }
+                        // stmt.get
+
+                        suffix = suffix.substring(1, suffix.length() - 1);
+
+                        List<String> refs = Arrays.asList(suffix.split(",")).stream().filter(x -> !x.isEmpty())
+                                .collect(Collectors.toList());
+
+                        List<Stmt> stmts = CompileUtils.generateTPStmts(usedBody, base, refs);
+                        // for (Stmt stm : stmts) {
+                        // App.p(stm);
+                        // }
+
+                        boolean isBefore = false;
+                        if (stmt instanceof JIfStmt || stmt instanceof JReturnStmt || stmt instanceof JReturnVoidStmt ||
+                                stmt instanceof JGotoStmt) {
+                            isBefore = true;
+                        }
+
+                        // if (service.equals("ts-launcher")) {
+                        CompileUtils.insertAt(units, stmt, stmts, isBefore);
+
+                        // }
+                        p2("---");
+                        // break;
+                    }
+                    sm.setActiveBody(usedBody);
+                    usedBody.validate();
+                    tocompile.add(sm.getDeclaringClass());
+                }
+
+                for (SootClass scc : tocompile) {
+                    // if (scc.toString().contains("CancelOrderInfo")) {
+                    SootClass actual = classMap.get(scc.toString());
+                    // if (service.toString().contains("ts-launcher"))
+                    if (scc.toString().contains("InsidePaymentServiceImpl"))
+                        CompileUtils.outputJimple(actual, "testl");
+                    // }
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -547,7 +582,7 @@ public class App {
 
     }
 
-    public static void setupSoot(String path) {
+    public static void setupSoot(Collection<String> cpath, List<String> pdir) {
         G.reset();
 
         Options.v().set_prepend_classpath(true);
@@ -566,7 +601,14 @@ public class App {
         // Spring annotations rely on this!!
         Options.v().set_write_local_annotations(true);
 
-        Options.v().set_soot_classpath(path);
+        String classpath = "";
+        for (String cp : cpath) {
+            classpath += cp + File.pathSeparator;
+        }
+        if (classpath.charAt(classpath.length() - 1) == File.pathSeparatorChar) {
+            classpath = classpath.substring(0, classpath.length() - 1);
+        }
+        Options.v().set_soot_classpath(classpath);
         Options.v().set_java_version(8);
         // Options.v().set_process_dir(Collections.singletonList(sourceDirectory));
         processList = new ArrayList<String>();
@@ -586,8 +628,8 @@ public class App {
         // Options.v().set_process_dir(processList);
 
         // String arr[] = { "../cancel/BOOT-INF/classes" };
-        String arr[] = { path };
-        Options.v().set_process_dir(Arrays.asList(arr));
+        // String arr[] = { path };
+        Options.v().set_process_dir(pdir);
 
         Options.v().set_output_dir(outputDirectory);
         if (outputFormat.equals("jimple")) {
@@ -625,21 +667,32 @@ public class App {
 
     }
 
-    public static void analyzePath(String path, String serviceName) {
+    public static void analyzePath(Map<String, String> pmap) {
         // Options.v().set
-        p("Analyzing " + path);
-        setupSoot(path);
+
+        for (String service : pmap.keySet()) {
+            p("Analyzing: " + service);
+            // p(service + ": " + pmap.get(service));
+            // }
+            setupSoot(pmap.values(), Collections.singletonList(pmap.get(service)));
+            setupClass(service);
+            // PackManager.v().runPacks();
+            // PackManager.v().writeOutput();
+            p("----------");
+
+        }
+    }
+
+    public static void setupClass(String service) {
         for (SootClass cls : Scene.v().getApplicationClasses()) {
             // Scene.v().forceResolve(cls.getName(), SootClass.BODIES);
             if (cls.toString().contains("conf.HttpAspect")) {
                 continue;
             }
-
             for (SootMethod sm : cls.getMethods()) {
                 if (sm.isAbstract()) {
                     continue;
                 }
-
                 sm.retrieveActiveBody();
 
                 MethodInfo minfo = new MethodInfo(sm);
@@ -647,7 +700,7 @@ public class App {
                 minfo.buildPostDominanceFrontier();
                 methodMap.put(sm.getSignature(), minfo);
                 CompileUtils.bodyMap.put(sm.getSignature(), ((Body) sm.getActiveBody().clone()));
-                serviceMap.put(sm.toString(), serviceName);
+                serviceMap.put(sm.toString(), service);
                 // if (sm.toString().contains("cancelOrder")) {
                 // App.p("!!! " + sm);
                 // }
@@ -656,24 +709,8 @@ public class App {
             if (compileJimple) {
                 CompileUtils.outputJimple(cls, "joutput");
             }
-            // PackManager.v().
-            // PackManager.v().runPacks();
 
-            // CompileUtils.outputJimple(cls, "WFH");
-            // App.p("!!!!!!!!!!!!");
-            // if (searchMethod("sendInsidePayment") != null) {
-
-            //
-            // CompileUtils.outputJimple(searchMethod("sendInsidePayment").sm.getDeclaringClass(),
-            // path);
-            // }
         }
-
-        // CompileUtils.outputJimple(searchMethod("sendInsidePayment").sm.getDeclaringClass(),
-        // path);
-        // PackManager.v().runPacks();
-        // PackManager.v().writeOutput();
-        p("----------");
 
     }
 
