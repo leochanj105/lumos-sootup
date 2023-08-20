@@ -176,12 +176,6 @@ public class App {
         if (compileJimple)
             return;
 
-        // List<TracePoint> readtps = (List<TracePoint>) readObj("TP", "tps");
-        // for (TracePoint tp : readtps) {
-        // // for (TracePoint tp : tps) {
-        // System.err.println(tp.sm + ": " + tp.s + ", " + tp.v + "." + tp.suffix);
-        // // }
-        // }
         // readTPs("TP", "tps");
         // if (true)
         // return;
@@ -207,7 +201,7 @@ public class App {
         Set<TracePoint> tps = getDependency(igraph, fia, ipnode, cvalue);
         p2("#TPs: " + tps.size());
 
-        writeTPs(tps, "TP", "tps");
+        writeTPs(tps, "TP", "tps2");
     }
 
     public static Set<TracePoint> getDependency(InterProcedureGraph igraph, ForwardIPAnalysis fia, IPNode ipnode,

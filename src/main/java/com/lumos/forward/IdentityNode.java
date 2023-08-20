@@ -19,7 +19,7 @@ import soot.jimple.internal.JInstanceFieldRef;
 
 public class IdentityNode extends IPNode {
 
-    boolean visible;
+    // boolean visible;
     Set<ContextSensitiveValue> cvdefs, cvuses;
     // cvrop;
 
@@ -66,7 +66,7 @@ public class IdentityNode extends IPNode {
             cvdefs.add(ContextSensitiveValue.getCValue(context, ((JAssignStmt) stmt).getLeftOp()));
         }
         this.type = "identity";
-        this.visible = cvuses.size() > 1 || IdentityWire.isSpecial(iexpr.toString());
+        // this.visible = cvuses.size() > 1 || IdentityWire.isSpecial(iexpr.toString());
         // if()
     }
 
@@ -86,9 +86,9 @@ public class IdentityNode extends IPNode {
             return;
         }
 
-        if ((!visible) && cvuses.size() > 1) {
-            App.panicni();
-        }
+        // if ((!visible) && cvuses.size() > 1) {
+        // App.panicni();
+        // }
 
         for (ContextSensitiveValue cvlop : cvdefs) {
             UniqueName un = new UniqueName(cvlop);
@@ -107,16 +107,16 @@ public class IdentityNode extends IPNode {
                     Set<Definition> defs = out.getDefinitionsByCV(cvrop);
                     Set<Definition> newdefs = new HashSet<>();
                     for (Definition def : defs) {
-                        if (!visible) {
-                            // if (def.getDefinedLocation() == null) {
-                            // newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
-                            // } else {
-                            newdefs.add(def);
-                            // }
-                        } else {
-                            newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
+                        // if (!visible) {
+                        // if (def.getDefinedLocation() == null) {
+                        // newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
+                        // } else {
+                        // newdefs.add(def);
+                        // }
+                        // } else {
+                        newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
 
-                        }
+                        // }
                     }
                     out.putDefinition(cvlop, newdefs);
                 }
