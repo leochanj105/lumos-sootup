@@ -29,7 +29,7 @@ public class WireHTTP {
                         add("inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)",
                                         95,
                                         "com.trainticket.service.PaymentServiceImpl: boolean pay(com.trainticket.domain.PaymentInfo)",
-                                        new String[] { "$stack64" }, new String[] { "info" }, "$stack70");
+                                        new String[] { "$stack54" }, new String[] { "info" }, "$stack60");
                         add("java.util.concurrent.Future sendOrderCancel",
                                         115,
                                         // "cancel.service.CancelServiceImpl: cancel.domain.CancelOrderResult

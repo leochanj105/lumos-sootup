@@ -75,9 +75,12 @@ public class IdentityNode extends IPNode {
         // EnterNode enode = (EnterNode) node;
         String stmtStr = this.stmt.getInvokeExpr().toString();
         if (stmtStr.contains("Object: void <init>")) {
-            // App.p("!!!!!!!!!!!!!!!!!!1");
             return;
         }
+
+        // if (stmtStr.contains("com.google.gson.Gson: void <init>")) {
+        // return;
+        // }
 
         if (stmtStr.contains("javax.servlet.http.Cookie: java.lang.String getValue()>")) {
             return;

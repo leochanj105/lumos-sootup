@@ -13,15 +13,6 @@ public class ContextSensitiveValue {
     public Value value;
 
     public static Map<Context, Map<Value, ContextSensitiveValue>> cache = new HashMap<>();
-    // public UniqueName uniqueName;
-
-    // public UniqueName getUniqueName() {
-    // return uniqueName;
-    // }
-
-    // public void setUniqueName(UniqueName uniqueName) {
-    // this.uniqueName = uniqueName;
-    // }
 
     public static ContextSensitiveValue getCValue(Context context, Value value) {
         // App.p(context);

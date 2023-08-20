@@ -33,12 +33,6 @@ import java.util.HashSet;
 
 import com.lumos.analysis.MethodInfo;
 import com.lumos.analysis.ReachingDefAnalysis;
-import com.lumos.common.BacktrackInfo;
-import com.lumos.common.Dependency;
-import com.lumos.common.InstrumentPoint;
-import com.lumos.common.Provenance;
-import com.lumos.common.Query;
-import com.lumos.common.RefSeq;
 // import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
@@ -140,7 +134,7 @@ public class App {
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
-    public static boolean compileJimple = false;
+    public static boolean compileJimple = true;
     public static boolean compileClass = true;
 
     public static boolean showRound = false;
@@ -159,24 +153,26 @@ public class App {
         // readParams();
         String[] services = new String[] {
                 "ts-launcher",
-                "ts-inside-payment-service",
-                "ts-order-other-service",
-                "ts-order-service",
-                "ts-payment-service",
-                "ts-cancel-service",
-                "ts-sso-service"
+                // "ts-inside-payment-service",
+                // "ts-order-other-service",
+                // "ts-order-service",
+                // "ts-payment-service",
+                // "ts-cancel-service",
+                // "ts-sso-service"
         };
         methodMap = new HashMap<>();
-        // analyzePath("C:\\Users\\jchen\\Desktop\\Academic\\sootup\\lumos-sootup\\src\\code");
+
         String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
         String suffix = "\\target\\classes";
         List<String> paths = new ArrayList<>();
         for (String str : services) {
             String complete = base + str + suffix;
+            // String complete = "xxxx";
             pathMap.put(str, complete);
             paths.add(complete);
         }
         analyzePath(pathMap);
+        // analyzePath("xxxx\\classes");
 
         if (compileJimple)
             return;
@@ -451,11 +447,11 @@ public class App {
                         Stmt stmt = iter.next();
 
                         // for (Unit uu : usedBody.getUnits()) {
-                        if (stmt.toString().contains("if $stack72")) {
-                            App.p(stmt);
-                            App.p(((JIfStmt) stmt).getTarget());
-                            // App.panicni();
-                        }
+                        // if (stmt.toString().contains("if $stack72")) {
+                        // App.p(stmt);
+                        // App.p(((JIfStmt) stmt).getTarget());
+                        // // App.panicni();
+                        // }
                         // }
                         // App.p(stmt + "\n" + mdata);
                         Value base = CompileUtils.findLocal(stmt, baseStr);
@@ -468,8 +464,8 @@ public class App {
 
                         List<String> refs = Arrays.asList(suffix.split(",")).stream().filter(x -> !x.isEmpty())
                                 .collect(Collectors.toList());
-
-                        List<Stmt> stmts = CompileUtils.generateTPStmts(usedBody, base, refs);
+                        // App.p(base + ", " + stmt + ", " + methodName);
+                        List<Stmt> stmts = CompileUtils.generateTPStmts(usedBody, base, refs, stmt);
                         // for (Stmt stm : stmts) {
                         // App.p(stm);
                         // }
@@ -496,8 +492,8 @@ public class App {
                     // if (scc.toString().contains("CancelOrderInfo")) {
                     SootClass actual = classMap.get(scc.toString());
                     // if (service.toString().contains("ts-launcher"))
-                    if (scc.toString().contains("InsidePaymentServiceImpl"))
-                        CompileUtils.outputJimple(actual, "testl");
+                    // if (scc.toString().contains("InsidePaymentServiceImpl"))
+                    CompileUtils.outputJimple(actual, "testl");
                     // }
                 }
             }
@@ -526,44 +522,6 @@ public class App {
             printWriter.close();
             // fileOut.close();
             System.out.printf("TP data is saved in " + file.getAbsolutePath());
-        } catch (IOException i) {
-            i.printStackTrace();
-        }
-    }
-
-    public static Object readObj(String path, String name) {
-        File file = new File(path + File.separator + name);
-        try {
-            FileInputStream fileIn = new FileInputStream(file);
-            ObjectInputStream in = new ObjectInputStream(fileIn);
-            Object o = in.readObject();
-            in.close();
-            fileIn.close();
-            return o;
-        } catch (IOException i) {
-            i.printStackTrace();
-            // return null;
-        } catch (ClassNotFoundException c) {
-            System.out.println("Employee class not found");
-            c.printStackTrace();
-            // return null;
-        }
-        return null;
-    }
-
-    public static void saveObj(Object obj, String path, String name) {
-        File outputDir = new File(path);
-        if (!outputDir.exists()) {
-            outputDir.mkdir();
-        }
-        File file = new File(outputDir + File.separator + name);
-        try {
-            FileOutputStream fileOut = new FileOutputStream(file);
-            ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            out.writeObject(obj);
-            out.close();
-            fileOut.close();
-            System.out.printf("Serialized data is saved in " + file.getAbsolutePath());
         } catch (IOException i) {
             i.printStackTrace();
         }
@@ -602,6 +560,9 @@ public class App {
         Options.v().set_write_local_annotations(true);
 
         String classpath = "";
+        // classpath +=
+        // "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\ts-launcher\\opentelemetry-javaagent.jar"
+        // + File.pathSeparator;
         for (String cp : cpath) {
             classpath += cp + File.pathSeparator;
         }
@@ -610,25 +571,8 @@ public class App {
         }
         Options.v().set_soot_classpath(classpath);
         Options.v().set_java_version(8);
-        // Options.v().set_process_dir(Collections.singletonList(sourceDirectory));
         processList = new ArrayList<String>();
-        // try {
-        // File myObj = new File("listWire");
-        // Scanner myReader = new Scanner(myObj);
-        // while (myReader.hasNextLine()) {
-        // String data = myReader.nextLine();
-        // processList.add(sourceDirectory + "/" + data + "/original/BOOT-INF/classes");
-        // // System.out.println(data);
-        // }
-        // myReader.close();
-        // } catch (Exception e) {
-        // System.out.println("An error occurred.");
-        // e.printStackTrace();
-        // }
-        // Options.v().set_process_dir(processList);
 
-        // String arr[] = { "../cancel/BOOT-INF/classes" };
-        // String arr[] = { path };
         Options.v().set_process_dir(pdir);
 
         Options.v().set_output_dir(outputDirectory);
@@ -652,6 +596,7 @@ public class App {
         Options.v().setPhaseOption("jb", "optimize:false");
         Options.v().setPhaseOption("jb", "use-original-names:true");
         Options.v().setPhaseOption("jb", "preserve-source-annotations:true");
+        Options.v().setPhaseOption("jb", "stabilize-local-names:true");
         // Options.v().setPhaseOption("jb.ls", "enabled:false");
         // Need this to avoid the need to provide an entry point
         Options.v().setPhaseOption("cg", "all-reachable:true");
@@ -663,6 +608,9 @@ public class App {
         Scene.v().addBasicClass("java.io.PrintStream", SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System", SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.String", SootClass.SIGNATURES);
+        // Scene.v().addBasicClass("io.opentelemetry.javaagent.shaded.io.opentelemetry.api.trace.Span",
+        // SootClass.SIGNATURES);
+        Scene.v().loadNecessaryClasses();
         // Scene.v().loadClassAndSupport();
 
     }
@@ -747,61 +695,8 @@ public class App {
         throw new RuntimeException("Not implemented");
     }
 
-    public static String wireExchange(InvokeExpr Expr, String reqMethod, int lineNum) {
-        return "";
-    }
-
-    public static Set<Query> resolveMethod(InvokeExpr iexpr, Stmt stmt) {
-        String methodName = iexpr.getMethod().getSignature();
-        Set<Query> resolvedQueries = new HashSet<>();
-
-        if (wireByNameForParams(methodName)) {
-            p("Manually wired " + methodName + " at " + stmt);
-            for (Value v : getParameters(iexpr)) {
-                // p("!!! " + v);
-                resolvedQueries.add(new Query(new RefSeq(v), stmt));
-            }
-        } else {
-            p("Method " + iexpr.getMethod().getSignature() + " not found.");
-        }
-        return resolvedQueries;
-    }
-
-    public static boolean wireByNameForParams(String name) {
-        boolean found = false;
-        for (String str : WireForAllParams.getNames()) {
-            if (name.contains(str)) {
-                found = true;
-                break;
-            }
-        }
-
-        return found;
-    }
-
-    // public static void analyzeExchange(SootMethod wsm) {
-    // for (Stmt stmt : wsm.getBody().getStmts()) {
-    // if (!stmt.containsInvokeExpr())
-    // continue;
-    // MethodSignature ms = stmt.getInvokeExpr().getMethodSignature();
-    // if (!ms.toString().contains("fff(")) // This should be exchange, but I'm
-    // testing for now
-    // continue;
-
-    // // p(ms);
-    // ReachingDefAnalysis rda = new
-    // ReachingDefAnalysis(wsm.getBody().getStmtGraph());
-    // Map<Value, Set<Dependency>> mdep = rda.getBeforeStmt(stmt);
-    // Value argURL = stmt.getInvokeExpr().getArg(0);
-    // p(mdep.get(argURL));
-    // }
-    // }
-
     public static List<Value> parameters(SootMethod wsm) {
-        // int hasThis = wsm.isStatic() ? 0 : 1;
-        // int methodParamCount = wsm.getParameterCount() + hasThis;
         List<Value> methodParams = new ArrayList<>();
-        // int count = 0;
         for (Value v : wsm.getActiveBody().getParameterLocals()) {
             methodParams.add(v);
         }
@@ -810,13 +705,6 @@ public class App {
         }
         return methodParams;
 
-    }
-
-    public static Body insertBefore(SootMethod wsm, Stmt stmt, Stmt toinsert) {
-        // // MutableStmtGraph graph = new MutableBlockStmtGraph(body.getStmtGraph());
-        // BodyBuilder builder = Body.builder(wsm.getBody(), wsm.getModifiers());
-        // builder.insertBefore(stmt, toinsert);
-        return null;
     }
 
     public static void readParams() {

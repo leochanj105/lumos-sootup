@@ -48,6 +48,7 @@ public class IdentityWire {
             specials = new ArrayList<>();
             addSpecial("java.util.Iterator", "boolean hasNext");
             addSpecial("Object", "void <init>");
+            // addSpecial("com.google.gson.Gson", "void <init>");
         }
         for (int i = 0; i < specials.size(); i++) {
             List<String> name = specials.get(i);
