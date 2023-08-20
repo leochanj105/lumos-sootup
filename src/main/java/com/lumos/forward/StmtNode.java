@@ -158,11 +158,12 @@ public class StmtNode extends IPNode {
             Value ret = ((JReturnStmt) stmt).getOp();
             cvused.add(ContextSensitiveValue.getCValue(getContext(), ret));
         } else {
-            // JAssignStmt astmt = (JAssignStmt) stmt;
+
+            // This "banned" is to ensure that if a reference is used, its
+            // base is not added
             Set<Value> banned = new HashSet<>();
             for (ValueBox vbox : stmt.getUseBoxes()) {
                 Value use = vbox.getValue();
-
                 if (banned.contains(use)) {
                     continue;
                 }
@@ -171,7 +172,8 @@ public class StmtNode extends IPNode {
                     continue;
                 }
 
-                if ((use instanceof Local) || (use instanceof JInstanceFieldRef)) {
+                if ((use instanceof Local) || (use instanceof JInstanceFieldRef) || (use instanceof StaticFieldRef)
+                        || (use instanceof Constant)) {
                     ContextSensitiveValue cvuse = ContextSensitiveValue.getCValue(getContext(), use);
                     cvused.add(cvuse);
                     if (use instanceof JInstanceFieldRef) {
