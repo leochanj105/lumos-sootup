@@ -164,4 +164,10 @@ public class ExitNode extends IPNode {
         }
 
     }
+
+    @Override
+    public boolean isSingleAssign() {
+        return false;
+    }
+
 }

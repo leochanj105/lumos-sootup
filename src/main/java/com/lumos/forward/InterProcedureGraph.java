@@ -252,6 +252,9 @@ public class InterProcedureGraph {
 
                 if (calleeinfo == null) {
                     snode = new IdentityNode(context, stmt);
+                    // if (((IdentityNode) snode).cvuses.size() == 1) {
+                    // App.idnodes.add(snode);
+                    // }
                 } else {
                     nctx.append(stmt, calleeinfo);
                     // App.p(nctx);

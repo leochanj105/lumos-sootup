@@ -45,6 +45,7 @@ import com.lumos.forward.ExitNode;
 import com.lumos.forward.ForwardIPAnalysis;
 import com.lumos.forward.IPFlowInfo;
 import com.lumos.forward.IPNode;
+import com.lumos.forward.IdentityNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.StmtNode;
 import com.lumos.forward.TracePoint;
@@ -149,6 +150,8 @@ public class App {
     public static String fileSeparator = ":";
     public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
 
+    public static Set<IPNode> idnodes = new HashSet<>();
+
     public static void main(String[] args) {
         String[] services = new String[] {
                 "ts-launcher",
@@ -157,7 +160,40 @@ public class App {
                 "ts-order-service",
                 "ts-payment-service",
                 "ts-cancel-service",
-                "ts-sso-service"
+                "ts-sso-service",
+                "ts-admin-basic-info-service",
+                "ts-admin-order-service",
+                "ts-admin-route-service",
+                "ts-admin-travel-service",
+                "ts-admin-user-service",
+                "ts-assurance-service",
+                "ts-basic-service",
+                "ts-config-service",
+                "ts-consign-price-service",
+                "ts-consign-service",
+                "ts-contacts-service",
+                "ts-execute-service",
+                "ts-food-map-service",
+                "ts-food-service",
+                "ts-login-service",
+                "ts-notification-service",
+                "ts-preserve-other-service",
+                "ts-preserve-service",
+                "ts-price-service",
+                "ts-rebook-service",
+                "ts-register-service",
+                "ts-route-plan-service",
+                "ts-route-service",
+                "ts-seat-service",
+                "ts-security-service",
+                "ts-sso-service",
+                "ts-station-service",
+                "ts-ticketinfo-service",
+                "ts-train-service",
+                "ts-travel-plan-service",
+                "ts-travel-service",
+                "ts-travel2-service",
+                "ts-verification-code-service"
         };
         methodMap = new HashMap<>();
 
@@ -177,10 +213,12 @@ public class App {
             return;
 
         // readTPs("TP", "tps");
-        // if (true)
-        // return;
 
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
+
+        if (true) {
+            return;
+        }
         ContextSensitiveInfo cinfo = igraph.build("doErrorQueue(");
 
         long start = System.currentTimeMillis();
@@ -188,6 +226,13 @@ public class App {
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
         // App.p(cinfo.getFirstNode().context.getStackLast().sm.);
         long analysisDuration = System.currentTimeMillis() - start;
+
+        // p("+++++++++++++++++++++");
+        // for (IPNode node : idnodes) {
+        // p(node.getContext() + ", " + node);
+        // }
+        // if (true)
+        // return;
 
         IPNode ipnode = igraph.searchNode(
                 "$stack66 = $stack62 & $stack68",
@@ -201,7 +246,14 @@ public class App {
         Set<TracePoint> tps = getDependency(igraph, fia, ipnode, cvalue);
         p2("#TPs: " + tps.size());
 
-        writeTPs(tps, "TP", "tps2");
+        writeTPs(tps, "TP", "tps");
+    }
+
+    public static void getDB(String... str) {
+        for (String method : methodMap.keySet()) {
+            MethodInfo minfo = methodMap.get(method);
+            // minfo.
+        }
     }
 
     public static Set<TracePoint> getDependency(InterProcedureGraph igraph, ForwardIPAnalysis fia, IPNode ipnode,
@@ -257,9 +309,11 @@ public class App {
 
                 boolean isConstant = false;
                 boolean isOnlyReturn = false;
+                Value constval = null;
                 if (cv.getValue() instanceof Constant) {
                     // App.p(" !! ! " + cv);
                     isConstant = true;
+                    constval = cv.getValue();
                 }
                 Set<Definition> satisfiedDefs = null;
                 if (!isConstant) {
@@ -268,6 +322,7 @@ public class App {
                         Definition onlyDef = satisfiedDefs.iterator().next();
                         if ((onlyDef.getDefinedValue().getBase().getValue()) instanceof Constant) {
                             isConstant = true;
+                            constval = onlyDef.getDefinedValue().getBase().getValue();
                         }
                         // if (onlyDef.getDefinedLocation().getStmt() instanceof JReturnStmt) {
                         // isOnlyReturn = true;
@@ -275,11 +330,14 @@ public class App {
                     }
                 }
                 if (isConstant) {
-                    p("Not tracking value that is known as a constant! " + cv);
+                    p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
                     continue;
                 }
                 if (!cv.getValue().toString().equals("null")) {
-                    if (node.getUsed().size() <= 1) {
+                    if (node.isSingleAssign()) {
+                        // if (node instanceof IdentityNode) {
+                        // App.idnodes.add(node);
+                        // }
                         App.p("Not tracing uses of a identity assignment node: " + node);
                     } else {
                         TracePoint provTP = null;
@@ -620,7 +678,10 @@ public class App {
     }
 
     public static void setupClass(String service) {
-        for (SootClass cls : Scene.v().getApplicationClasses()) {
+        SootClass cls = null;
+        for (Iterator<SootClass> iter = Scene.v().getApplicationClasses().snapshotIterator(); iter
+                .hasNext();) {
+            cls = iter.next();
             // Scene.v().forceResolve(cls.getName(), SootClass.BODIES);
             if (cls.toString().contains("conf.HttpAspect")) {
                 continue;
@@ -635,7 +696,8 @@ public class App {
                 // Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
                 minfo.buildPostDominanceFrontier();
                 methodMap.put(sm.getSignature(), minfo);
-                CompileUtils.bodyMap.put(sm.getSignature(), ((Body) sm.getActiveBody().clone()));
+                // CompileUtils.bodyMap.put(sm.getSignature(), ((Body)
+                // sm.getActiveBody().clone()));
                 serviceMap.put(sm.toString(), service);
                 // if (sm.toString().contains("cancelOrder")) {
                 // App.p("!!! " + sm);

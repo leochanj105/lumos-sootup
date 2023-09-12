@@ -141,6 +141,11 @@ public class StmtNode extends IPNode {
                         out.clearDefinition(uname);
                         out.putDefinition(uname, currDefs);
                     } else {
+                        if (!out.getCurrMapping().containsKey(uname)) {
+                            App.p2(uname);
+                            App.p2(this.stmt);
+                            App.panicni();
+                        }
                         out.getCurrMapping().get(uname).addAll(currDefs);
                     }
                 }
@@ -185,4 +190,10 @@ public class StmtNode extends IPNode {
         }
         return cvused;
     }
+
+    @Override
+    public boolean isSingleAssign() {
+        return getUsed().size() <= 1;
+    }
+
 }

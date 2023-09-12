@@ -17,6 +17,8 @@ public abstract class IPNode {
     public Context context;
     public String type;
 
+    public abstract boolean isSingleAssign();
+
     public MethodInfo getMethodInfo() {
         return context.getStackLast();
     }

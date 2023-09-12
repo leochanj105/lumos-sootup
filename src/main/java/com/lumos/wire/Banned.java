@@ -17,6 +17,7 @@ public class Banned {
             addBannedType("AsyncTask");
             addBannedType("Service");
             addBannedType("Iterator");
+            addBannedType("DecimalFormat");
         }
         for (int i = 0; i < bannedTypes.size(); i++) {
             List<String> name = bannedTypes.get(i);

@@ -86,6 +86,10 @@ public class IdentityNode extends IPNode {
             return;
         }
 
+        if (cvuses.size() == 1) {
+            App.idnodes.add(this);
+        }
+
         // if ((!visible) && cvuses.size() > 1) {
         // App.panicni();
         // }
@@ -95,18 +99,24 @@ public class IdentityNode extends IPNode {
             // if (out.getCurrMapping().containsKey(un)) {
             out.clearDefinition(cvlop);
             // }
-            if (cvuses.size() > 1 || cvuses.size() == 0) {
+            if ((cvuses.size() > 1 || cvuses.size() == 0)
+                    || !isSingleAssign()) {
                 // if (this.toString().contains("compareTo")) {
                 // App.p("!!!!! " + cvlop);
                 // }
                 // out.clearDefinition(cvlop);
                 // out.clearDefinition(cvlop);
+                // App.p(this.stmt);
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
             } else {
+                // if(cvuses.size() == 1){
+                // App.p(this.stmt);
+                // }
                 for (ContextSensitiveValue cvrop : cvuses) {
                     Set<Definition> defs = out.getDefinitionsByCV(cvrop);
                     Set<Definition> newdefs = new HashSet<>();
                     for (Definition def : defs) {
+                        newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
                         // if (!visible) {
                         // if (def.getDefinedLocation() == null) {
                         // newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
@@ -114,7 +124,6 @@ public class IdentityNode extends IPNode {
                         // newdefs.add(def);
                         // }
                         // } else {
-                        newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
 
                         // }
                     }
@@ -124,6 +133,11 @@ public class IdentityNode extends IPNode {
             }
         }
 
+    }
+
+    @Override
+    public boolean isSingleAssign() {
+        return IdentityWire.findWire(this.stmt.getInvokeExpr().toString());
     }
 
     @Override

@@ -98,6 +98,11 @@ public class EnterNode extends IPNode {
         this.aliasPairs.add(pair);
     }
 
+    @Override
+    public boolean isSingleAssign() {
+        return false;
+    }
+
     public void addAlising(ContextSensitiveValue v1, ContextSensitiveValue v2) {
         this.aliasPairs.add(Arrays.asList(new ContextSensitiveValue[] { v1, v2 }));
     }

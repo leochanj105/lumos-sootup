@@ -9,23 +9,31 @@ public class IdentityWire {
     public static List<Boolean> visibles;
     public static List<List<String>> specials;
 
-    public static int findWire(String query) {
+    public static boolean findWire(String query) {
         if (wires == null || visibles == null) {
             wires = new ArrayList<>();
             visibles = new ArrayList<>();
             add(false, "org.springframework.http.ResponseEntity", "getBody");
             add(false, "java.lang.Boolean", "booleanValue");
-            add(false, "java.util.concurrent.Future", "get");
-            add(false, "org.springframework.scheduling.'annotation'.AsyncResult", "init");
             add(false, "java.lang.Boolean", "valueOf(boolean)");
-            add(true, "java.math.BigDecimal", "int compareTo");
-            add(true, "java.math.BigDecimal", "java.math.BigDecimal add");
+            add(false, "java.util.concurrent.Future", "get");
+            add(false, "<init>");
+            // add(true, "java.math.BigDecimal", "int compareTo");
+            // add(true, "java.math.BigDecimal", "java.math.BigDecimal add");
             add(true, "java.math.BigDecimal", "void <init>");
-            add(false, "java.util.Iterator", "java.lang.Object next");
-            add(false, "java.util.List", "java.util.Iterator iterator");
-            add(true, "Repository", "findByUserId");
-            add(true, "Repository", "findById");
-            add(true, "javax.servlet.http.Cookie", "java.lang.String getValue");
+            // add(false, "java.util.Iterator", "java.lang.Object next");
+            // add(false, "java.util.List", "java.util.Iterator iterator");
+            // add(true, "Repository", "findByUserId");
+            add(true, "Repository", "save");
+            add("java.lang.Double", "parseDouble");
+            // add("java.lang.Double", "parseDouble");
+            add("java.util.UUID", "fromString");
+            add("java.lang.Object", "clone");
+            add("java.lang.String", "toString");
+            add("org.springframework.messaging.support.MessageBuilder", "build");
+            add("org.springframework.messaging.support.MessageBuilder", "withPayload");
+
+            // add(true, "javax.servlet.http.Cookie", "java.lang.String getValue");
 
         }
         for (int i = 0; i < wires.size(); i++) {
@@ -37,16 +45,17 @@ public class IdentityWire {
                 }
             }
             if (matched) {
-                return visibles.get(i).booleanValue() ? 1 : 0;
+                // return visibles.get(i).booleanValue() ? 1 : 0;
+                return true;
             }
         }
-        return -1;
+        return false;
     }
 
     public static boolean isSpecial(String query) {
         if (specials == null) {
             specials = new ArrayList<>();
-            addSpecial("java.util.Iterator", "boolean hasNext");
+            // addSpecial("java.util.Iterator", "boolean hasNext");
             addSpecial("Object", "void <init>");
             // addSpecial("com.google.gson.Gson", "void <init>");
         }
@@ -73,6 +82,10 @@ public class IdentityWire {
             nlist.add(str);
         }
         specials.add(nlist);
+    }
+
+    public static void add(String... strs) {
+        add(true, strs);
     }
 
     public static void add(boolean vis, String... strs) {

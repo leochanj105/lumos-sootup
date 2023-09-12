@@ -48,4 +48,9 @@ public class WrapperNode extends IPNode {
         App.panicni();
     }
 
+    @Override
+    public boolean isSingleAssign() {
+        return false;
+    }
+
 }
