@@ -80,6 +80,7 @@ import soot.JastAddJ.Signatures.MethodSignature;
 import soot.jbco.util.BodyBuilder;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
+import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Jimple;
@@ -215,6 +216,15 @@ public class App {
         // readTPs("TP", "tps");
 
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
+        getDB("save", "OrderRepository");
+        App.p(".................................");
+        getDB("save", "OrderOtherRepository");
+        App.p(".................................");
+        getDB("save", "AddMoneyRepository");
+        App.p(".................................");
+        getDB("save", "PaymentRepository");
+        App.p(".................................");
+        getDB("save", "LoginUserListRepository");
 
         if (true) {
             return;
@@ -249,10 +259,30 @@ public class App {
         writeTPs(tps, "TP", "tps");
     }
 
-    public static void getDB(String... str) {
+    public static void getDB(String... strs) {
+        // List<Stmt>
         for (String method : methodMap.keySet()) {
             MethodInfo minfo = methodMap.get(method);
-            // minfo.
+            for (Unit unit : minfo.sm.getActiveBody().getUnits()) {
+                Stmt stmt = (Stmt) unit;
+                if (stmt.containsInvokeExpr()) {
+                    InvokeExpr iexpr = stmt.getInvokeExpr();
+                    if (iexpr instanceof InstanceInvokeExpr) {
+                        InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                        boolean matched = true;
+                        for (String s : strs) {
+                            if (!inexpr.toString().contains(s)) {
+                                matched = false;
+                                break;
+                            }
+                        }
+                        if (matched) {
+                            p(method + ":  " + stmt);
+                        }
+                    }
+                }
+
+            }
         }
     }
 
