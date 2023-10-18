@@ -136,7 +136,7 @@ public class App {
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
-    public static boolean compileJimple = false;
+    public static boolean compileJimpleOnly = false;
     public static boolean compileClass = true;
 
     public static boolean showRound = false;
@@ -153,6 +153,8 @@ public class App {
 
     public static Set<IPNode> idnodes = new HashSet<>();
 
+    public static String caseStudyPath = "cases/f13/";
+
     public static void main(String[] args) {
         String[] services = new String[] {
                 "ts-launcher",
@@ -162,39 +164,38 @@ public class App {
                 "ts-payment-service",
                 "ts-cancel-service",
                 "ts-sso-service",
-                "ts-admin-basic-info-service",
-                "ts-admin-order-service",
-                "ts-admin-route-service",
-                "ts-admin-travel-service",
-                "ts-admin-user-service",
-                "ts-assurance-service",
-                "ts-basic-service",
-                "ts-config-service",
-                "ts-consign-price-service",
-                "ts-consign-service",
-                "ts-contacts-service",
-                "ts-execute-service",
-                "ts-food-map-service",
-                "ts-food-service",
-                "ts-login-service",
-                "ts-notification-service",
-                "ts-preserve-other-service",
-                "ts-preserve-service",
-                "ts-price-service",
-                "ts-rebook-service",
-                "ts-register-service",
-                "ts-route-plan-service",
-                "ts-route-service",
-                "ts-seat-service",
-                "ts-security-service",
-                "ts-sso-service",
-                "ts-station-service",
-                "ts-ticketinfo-service",
-                "ts-train-service",
-                "ts-travel-plan-service",
-                "ts-travel-service",
-                "ts-travel2-service",
-                "ts-verification-code-service"
+                // "ts-admin-basic-info-service",
+                // "ts-admin-order-service",
+                // "ts-admin-route-service",
+                // "ts-admin-travel-service",
+                // "ts-admin-user-service",
+                // "ts-assurance-service",
+                // "ts-basic-service",
+                // "ts-config-service",
+                // "ts-consign-price-service",
+                // "ts-consign-service",
+                // "ts-contacts-service",
+                // "ts-execute-service",
+                // "ts-food-map-service",
+                // "ts-food-service",
+                // "ts-login-service",
+                // "ts-notification-service",
+                // "ts-preserve-other-service",
+                // "ts-preserve-service",
+                // "ts-price-service",
+                // "ts-rebook-service",
+                // "ts-register-service",
+                // "ts-route-plan-service",
+                // "ts-route-service",
+                // "ts-seat-service",
+                // "ts-security-service",
+                // "ts-station-service",
+                // "ts-ticketinfo-service",
+                // "ts-train-service",
+                // "ts-travel-plan-service",
+                // "ts-travel-service",
+                // "ts-travel2-service",
+                // "ts-verification-code-service"
         };
         methodMap = new HashMap<>();
 
@@ -210,25 +211,25 @@ public class App {
         analyzePath(pathMap);
         // analyzePath("xxxx\\classes");
 
-        if (compileJimple)
+        if (compileJimpleOnly)
             return;
 
         // readTPs("TP", "tps");
 
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
-        getDB("save", "OrderRepository");
-        App.p(".................................");
-        getDB("save", "OrderOtherRepository");
-        App.p(".................................");
-        getDB("save", "AddMoneyRepository");
-        App.p(".................................");
-        getDB("save", "PaymentRepository");
-        App.p(".................................");
-        getDB("save", "LoginUserListRepository");
+        // getDB("save", "OrderRepository");
+        // App.p(".................................");
+        // getDB("save", "OrderOtherRepository");
+        // App.p(".................................");
+        // getDB("save", "AddMoneyRepository");
+        // App.p(".................................");
+        // getDB("save", "PaymentRepository");
+        // App.p(".................................");
+        // getDB("save", "LoginUserListRepository");
 
-        if (true) {
-            return;
-        }
+        // if (true) {
+        // return;
+        // }
         ContextSensitiveInfo cinfo = igraph.build("doErrorQueue(");
 
         long start = System.currentTimeMillis();
@@ -255,7 +256,8 @@ public class App {
         p2("Analysis time: " + analysisDuration);
         Set<TracePoint> tps = getDependency(igraph, fia, ipnode, cvalue);
         p2("#TPs: " + tps.size());
-
+        if (true)
+            return;
         writeTPs(tps, "TP", "tps");
     }
 
@@ -734,7 +736,7 @@ public class App {
                 // }
             }
             classMap.put(cls.toString(), cls);
-            if (compileJimple) {
+            if (compileJimpleOnly) {
                 CompileUtils.outputJimple(cls, "joutput");
             }
 
