@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.swing.text.AbstractDocument.Content;
 
 import org.glassfish.jaxb.runtime.v2.runtime.reflect.Lister.Pack;
+import org.glassfish.jaxb.runtime.v2.schemagen.Util;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.StmtNode;
 import com.lumos.forward.TracePoint;
 import com.lumos.forward.UniqueName;
+import com.lumos.utils.Utils;
 import com.lumos.wire.Banned;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.WireForAllParams;
@@ -141,6 +143,7 @@ public class App {
 
     public static boolean showRound = false;
     public static boolean showLineNum = true;
+    public static boolean showIPNodesOnly = false;
 
     public static Map<String, MethodInfo> methodMap;
 
@@ -154,6 +157,8 @@ public class App {
     public static Set<IPNode> idnodes = new HashSet<>();
 
     public static String caseStudyPath = "cases/f13/";
+    public static String safeListPath = "safelist";
+    public static Set<String> safeList = new HashSet<>();
 
     public static void main(String[] args) {
         String[] services = new String[] {
@@ -216,6 +221,11 @@ public class App {
 
         // readTPs("TP", "tps");
 
+        Utils.readFrom(safeListPath).forEach(s -> {
+            safeList.add(s);
+            // App.p("!!! " + s);
+        });
+
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
         // getDB("save", "OrderRepository");
         // App.p(".................................");
@@ -237,13 +247,18 @@ public class App {
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
         // App.p(cinfo.getFirstNode().context.getStackLast().sm.);
         long analysisDuration = System.currentTimeMillis() - start;
-
-        // p("+++++++++++++++++++++");
-        // for (IPNode node : idnodes) {
-        // p(node.getContext() + ", " + node);
-        // }
-        // if (true)
-        // return;
+        if (showIPNodesOnly) {
+            p("+++++++++++++++++++++");
+            Set<String> safeMethods = new HashSet<>();
+            for (IPNode node : idnodes) {
+                // p(node.getStmt().getInvokeExpr().getMethod());
+                safeMethods.add(node.getStmt().getInvokeExpr().getMethod().getSignature());
+            }
+            safeMethods.forEach(m -> {
+                p(m);
+            });
+            return;
+        }
 
         IPNode ipnode = igraph.searchNode(
                 "$stack66 = $stack62 & $stack68",

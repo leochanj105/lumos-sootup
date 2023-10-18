@@ -21,7 +21,12 @@ public class IdentityNode extends IPNode {
 
     // boolean visible;
     Set<ContextSensitiveValue> cvdefs, cvuses;
-    // cvrop;
+
+    // RADICAL means that we assume a function call do not have more than one defs
+    // CONSERVATIVE means that everything is a def
+    public static String idMode = "RADICAL";
+    public static boolean warnForUnsafe = true;
+    // public static String idMode = "CONSERVATIVE";
 
     public IdentityNode(Context context, Stmt stmt) {
         // super(context, stmt);
@@ -35,39 +40,61 @@ public class IdentityNode extends IPNode {
         }
 
         InvokeExpr iexpr = stmt.getInvokeExpr();
-        // App.p(iexpr);
+
         cvdefs = new HashSet<>();
         cvuses = new HashSet<>();
-        if (iexpr.getArgs().size() > 0) {
-            for (Value arg : iexpr.getArgs()) {
-                cvuses.add(ContextSensitiveValue.getCValue(context, arg));
-            }
-            if ((stmt instanceof JAssignStmt) && (iexpr instanceof InstanceInvokeExpr)) {
-                cvuses.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
-            }
-        } else {
-            if (iexpr instanceof StaticInvokeExpr) {
-                // cvuses.add(ContextSensitiveValue.getCValue(context, iexpr));
-            } else {
-                cvuses.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
-            }
-        }
 
-        if (!(stmt instanceof JAssignStmt)) {
-            // App.p(stmt);
-            if (iexpr instanceof StaticInvokeExpr) {
-                if (iexpr.getArgs().size() > 0) {
-                    cvdefs.add(ContextSensitiveValue.getCValue(context, iexpr.getArg(0)));
+        if (idMode.equals("RADICAL")) {
+            if (!App.safeList.contains(iexpr.getMethod().getSignature())) {
+                if (warnForUnsafe) {
+                    App.p("===[WARN]===\nUnsafe method: " + iexpr.getMethod().getSignature());
+                }
+            }
+            if (iexpr.getArgs().size() > 0) {
+                for (Value arg : iexpr.getArgs()) {
+                    cvuses.add(ContextSensitiveValue.getCValue(context, arg));
+                }
+                if ((stmt instanceof JAssignStmt) && (iexpr instanceof InstanceInvokeExpr)) {
+                    cvuses.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
                 }
             } else {
+                if (iexpr instanceof StaticInvokeExpr) {
+                    // cvuses.add(ContextSensitiveValue.getCValue(context, iexpr));
+                } else {
+                    cvuses.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
+                }
+            }
+
+            if (!(stmt instanceof JAssignStmt)) {
+                // App.p(stmt);
+                if (iexpr instanceof StaticInvokeExpr) {
+                    if (iexpr.getArgs().size() > 0) {
+                        cvdefs.add(ContextSensitiveValue.getCValue(context, iexpr.getArg(0)));
+                    }
+                } else {
+                    cvdefs.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
+                }
+            } else {
+                cvdefs.add(ContextSensitiveValue.getCValue(context, ((JAssignStmt) stmt).getLeftOp()));
+            }
+        } else if (idMode.equals("CONSERVATIVE")) {
+            for (Value arg : iexpr.getArgs()) {
+                cvuses.add(ContextSensitiveValue.getCValue(context, arg));
+                cvdefs.add(ContextSensitiveValue.getCValue(context, arg));
+            }
+            if (iexpr instanceof InstanceInvokeExpr) {
+                cvuses.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
                 cvdefs.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
             }
+            if (stmt instanceof JAssignStmt) {
+                cvdefs.add(ContextSensitiveValue.getCValue(context, ((JAssignStmt) stmt).getLeftOp()));
+            }
         } else {
-            cvdefs.add(ContextSensitiveValue.getCValue(context, ((JAssignStmt) stmt).getLeftOp()));
+            App.panicni();
         }
+
         this.type = "identity";
         // this.visible = cvuses.size() > 1 || IdentityWire.isSpecial(iexpr.toString());
-        // if()
     }
 
     @Override
@@ -78,16 +105,17 @@ public class IdentityNode extends IPNode {
             return;
         }
 
-        // if (stmtStr.contains("com.google.gson.Gson: void <init>")) {
+        // if (stmtStr.contains("javax.servlet.http.Cookie: java.lang.String
+        // getValue()>")) {
         // return;
         // }
 
-        if (stmtStr.contains("javax.servlet.http.Cookie: java.lang.String getValue()>")) {
-            return;
-        }
+        if (App.showIPNodesOnly)
 
-        if (cvuses.size() == 1) {
+        {
+            // if (cvuses.size() == 1) {
             App.idnodes.add(this);
+            // }
         }
 
         // if ((!visible) && cvuses.size() > 1) {
@@ -96,36 +124,16 @@ public class IdentityNode extends IPNode {
 
         for (ContextSensitiveValue cvlop : cvdefs) {
             UniqueName un = new UniqueName(cvlop);
-            // if (out.getCurrMapping().containsKey(un)) {
             out.clearDefinition(cvlop);
-            // }
-            if ((cvuses.size() > 1 || cvuses.size() == 0)
-                    || !isSingleAssign()) {
-                // if (this.toString().contains("compareTo")) {
-                // App.p("!!!!! " + cvlop);
-                // }
-                // out.clearDefinition(cvlop);
-                // out.clearDefinition(cvlop);
-                // App.p(this.stmt);
+            if (idMode.equals("CONSERVATIVE") || ((cvuses.size() > 1 || cvuses.size() == 0)
+                    || !isSingleAssign())) {
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
             } else {
-                // if(cvuses.size() == 1){
-                // App.p(this.stmt);
-                // }
                 for (ContextSensitiveValue cvrop : cvuses) {
                     Set<Definition> defs = out.getDefinitionsByCV(cvrop);
                     Set<Definition> newdefs = new HashSet<>();
                     for (Definition def : defs) {
                         newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
-                        // if (!visible) {
-                        // if (def.getDefinedLocation() == null) {
-                        // newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
-                        // } else {
-                        // newdefs.add(def);
-                        // }
-                        // } else {
-
-                        // }
                     }
                     out.putDefinition(cvlop, newdefs);
                 }
