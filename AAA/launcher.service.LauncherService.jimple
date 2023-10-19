@@ -1,6 +1,0 @@
-public interface  launcher.service.LauncherService extends java.lang.Object
-{
-/*LauncherService.java*/
-
-    public abstract void doErrorQueue(java.lang.String, java.lang.String);
-}

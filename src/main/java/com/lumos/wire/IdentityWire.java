@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.lumos.App;
+import com.lumos.utils.Utils;
+
 public class IdentityWire {
     public static List<List<String>> wires;
     public static List<Boolean> visibles;
@@ -13,28 +16,10 @@ public class IdentityWire {
         if (wires == null || visibles == null) {
             wires = new ArrayList<>();
             visibles = new ArrayList<>();
-            add(false, "org.springframework.http.ResponseEntity", "getBody");
-            add(false, "java.lang.Boolean", "booleanValue");
-            add(false, "java.lang.Boolean", "valueOf(boolean)");
-            add(false, "java.util.concurrent.Future", "get");
-            add(false, "<init>");
-            // add(true, "java.math.BigDecimal", "int compareTo");
-            // add(true, "java.math.BigDecimal", "java.math.BigDecimal add");
-            add(true, "java.math.BigDecimal", "void <init>");
-            // add(false, "java.util.Iterator", "java.lang.Object next");
-            // add(false, "java.util.List", "java.util.Iterator iterator");
-            // add(true, "Repository", "findByUserId");
-            add(true, "Repository", "save");
-            add("java.lang.Double", "parseDouble");
-            // add("java.lang.Double", "parseDouble");
-            add("java.util.UUID", "fromString");
-            add("java.lang.Object", "clone");
-            add("java.lang.String", "toString");
-            add("org.springframework.messaging.support.MessageBuilder", "build");
-            add("org.springframework.messaging.support.MessageBuilder", "withPayload");
-
-            // add(true, "javax.servlet.http.Cookie", "java.lang.String getValue");
-
+            List<String> strs = Utils.readFrom(App.caseStudyPath + "identityWires");
+            for (String s : strs) {
+                add(true, s.split(","));
+            }
         }
         for (int i = 0; i < wires.size(); i++) {
             List<String> name = wires.get(i);
@@ -45,43 +30,10 @@ public class IdentityWire {
                 }
             }
             if (matched) {
-                // return visibles.get(i).booleanValue() ? 1 : 0;
                 return true;
             }
         }
         return false;
-    }
-
-    public static boolean isSpecial(String query) {
-        if (specials == null) {
-            specials = new ArrayList<>();
-            // addSpecial("java.util.Iterator", "boolean hasNext");
-            addSpecial("Object", "void <init>");
-            // addSpecial("com.google.gson.Gson", "void <init>");
-        }
-        for (int i = 0; i < specials.size(); i++) {
-            List<String> name = specials.get(i);
-            boolean matched = true;
-            for (String n : name) {
-                if (!query.contains(n)) {
-                    matched = false;
-                }
-            }
-            if (matched) {
-                return true;
-            }
-
-        }
-        return false;
-
-    }
-
-    public static void addSpecial(String... strs) {
-        List<String> nlist = new ArrayList<>();
-        for (String str : strs) {
-            nlist.add(str);
-        }
-        specials.add(nlist);
     }
 
     public static void add(String... strs) {

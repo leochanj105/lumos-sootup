@@ -8,7 +8,7 @@ import java.util.Set;
 import com.lumos.App;
 import com.lumos.wire.IdentityWire;
 
-import fj.P;
+import soot.SootMethod;
 import soot.Value;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
@@ -93,15 +93,22 @@ public class IdentityNode extends IPNode {
             App.panicni();
         }
 
+        if (App.showInitOnly) {
+            if (isSingleAssign()) {
+                if (iexpr.getMethod().getSignature().contains("<init>") && !isEmptyInit()) {
+                    App.initList.add(iexpr.getMethod().getSignature());
+                }
+            }
+        }
+
         this.type = "identity";
-        // this.visible = cvuses.size() > 1 || IdentityWire.isSpecial(iexpr.toString());
     }
 
     @Override
     public void flow(IPFlowInfo out) {
         // EnterNode enode = (EnterNode) node;
-        String stmtStr = this.stmt.getInvokeExpr().toString();
-        if (stmtStr.contains("Object: void <init>")) {
+        // String stmtStr = this.stmt.getInvokeExpr().toString();
+        if (isEmptyInit()) {
             return;
         }
 
@@ -110,12 +117,8 @@ public class IdentityNode extends IPNode {
         // return;
         // }
 
-        if (App.showIPNodesOnly)
-
-        {
-            // if (cvuses.size() == 1) {
+        if (App.showIDNodesOnly) {
             App.idnodes.add(this);
-            // }
         }
 
         // if ((!visible) && cvuses.size() > 1) {
@@ -145,7 +148,13 @@ public class IdentityNode extends IPNode {
 
     @Override
     public boolean isSingleAssign() {
-        return IdentityWire.findWire(this.stmt.getInvokeExpr().toString());
+        return isEmptyInit() || (getUsed().size() == 1
+                && IdentityWire.findWire(this.stmt.getInvokeExpr().getMethod().getSignature().toString()));
+    }
+
+    public boolean isEmptyInit() {
+        SootMethod sm = stmt.getInvokeExpr().getMethod();
+        return sm.getName().contains("<init>") && sm.getParameterCount() == 0;
     }
 
     @Override

@@ -143,7 +143,8 @@ public class App {
 
     public static boolean showRound = false;
     public static boolean showLineNum = true;
-    public static boolean showIPNodesOnly = false;
+    public static boolean showIDNodesOnly = false;
+    public static boolean showInitOnly = false;
 
     public static Map<String, MethodInfo> methodMap;
 
@@ -159,6 +160,8 @@ public class App {
     public static String caseStudyPath = "cases/f13/";
     public static String safeListPath = "safelist";
     public static Set<String> safeList = new HashSet<>();
+
+    public static Set<String> initList = new HashSet<>();
 
     public static void main(String[] args) {
         String[] services = new String[] {
@@ -247,7 +250,16 @@ public class App {
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
         // App.p(cinfo.getFirstNode().context.getStackLast().sm.);
         long analysisDuration = System.currentTimeMillis() - start;
-        if (showIPNodesOnly) {
+
+        if (showInitOnly) {
+            p("+++++++++++++++++++++");
+            initList.forEach(m -> {
+                p(m);
+            });
+            return;
+        }
+
+        if (showIDNodesOnly) {
             p("+++++++++++++++++++++");
             Set<String> safeMethods = new HashSet<>();
             for (IPNode node : idnodes) {
