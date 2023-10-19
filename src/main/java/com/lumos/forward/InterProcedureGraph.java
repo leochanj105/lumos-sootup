@@ -63,13 +63,20 @@ public class InterProcedureGraph {
             // }
             boolean match = true;
             for (String s : str) {
-                // node.stmt.
-                if (!node.getDescription().contains(s)) {
-                    match = false;
-                    break;
+                // '!' at the beginning means don't match
+                if (s.charAt(0) == '!') {
+                    if (node.getDescription().contains(s.substring(1, s.length()))) {
+                        match = false;
+                        break;
+                    }
+                } else {
+                    if (!node.getDescription().contains(s)) {
+                        match = false;
+                        break;
+                    }
                 }
             }
-            if (match && !(node.stmt.toString().contains(App.exclude))) {
+            if (match) {
                 return node;
             }
         }

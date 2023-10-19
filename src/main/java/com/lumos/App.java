@@ -138,7 +138,7 @@ public class App {
     public static final String LOG_PREFIX = "LUMOS-LOG";
 
     public static boolean compileJimpleOnly = false;
-    public static boolean compileClass = true;
+    public static boolean compileClass = false;
 
     public static boolean showRound = false;
     public static boolean showLineNum = true;
@@ -152,7 +152,7 @@ public class App {
     public static Map<String, String> serviceMap = new HashMap<>();
     public static Map<String, String> pathMap = new HashMap<>();
     public static String fileSeparator = ":";
-    public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
+    // public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
 
     public static Set<IPNode> idnodes = new HashSet<>();
 
@@ -242,10 +242,16 @@ public class App {
         // if (true) {
         // return;
         // }
-        ContextSensitiveInfo cinfo = igraph.build("doErrorQueue(");
+
+        List<String> graphConfig = Utils.readFrom(caseStudyPath + "graph");
+        String entryMethod = graphConfig.get(0).trim();
+        String firstStmt = graphConfig.get(1);
+        String symptomStmt = graphConfig.get(2);
+
+        ContextSensitiveInfo cinfo = igraph.build(entryMethod);
 
         long start = System.currentTimeMillis();
-        IPNode firstNode = igraph.searchNode("$stack16 = new launcher.domain.RegisterInfo");
+        IPNode firstNode = igraph.searchNode(firstStmt.split(","));
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
         // App.p(cinfo.getFirstNode().context.getStackLast().sm.);
         long analysisDuration = System.currentTimeMillis() - start;
@@ -271,9 +277,7 @@ public class App {
             return;
         }
 
-        IPNode ipnode = igraph.searchNode(
-                "$stack66 = $stack62 & $stack68",
-                "stmt");
+        IPNode ipnode = igraph.searchNode(symptomStmt.split(","));
         p(ipnode.stmt.toString());
 
         ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(),

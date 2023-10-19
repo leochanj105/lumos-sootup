@@ -89,10 +89,6 @@ public class WireHTTP {
                                         "$stack9");
 
                 }
-                // System.out.println(reqMethod + ", " + lineNum);
-                // if (reqMethod.contains("sendOrderCancel")) {
-                // App.p("!!!!! " + reqMethod + ", " + lineNum);
-                // }
                 for (RequestWirePoint wp : wps.keySet()) {
 
                         if (reqMethod.contains(wp.reqMethod) && lineNum == wp.lineNum) {
