@@ -23,8 +23,15 @@ public class WireHTTP {
                         add("boolean pay", 50,
                                         "other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById",
                                         new String[] { "$stack17" }, new String[] { "info" }, "$stack84");
+                        // add("boolean pay", 50,
+                        // "other.controller.OrderOtherController: other.domain.GetOrderResult
+                        // getOrderById",
+                        // new String[] { "$stack17" }, new String[] { "info" }, "$stack84");
+                        // add("boolean pay", 46,
+                        // "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById",
+                        // new String[] { "$stack17" }, new String[] { "info" }, "$stack23");
                         add("boolean pay", 46,
-                                        "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById",
+                                        "order.controller.OrderController: order.domain.GetOrderResult getOrderById",
                                         new String[] { "$stack17" }, new String[] { "info" }, "$stack23");
                         add("inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)",
                                         95,
@@ -44,8 +51,23 @@ public class WireHTTP {
                                         new String[] { "info" },
                                         new String[] { "info" },
                                         "$stack6");
+                        // add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult
+                        // getOrderByIdFromOrderOther",
+                        // 340,
+                        // "other.controller.OrderOtherController: other.domain.GetOrderResult
+                        // getOrderById(other.domain.GetOrderByIdInfo)",
+                        // new String[] { "info" },
+                        // new String[] { "info" },
+                        // "$stack6");
+                        // add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult
+                        // getOrderByIdFromOrder", 332,
+                        // "order.service.OrderServiceImpl: order.domain.GetOrderResult
+                        // getOrderById(order.domain.GetOrderByIdInfo)",
+                        // new String[] { "info" },
+                        // new String[] { "info" },
+                        // "$stack6");
                         add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult getOrderByIdFromOrder", 332,
-                                        "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById(order.domain.GetOrderByIdInfo)",
+                                        "order.controller.OrderController: order.domain.GetOrderResult getOrderById(order.domain.GetOrderByIdInfo)",
                                         new String[] { "info" },
                                         new String[] { "info" },
                                         "$stack6");

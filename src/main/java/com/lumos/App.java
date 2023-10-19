@@ -162,6 +162,10 @@ public class App {
 
     public static Set<String> initList = new HashSet<>();
 
+    public static String outputTPDir = "TP";
+    public static String outputTPFileName = "tps1";
+    public static boolean outputTP = false;
+
     public static void main(String[] args) {
         String[] services = new String[] {
                 "ts-launcher",
@@ -286,9 +290,9 @@ public class App {
         p2("Analysis time: " + analysisDuration);
         Set<TracePoint> tps = getDependency(igraph, fia, ipnode, cvalue);
         p2("#TPs: " + tps.size());
-        if (true)
-            return;
-        writeTPs(tps, "TP", "tps");
+        if (outputTP) {
+            writeTPs(tps, outputTPDir, outputTPFileName);
+        }
     }
 
     public static void getDB(String... strs) {
