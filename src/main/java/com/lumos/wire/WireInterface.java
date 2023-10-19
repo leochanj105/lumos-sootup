@@ -10,33 +10,22 @@ import com.lumos.App;
 public class WireInterface {
     private static Map<RequestWirePoint, String> wps = null;
 
+    public static String translateServiceInterface(String sig) {
+        int index = sig.indexOf("Service:");
+        String first = sig.substring(0, index);
+        String second = sig.substring(index + "Service:".length(), sig.length());
+        return first + "ServiceImpl:" + second;
+    }
+
     public static String get(String reqMethod, int lineNum) {
         if (wps == null) {
             wps = new HashMap<>();
-            add("order.controller.OrderController: order.domain.ChangeOrderResult saveOrderInfo(order.domain.ChangeOrderInfo)",
-                    120,
-                    "order.service.OrderServiceImpl: order.domain.ChangeOrderResult saveChanges(order.domain.Order)");
-            add("cancel.controller.CancelController: cancel.domain.CancelOrderResult cancelTicket(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)",
-                    53,
-                    "cancel.service.CancelServiceImpl: cancel.domain.CancelOrderResult cancelOrder(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)");
-            add("other.queue.AsyncTask: void putResultIntoReturnQueue(other.domain.ChangeOrderInfo)", 23,
-                    "other.service.OrderOtherServiceImpl: other.domain.ChangeOrderResult saveChanges(other.domain.Order)");
-
-            // add("other.controller.OrderOtherController: order.domain.ChangeOrderResult
-            // saveOrderInfo(order.domain.ChangeOrderInfo)",
-            // 120,
-            // "order.service.OrderServiceImpl: order.domain.ChangeOrderResult
-            // saveChanges(order.domain.Order)");
         }
-        // if (reqMethod.contains("saveChanges")) {
-        // App.p("!!! " + reqMethod + ", " + lineNum);
-        // }
         for (RequestWirePoint wp : wps.keySet()) {
             if (reqMethod.contains(wp.reqMethod) && lineNum == wp.lineNum) {
                 return wps.get(wp);
             }
         }
-        // return wps.get(new HTTPRequestWirePoint(reqMethod, lineNum));
         return null;
     }
 

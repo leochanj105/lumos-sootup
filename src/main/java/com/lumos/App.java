@@ -54,7 +54,6 @@ import com.lumos.forward.UniqueName;
 import com.lumos.utils.Utils;
 import com.lumos.wire.Banned;
 import com.lumos.wire.HTTPReceiveWirePoint;
-import com.lumos.wire.WireForAllParams;
 import com.lumos.wire.WireHTTP;
 
 import soot.Body;

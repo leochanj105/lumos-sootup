@@ -97,7 +97,16 @@ public class InterProcedureGraph {
         MethodInfo minfo = null;
         // App.p(context + ", " + stmt);
         ResolveResult result = new ResolveResult();
-        minfo = methodMap.get(sm.getSignature());
+        String signature = sm.getSignature();
+        if (signature.contains("Service:")) {
+            String translated = WireInterface.translateServiceInterface(signature);
+            // App.p("==== " + translated);
+            if (translated.contains("ServiceImpl:")) {
+                App.p("wired interface " + translated);
+                signature = translated;
+            }
+        }
+        minfo = methodMap.get(signature);
         String mname = sm.getSignature().toString();
         String lastMethod = context.getStackLast().sm.getSignature();
         if (minfo == null && (mname.contains("exchange") || mname.contains("ForObject") ||
@@ -120,28 +129,11 @@ public class InterProcedureGraph {
             }
         }
 
-        if (minfo == null) {
-            String target = WireInterface.get(lastMethod, stmt.getJavaSourceStartLineNumber());
-            if (target != null) {
-                minfo = searchMethod(target);
-            }
-            if (minfo != null) {
-                App.p("wired interface " + minfo.sm.getName());
-            }
-        }
-
         if (minfo != null) {
             result.setMinfo(minfo);
         }
         return result;
     }
-
-    // public IPNode resolveStmt(Context context, Stmt stmt) {
-
-    // } else {
-    // return getIPNode(context, stmt);
-    // }
-    // }
 
     public ContextSensitiveInfo build(Context context) {
 
@@ -241,6 +233,7 @@ public class InterProcedureGraph {
         umap = stmtMap.get(context);
 
         IPNode snode = null;
+
         if (!umap.containsKey(stmt)) {
             if (stmt.containsInvokeExpr()) {
                 InvokeExpr iexpr = stmt.getInvokeExpr();
