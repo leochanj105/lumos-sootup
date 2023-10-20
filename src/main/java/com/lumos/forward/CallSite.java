@@ -2,6 +2,7 @@ package com.lumos.forward;
 
 import java.util.List;
 
+import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
 
 import soot.SootMethod;
@@ -10,7 +11,7 @@ import soot.jimple.Stmt;
 public class CallSite {
 
     public Stmt callingStmt;
-    public MethodInfo minfo;
+    public SootMethod sm;
 
     public Stmt getCallingStmt() {
         return this.callingStmt;
@@ -20,17 +21,13 @@ public class CallSite {
         this.callingStmt = callingStmt;
     }
 
-    public MethodInfo getMinfo() {
-        return this.minfo;
-    }
-
-    public void setMinfo(MethodInfo minfo) {
-        this.minfo = minfo;
-    }
-
-    public CallSite(Stmt callingStmt, MethodInfo minfo) {
+    public CallSite(Stmt callingStmt, SootMethod sm) {
         this.callingStmt = callingStmt;
-        this.minfo = minfo;
+        this.sm = sm;
+    }
+
+    public MethodInfo getMInfo() {
+        return App.methodMap.get(sm.getSignature());
     }
 
     @Override
@@ -38,13 +35,8 @@ public class CallSite {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((callingStmt == null) ? 0 : callingStmt.hashCode());
-        result = prime * result + ((minfo == null) ? 0 : minfo.hashCode());
+        result = prime * result + ((sm == null) ? 0 : sm.hashCode());
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return (callingStmt == null ? "None" : callingStmt.toString());
     }
 
     @Override
@@ -61,12 +53,25 @@ public class CallSite {
                 return false;
         } else if (!callingStmt.equals(other.callingStmt))
             return false;
-        if (minfo == null) {
-            if (other.minfo != null)
+        if (sm == null) {
+            if (other.sm != null)
                 return false;
-        } else if (!minfo.equals(other.minfo))
+        } else if (!sm.equals(other.sm))
             return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return (callingStmt == null ? "None" : callingStmt.toString());
+    }
+
+    public SootMethod getSm() {
+        return sm;
+    }
+
+    public void setSm(SootMethod sm) {
+        this.sm = sm;
     }
 
 }

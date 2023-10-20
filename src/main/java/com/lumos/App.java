@@ -351,21 +351,22 @@ public class App {
             Stmt stmt = node.getStmt();
             App.p("\nBacktracking at " + node);
 
-            MethodInfo minfo = null;
-            minfo = node.getContext().getStackLast();
-            for (Stmt cfstmt : minfo.cfDependency.get(stmt)) {
-                IPNode cfnode = igraph.getIPNode(node.getContext(), cfstmt);
+            // MethodInfo minfo = null;
+            // minfo = node.getContext().getStackLast();
+            for (IPNode cfnode : node.getCfDepNodes()) {
+                // IPNode cfnode = igraph.getIPNode(node.getContext(), cfstmt);
+                App.p("Adding control dep: " + cfnode + " for " + node);
                 unresolvedNodes.add(cfnode);
             }
-            CallSite csite = node.getContext().getLastCallSite();
-            if (csite.getCallingStmt() != null) {
-                for (Stmt cfstmt : node.getContext().getStackSecondToLast().cfDependency
-                        .get(csite.getCallingStmt())) {
-                    IPNode cfnode = igraph.getIPNode(node.getContext().popLast(), cfstmt);
-                    App.p("Adding control dep: " + cfnode + " for " + node);
-                    unresolvedNodes.add(cfnode);
-                }
-            }
+            // CallSite csite = node.getContext().getLastCallSite();
+            // if (csite.getCallingStmt() != null) {
+            // for (Stmt cfstmt : node.getContext().getStackSecondToLast().cfDependency
+            // .get(csite.getCallingStmt())) {
+            // IPNode cfnode = igraph.getIPNode(node.getContext().getParent(), cfstmt);
+            // App.p("Adding control dep: " + cfnode + " for " + node);
+            // unresolvedNodes.add(cfnode);
+            // }
+            // }
 
             for (ContextSensitiveValue cv : node.getUsed()) {
                 if (Banned.isTypeBanned(cv.getValue().getType().toString())) {

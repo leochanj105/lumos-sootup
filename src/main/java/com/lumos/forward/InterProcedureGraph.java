@@ -144,9 +144,10 @@ public class InterProcedureGraph {
 
     public ContextSensitiveInfo build(Context context) {
 
-        List<CallSite> ctrace = context.getCtrace();
-        CallSite lastSite = ctrace.get(ctrace.size() - 1);
-        MethodInfo minfo = lastSite.getMinfo();
+        // List<CallSite> ctrace = context.getCtrace();
+        // CallSite lastSite = ctrace.get(ctrace.size() - 1);
+        MethodInfo minfo = context.getLastCallSite().getMInfo();
+
         BriefUnitGraph cfg = minfo.cfg;
 
         ContextSensitiveInfo cinfo = new ContextSensitiveInfo();
@@ -219,16 +220,15 @@ public class InterProcedureGraph {
             return null;
         }
         App.p("buiding " + minfo.sm);
-        return build(topContext(minfo));
+        return build(topContext(minfo, this));
     }
 
-    public static Context topContext(MethodInfo minfo) {
-        CallSite top = new CallSite(null, minfo);
-        return new Context(Collections.singletonList(top));
+    public static Context topContext(MethodInfo minfo, InterProcedureGraph igraph) {
+        return new Context(emptyContext(), new CallSite(null, minfo.sm), igraph);
     }
 
     public static Context emptyContext() {
-        return new Context(new ArrayList<>());
+        return null;
     }
 
     public IPNode getIPNode(Context context, Stmt stmt) {
@@ -245,7 +245,7 @@ public class InterProcedureGraph {
             if (stmt.containsInvokeExpr()) {
                 InvokeExpr iexpr = stmt.getInvokeExpr();
 
-                Context nctx = context.deepcopy();
+                // Context nctx = context.deepcopy();
                 ResolveResult result = resolveMethod(context, stmt);
                 MethodInfo callerinfo = context.getStackLast();
                 MethodInfo calleeinfo = result.getMinfo();
@@ -256,7 +256,7 @@ public class InterProcedureGraph {
                     // App.idnodes.add(snode);
                     // }
                 } else {
-                    nctx.append(stmt, calleeinfo);
+                    Context nctx = context.append(stmt, calleeinfo);
                     // App.p(nctx);
                     // App.p(stmt);
                     ContextSensitiveInfo newcinfo = build(nctx);

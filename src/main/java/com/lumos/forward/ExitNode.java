@@ -27,7 +27,7 @@ public class ExitNode extends IPNode {
 
     // public List<Value> arguments;
     // public List<Local> parameters;
-    public CallSite lastCall;
+    // public CallSite lastCall;
     public List<IPNode> returnStmtNodes;
     public ContextSensitiveValue ret;
     boolean isRemote;
@@ -78,8 +78,8 @@ public class ExitNode extends IPNode {
         this.sm = stmt.getInvokeExpr().getMethod();
         this.context = context;
         this.stmt = stmt;
-        List<CallSite> ctrace = context.getCtrace();
-        lastCall = ctrace.get(ctrace.size() - 1);
+        // List<CallSite> ctrace = context.getCtrace();
+        // lastCall = context.getLastCallSite();
         this.type = "exit";
         isRemote = false;
         // List<Stmt> rets = new ArrayList<>();
@@ -104,8 +104,8 @@ public class ExitNode extends IPNode {
         if (isRemote) {
             for (UniqueName un : out.getCurrMapping().keySet()) {
                 Context original = un.getBase().getContext();
+                // App.p(original + ", " + un);
                 boolean modified = false;
-
                 if (!this.context.parentOf(original)) {
                     for (Definition def : out.getCurrMapping().get(un)) {
                         if (def.getDefinedLocation() != null) {

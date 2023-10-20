@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
 
 import polyglot.ast.Call;
@@ -12,141 +13,130 @@ import soot.jimple.Stmt;
 
 public class Context {
 
-    public List<CallSite> ctrace;
+    // public List<CallSite> ctrace;
+    public Context parent;
+    public CallSite lastCallSite;
 
-    public static Context emptyContext = new Context(Collections.emptyList());
+    public static Context emptyContext = null;
+    public List<IPNode> cfDepNodes;
+
+    public InterProcedureGraph igraph;
+
+    public InterProcedureGraph getIgraph() {
+        return igraph;
+    }
+
+    public void setIgraph(InterProcedureGraph igraph) {
+        this.igraph = igraph;
+    }
 
     @Override
     public String toString() {
-        String result = "";
-        for (CallSite cs : ctrace) {
-            result += cs.getMinfo().sm.getName() + ",";
-        }
-        if (!ctrace.isEmpty()) {
-            result = result.substring(0, result.length() - 1);
-        }
-        return result;
+        return (parent == null ? "" : parent.toString()) + "," + lastCallSite.getSm().getName();
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((ctrace == null) ? 0 : ctrace.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Context other = (Context) obj;
-        if (ctrace == null) {
-            if (other.ctrace != null)
-                return false;
-        } else if (!ctrace.equals(other.ctrace))
-            return false;
-        return true;
-    }
-
-    public List<CallSite> getCtrace() {
-        return ctrace;
-    }
-
-    public void setCtrace(List<CallSite> ctrace) {
-        this.ctrace = ctrace;
-    }
-
-    public Context(List<CallSite> ctrace) {
-        this.ctrace = ctrace;
+    public Context(Context parent, CallSite lastCallSite, InterProcedureGraph igraph) {
+        this.parent = parent;
+        this.lastCallSite = lastCallSite;
+        this.igraph = igraph;
     }
 
     public Context deepcopy() {
-        List<CallSite> nctx = new ArrayList<>();
-        for (CallSite cs : this.ctrace) {
-            nctx.add(cs);
-        }
-        return new Context(nctx);
+        Context pcopy = parent == null ? null : parent.deepcopy();
+        return new Context(pcopy, new CallSite(lastCallSite.getCallingStmt(), lastCallSite.getSm()), igraph);
     }
 
-    public void append(CallSite cs) {
-        this.ctrace.add(cs);
+    public Context append(CallSite cs) {
+        return new Context(this, cs, igraph);
     }
 
-    public void append(Stmt callingStmt, MethodInfo minfo) {
-        this.append(new CallSite(callingStmt, minfo));
+    public Context append(Stmt callingStmt, MethodInfo minfo) {
+        return append(new CallSite(callingStmt, minfo.sm));
     }
 
     public MethodInfo getStackLast() {
-        if (ctrace.size() == 0) {
-            return null;
-        }
-        CallSite cs = ctrace.get(ctrace.size() - 1);
-        return cs.minfo;
+        return App.methodMap.get(lastCallSite.getSm().getSignature());
     }
 
     public MethodInfo getStackSecondToLast() {
-        if (ctrace.size() < 2) {
+        if (parent == null) {
             return null;
         }
-        CallSite cs = ctrace.get(ctrace.size() - 2);
-        return cs.minfo;
+
+        return parent.getStackLast();
     }
 
     public Stmt getCallingStmt() {
-        if (ctrace.size() == 0) {
-            return null;
-        }
-        CallSite cs = ctrace.get(ctrace.size() - 1);
-        return cs.getCallingStmt();
+        return lastCallSite.getCallingStmt();
     }
 
     public CallSite getLastCallSite() {
-        if (ctrace.size() == 0) {
-            return null;
-        }
-        CallSite cs = ctrace.get(ctrace.size() - 1);
-        return cs;
+        return lastCallSite;
     }
 
-    public Context popLast() {
-        List<CallSite> newsite = new ArrayList<>(this.ctrace);
-        newsite.remove(newsite.size() - 1);
-        Context c = new Context(newsite);
-        return c;
+    // public Context popLast() {
+    // List<CallSite> newsite = new ArrayList<>(this.ctrace);
+    // newsite.remove(newsite.size() - 1);
+    // Context c = new Context(newsite);
+    // return c;
+    // }
+
+    public List<IPNode> getCfDepNodesRecursive() {
+        if (this.cfDepNodes != null) {
+            return this.cfDepNodes;
+        }
+        cfDepNodes = new ArrayList<>();
+        MethodInfo minfo = getStackSecondToLast();
+
+        if (minfo == null) {
+            return cfDepNodes;
+        }
+
+        for (Stmt cfstmt : minfo.cfDependency.get(getCallingStmt())) {
+            cfDepNodes.add(igraph.getIPNode(parent, cfstmt));
+        }
+
+        if (getParent() != null) {
+            for (IPNode cfnode : getParent().getCfDepNodesRecursive()) {
+                cfDepNodes.add(cfnode);
+            }
+        }
+        return cfDepNodes;
+    }
+
+    public int length() {
+        return (parent == null ? 0 : parent.length()) + 1;
     }
 
     public boolean parentOf(Context other) {
-        if (other.getCtrace().size() < this.getCtrace().size()) {
-            return false;
-        }
-        // boolean included = true;
-        for (int i = 0; i < this.getCtrace().size(); i++) {
-            if (!this.getCtrace().get(i).equals(other.getCtrace().get(i))) {
-                return false;
-            }
-        }
-        return true;
+        return other != null && (this.equals(other) || strictParentOf(other));
     }
 
     public boolean strictParentOf(Context other) {
-        if (other.getCtrace().size() <= this.getCtrace().size()) {
+        if (other == null || other.getParent() == null) {
             return false;
         }
-        // boolean included = true;
-        for (int i = 0; i < this.getCtrace().size(); i++) {
-            if (!this.getCtrace().get(i).equals(other.getCtrace().get(i))) {
-                return false;
-            }
-        }
-        return true;
+        return parentOf(other.getParent());
     }
 
     public static Context emptyContext() {
         return emptyContext;
     }
+
+    public Context getParent() {
+        return parent;
+    }
+
+    public void setParent(Context parent) {
+        this.parent = parent;
+    }
+
+    public static Context getEmptyContext() {
+        return emptyContext;
+    }
+
+    public static void setEmptyContext(Context emptyContext) {
+        Context.emptyContext = emptyContext;
+    }
+
 }

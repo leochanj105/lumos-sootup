@@ -1,9 +1,11 @@
 package com.lumos.forward;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
 
 // import fj.data.Set;
@@ -16,6 +18,18 @@ public abstract class IPNode {
     public Stmt stmt;
     public Context context;
     public String type;
+
+    public List<IPNode> cfDepNodes;
+
+    // public InterProcedureGraph igraph;
+
+    public InterProcedureGraph getIgraph() {
+        return context == null ? null : context.getIgraph();
+    }
+
+    // public void setIgraph(InterProcedureGraph igraph) {
+    //     this.igraph = igraph;
+    // }
 
     public abstract boolean isSingleAssign();
 
@@ -66,6 +80,25 @@ public abstract class IPNode {
     public String getDescription() {
         return this.context.toString() + ", " + this.stmt.toString() + ", " + this.type + ", "
                 + this.stmt.getJavaSourceStartLineNumber();
+    }
+
+    public List<IPNode> getCfDepNodes() {
+        if (this.cfDepNodes != null) {
+            return this.cfDepNodes;
+        }
+        cfDepNodes = new ArrayList<>();
+        MethodInfo minfo = getContext().getStackLast();
+        for (Stmt cfstmt : minfo.cfDependency.get(stmt)) {
+            cfDepNodes.add(getIgraph().getIPNode(context, cfstmt));
+        }
+        // Stmt callingStmt = getContext().getCallingStmt();
+
+        if (getContext() != null) {
+            for (IPNode cfnode : getContext().getCfDepNodesRecursive()) {
+                cfDepNodes.add(cfnode);
+            }
+        }
+        return cfDepNodes;
     }
 
     public abstract void flow(IPFlowInfo out);

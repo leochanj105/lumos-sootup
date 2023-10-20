@@ -21,51 +21,29 @@ public class WireHTTP {
                                         new String[] { "$u0", "loginId" }, new String[] { "info", "$stack16" },
                                         "$stack29");
                         add("boolean pay", 50,
-                                        "other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById",
+                                        "other.controller.OrderOtherController: other.domain.GetOrderResult getOrderById",
                                         new String[] { "$stack17" }, new String[] { "info" }, "$stack84");
-                        // add("boolean pay", 50,
-                        // "other.controller.OrderOtherController: other.domain.GetOrderResult
-                        // getOrderById",
-                        // new String[] { "$stack17" }, new String[] { "info" }, "$stack84");
-                        // add("boolean pay", 46,
-                        // "order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById",
-                        // new String[] { "$stack17" }, new String[] { "info" }, "$stack23");
                         add("boolean pay", 46,
                                         "order.controller.OrderController: order.domain.GetOrderResult getOrderById",
                                         new String[] { "$stack17" }, new String[] { "info" }, "$stack23");
                         add("inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)",
                                         95,
-                                        "com.trainticket.service.PaymentServiceImpl: boolean pay(com.trainticket.domain.PaymentInfo)",
+                                        "com.trainticket.controller.PaymentController: boolean pay(com.trainticket.domain.PaymentInfo)",
                                         new String[] { "$stack54" }, new String[] { "info" }, "$stack60");
                         add("java.util.concurrent.Future sendOrderCancel",
                                         115,
-                                        // "cancel.service.CancelServiceImpl: cancel.domain.CancelOrderResult
-                                        // cancelOrder(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)",
                                         "cancel.controller.CancelController: cancel.domain.CancelOrderResult cancelTicket(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)",
                                         new String[] { "$u0", "loginId", "loginToken" },
                                         new String[] { "info", "loginId", "loginToken" },
                                         "$stack25");
+
                         add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult getOrderByIdFromOrderOther",
                                         340,
-                                        "other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById(other.domain.GetOrderByIdInfo)",
+                                        "other.controller.OrderOtherController: other.domain.GetOrderResult getOrderById(other.domain.GetOrderByIdInfo)",
                                         new String[] { "info" },
                                         new String[] { "info" },
                                         "$stack6");
-                        // add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult
-                        // getOrderByIdFromOrderOther",
-                        // 340,
-                        // "other.controller.OrderOtherController: other.domain.GetOrderResult
-                        // getOrderById(other.domain.GetOrderByIdInfo)",
-                        // new String[] { "info" },
-                        // new String[] { "info" },
-                        // "$stack6");
-                        // add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult
-                        // getOrderByIdFromOrder", 332,
-                        // "order.service.OrderServiceImpl: order.domain.GetOrderResult
-                        // getOrderById(order.domain.GetOrderByIdInfo)",
-                        // new String[] { "info" },
-                        // new String[] { "info" },
-                        // "$stack6");
+
                         add("cancel.service.CancelServiceImpl: cancel.domain.GetOrderResult getOrderByIdFromOrder", 332,
                                         "order.controller.OrderController: order.domain.GetOrderResult getOrderById(order.domain.GetOrderByIdInfo)",
                                         new String[] { "info" },
@@ -79,21 +57,22 @@ public class WireHTTP {
 
                         add("cancel.service.CancelServiceImpl: boolean drawbackMoney(java.lang.String,java.lang.String)",
                                         312,
-                                        "inside_payment.service.InsidePaymentServiceImpl: boolean drawBack(inside_payment.domain.DrawBackInfo)",
+                                        "inside_payment.controller.InsidePaymentController: boolean drawBack(inside_payment.domain.DrawBackInfo)",
                                         new String[] { "$stack6" },
                                         new String[] { "info" },
                                         "$stack9");
+
                         add("cancel.service.CancelServiceImpl: cancel.domain.GetAccountByIdResult getAccount(cancel.domain.GetAccountByIdInfo)",
                                         322,
-                                        "sso.service.AccountSsoServiceImpl: sso.domain.GetAccountByIdResult getAccountById(sso.domain.GetAccountByIdInfo)",
+                                        "sso.controller.AccountSsoController: sso.domain.GetAccountByIdResult getAccountById(sso.domain.GetAccountByIdInfo)",
                                         new String[] { "info" },
                                         new String[] { "info" },
                                         "$stack6");
                         add("cancel.controller.CancelController: cancel.domain.VerifyResult verifySsoLogin(java.lang.String)",
                                         64,
-                                        "sso.service.AccountSsoServiceImpl: sso.domain.VerifyResult verifyLoginToken(java.lang.String)",
+                                        "sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken(java.lang.String)",
                                         new String[] { "loginToken" },
-                                        new String[] { "verifyToken" },
+                                        new String[] { "token" },
                                         "$stack9");
                         add("cancel.queue.MsgSendingBean: void sendCancelInfoToOrderOther(cancel.domain.ChangeOrderInfo)",
                                         27, "other.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)",
@@ -105,9 +84,9 @@ public class WireHTTP {
                                         new String[] { "changeOrderResult" }, "");
                         add("order.controller.OrderController: order.domain.VerifyResult verifySsoLogin(java.lang.String)",
                                         155,
-                                        "sso.service.AccountSsoServiceImpl: sso.domain.VerifyResult verifyLoginToken(java.lang.String)",
+                                        "sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken(java.lang.String)",
                                         new String[] { "loginToken" },
-                                        new String[] { "verifyToken" },
+                                        new String[] { "token" },
                                         "$stack9");
 
                 }
