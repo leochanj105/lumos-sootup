@@ -1,0 +1,20 @@
+java.util.concurrent.Future sendInsidePayment
+99
+inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)
+$u0,loginId
+info,$stack16
+java.util.concurrent.Future sendOrderCancel
+115
+cancel.controller.CancelController: cancel.domain.CancelOrderResult cancelTicket(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)
+$u0,loginId,loginToken
+info,loginId,loginToken
+cancel.queue.MsgSendingBean: void sendCancelInfoToOrderOther(cancel.domain.ChangeOrderInfo)
+27
+other.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)
+changeOrderInfo
+changeOrderInfo
+other.queue.MsgSendingBean: void sendLoginInfoToSso(other.domain.ChangeOrderResult)
+27
+cancel.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)
+changeOrderResult
+changeOrderResult
