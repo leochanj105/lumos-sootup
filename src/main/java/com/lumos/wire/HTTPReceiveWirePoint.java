@@ -10,27 +10,26 @@ public class HTTPReceiveWirePoint {
     public List<String> sendParams;
     public List<String> recvParams;
 
-    public String retWireName;
+    // public String retWireName;
 
-    public String getRetWireName() {
-        return retWireName;
-    }
+    // public String getRetWireName() {
+    // return retWireName;
+    // }
 
-    public void setRetWireName(String retWireName) {
-        this.retWireName = retWireName;
-    }
+    // public void setRetWireName(String retWireName) {
+    // this.retWireName = retWireName;
+    // }
 
     @Override
     public String toString() {
         return "HTTPReceiveWirePoint [targetMethod=" + targetMethod + "]";
     }
 
-    public HTTPReceiveWirePoint(String targetMethod, List<String> sendParams, List<String> recvParams,
-            String retWireName) {
+    public HTTPReceiveWirePoint(String targetMethod, List<String> sendParams, List<String> recvParams) {
         this.targetMethod = targetMethod;
         this.sendParams = sendParams;
         this.recvParams = recvParams;
-        this.retWireName = retWireName;
+        // this.retWireName = retWireName;
     }
 
     public String getTargetMethod() {

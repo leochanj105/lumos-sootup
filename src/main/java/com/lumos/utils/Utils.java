@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+
+import com.lumos.App;
 
 public class Utils {
     public static List<String> readFrom(String file) {
@@ -34,4 +37,83 @@ public class Utils {
         return list;
     }
 
+    public static String trimSlash(String str) {
+        if (str.length() > 0 && str.charAt(str.length() - 1) == '/') {
+            return str.substring(0, str.length() - 1);
+        }
+        return str;
+    }
+
+    public static String getReqTypeString(Object req) {
+        String reqString = req.toString().toUpperCase();
+        // System.out.println(reqString);
+        if (reqString.contains("GET")) {
+            return "GET";
+        } else if (reqString.contains("POST")) {
+            return "POST";
+        } else if (reqString.contains("PUT")) {
+            return "PUT";
+        } else if (reqString.contains("DELETE")) {
+            return "DELETE";
+        } else if (reqString.contains("PATCH")) {
+            return "PATCH";
+        }
+        return null;
+    }
+
+    public static boolean isCrossContext(String mname) {
+        return mname.contains("exchange") || mname.contains("ForObject") ||
+                mname.contains("boolean send(org.springframework.messaging.Message)");
+    }
+
+    public static String getDirectName(String cname) {
+        return cname.substring(cname.lastIndexOf(".") + 1);
+    }
+
+    public static boolean typeMatch(String caller, String callee) {
+        return caller.equals(callee) || specialMatch(caller, callee);
+    }
+
+    public static boolean specialMatch(String s1, String s2) {
+        return s1.equals("OutsidePaymentInfo") && s2.equals("PaymentInfo");
+    }
+
+    public static String getSourceLine(String className, int target) {
+        String ans = "";
+        if (!App.sourceMap.containsKey(className)) {
+            App.p(className + " does not exist");
+            return ans;
+        }
+        try {
+            Scanner myReader = new Scanner(App.sourceMap.get(className));
+            int line = 1;
+            // int target = 42;
+            boolean beginFound = false;
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                if (beginFound) {
+                    String tdata = data.trim();
+                    ans += tdata;
+                    if (tdata.charAt(tdata.length() - 1) == ';') {
+                        break;
+                    }
+                } else if (line == target) {
+                    // p(data);
+                    ans = data.trim();
+                    // ans.trim()
+                    beginFound = true;
+                    if (ans.charAt(ans.length() - 1) == ';') {
+                        break;
+                    }
+                    // break;
+                    // return data;
+                }
+                line += 1;
+            }
+            myReader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ans;
+    }
 }

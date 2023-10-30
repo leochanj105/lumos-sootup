@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
+import com.lumos.utils.Utils;
 import com.lumos.wire.Banned;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.IdentityWire;
@@ -116,14 +117,12 @@ public class InterProcedureGraph {
         minfo = methodMap.get(signature);
         String mname = sm.getSignature().toString();
         String lastMethod = context.getStackLast().sm.getSignature();
-        if (minfo == null && (mname.contains("exchange") || mname.contains("ForObject") ||
-                mname.contains("boolean send(org.springframework.messaging.Message)"))) {
-            HTTPReceiveWirePoint hwire = WireHTTP.get(lastMethod,
-                    stmt.getJavaSourceStartLineNumber());
-            // if (stmt.toString().contains("exchange")) {
-            // App.p(context.getStackLast().sm.getSignature() + ", " +
-            // stmt.getJavaSourceStartLineNumber());
-            // }
+        if (minfo == null && (Utils.isCrossContext(mname))) {
+            HTTPReceiveWirePoint hwire = WireHTTP.templateWire(stmt, context.getStackLast());
+            if (hwire == null) {
+                hwire = WireHTTP.get(lastMethod,
+                        stmt.getJavaSourceStartLineNumber());
+            }
             if (hwire != null) {
                 String target = hwire.targetMethod;
                 minfo = searchMethod(target);
@@ -132,8 +131,9 @@ public class InterProcedureGraph {
                 }
                 result.setHwire(hwire);
             } else {
-
+                App.p("===[SEVERE]===\nHTTP wiring failed for " + stmt);
             }
+
         }
 
         if (minfo != null) {

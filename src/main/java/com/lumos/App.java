@@ -10,6 +10,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.text.AbstractDocument.Content;
 
@@ -56,6 +57,7 @@ import com.lumos.wire.Banned;
 import com.lumos.wire.HTTPReceiveWirePoint;
 import com.lumos.wire.WireHTTP;
 
+import polyglot.ast.Assign;
 import soot.Body;
 // import soot.toolkits.scalar.ForwardFlowAnalysis;
 // import sootup.java.sourcecode.frontend.WalaIRToJimpleConverter;
@@ -103,6 +105,11 @@ import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
 import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.options.Options;
+import soot.tagkit.AnnotationArrayElem;
+import soot.tagkit.AnnotationElem;
+import soot.tagkit.AnnotationStringElem;
+import soot.tagkit.AnnotationTag;
+import soot.tagkit.VisibilityAnnotationTag;
 import soot.util.Cons;
 
 import java.io.File;
@@ -144,6 +151,7 @@ public class App {
     public static boolean showLineNum = true;
     public static boolean showIDNodesOnly = false;
     public static boolean showInitOnly = false;
+    public static boolean analyzeControllerOnly = false;
 
     public static Map<String, MethodInfo> methodMap;
 
@@ -151,6 +159,8 @@ public class App {
 
     public static Map<String, String> serviceMap = new HashMap<>();
     public static Map<String, String> pathMap = new HashMap<>();
+
+    public static Map<String, String> srcMap = new HashMap<>();
     public static String fileSeparator = ":";
     // public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
 
@@ -166,70 +176,94 @@ public class App {
     public static String outputTPFileName = "tps1";
     public static boolean outputTP = false;
 
+    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
+    public static String bcodeSuffix = "\\target\\classes";
+    public static String scodeSuffix = "\\src\\main\\java";
+    public static Map<String, Path> sourceMap = new HashMap<>();
+
+    public static Map<String, SootMethod> remoteMap = new HashMap<>();
+
+    public static String[] services = new String[] {
+            "ts-launcher",
+            "ts-inside-payment-service",
+            "ts-order-other-service",
+            "ts-order-service",
+            "ts-payment-service",
+            "ts-cancel-service",
+            "ts-sso-service",
+            // "ts-admin-basic-info-service",
+            // "ts-admin-order-service",
+            // "ts-admin-route-service",
+            // "ts-admin-travel-service",
+            // "ts-admin-user-service",
+            // "ts-assurance-service",
+            // "ts-basic-service",
+            // "ts-config-service",
+            // "ts-consign-price-service",
+            // "ts-consign-service",
+            // "ts-contacts-service",
+            // "ts-execute-service",
+            // "ts-food-map-service",
+            // "ts-food-service",
+            // "ts-login-service",
+            // "ts-notification-service",
+            // "ts-preserve-other-service",
+            // "ts-preserve-service",
+            // "ts-price-service",
+            // "ts-rebook-service",
+            // "ts-register-service",
+            // "ts-route-plan-service",
+            // "ts-route-service",
+            // "ts-seat-service",
+            // "ts-security-service",
+            // "ts-station-service",
+            // "ts-ticketinfo-service",
+            // "ts-train-service",
+            // "ts-travel-plan-service",
+            // "ts-travel-service",
+            // "ts-travel2-service",
+            // "ts-verification-code-service"
+    };
+
     public static void main(String[] args) {
-        String[] services = new String[] {
-                "ts-launcher",
-                "ts-inside-payment-service",
-                "ts-order-other-service",
-                "ts-order-service",
-                "ts-payment-service",
-                "ts-cancel-service",
-                "ts-sso-service",
-                // "ts-admin-basic-info-service",
-                // "ts-admin-order-service",
-                // "ts-admin-route-service",
-                // "ts-admin-travel-service",
-                // "ts-admin-user-service",
-                // "ts-assurance-service",
-                // "ts-basic-service",
-                // "ts-config-service",
-                // "ts-consign-price-service",
-                // "ts-consign-service",
-                // "ts-contacts-service",
-                // "ts-execute-service",
-                // "ts-food-map-service",
-                // "ts-food-service",
-                // "ts-login-service",
-                // "ts-notification-service",
-                // "ts-preserve-other-service",
-                // "ts-preserve-service",
-                // "ts-price-service",
-                // "ts-rebook-service",
-                // "ts-register-service",
-                // "ts-route-plan-service",
-                // "ts-route-service",
-                // "ts-seat-service",
-                // "ts-security-service",
-                // "ts-station-service",
-                // "ts-ticketinfo-service",
-                // "ts-train-service",
-                // "ts-travel-plan-service",
-                // "ts-travel-service",
-                // "ts-travel2-service",
-                // "ts-verification-code-service"
-        };
+
         methodMap = new HashMap<>();
 
-        String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
-        String suffix = "\\target\\classes";
         List<String> paths = new ArrayList<>();
         for (String str : services) {
-            String complete = base + str + suffix;
+            String complete = base + str + bcodeSuffix;
             // String complete = "xxxx";
             pathMap.put(str, complete);
             paths.add(complete);
         }
+
         analyzePath(pathMap);
         // analyzePath("xxxx\\classes");
+        getSourceCodes();
+        // if (1 - 2 < 0) {
+        // getSourceCodes();
+        // for (String s : methodMap.keySet()) {
+        // p("! " + s + ", " + methodMap.get(s).sm.getDeclaringClass());
+        // }
+        // return;
+        // }
 
         if (compileJimpleOnly)
             return;
 
+        analyzeController();
+        // analyzeSend();
+        if (analyzeControllerOnly) {
+            return;
+        }
+
         // readTPs("TP", "tps");
 
+        // Safelist contains a list of lib methods
+        // that don't modify >1 args, and obeying
+        // the basic template of R/Ws
         Utils.readFrom(safeListPath).forEach(s -> {
             safeList.add(s);
-            // App.p("!!! " + s);
         });
 
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
@@ -318,6 +352,152 @@ public class App {
                     }
                 }
 
+            }
+        }
+    }
+
+    // public static void analyzeSend() {
+    // methodMap.forEach((s, minfo) -> {
+    // Body currBody = minfo.sm.getActiveBody();
+    // for (Iterator iter = currBody.getUnits().snapshotIterator(); iter.hasNext();)
+    // {
+    // final Unit currUnit = (Unit) iter.next();
+    // Stmt currStmt = (Stmt) currUnit;
+    // if (currStmt.containsInvokeExpr()) {
+    // InvokeExpr expr = currStmt.getInvokeExpr();
+    // SootMethod invokedMethod = expr.getMethod();
+    // if (Utils.isCrossContext(invokedMethod.toString())) {
+    // // App.p("!!! " + currStmt);
+    // // App.p(minfo.sm.getDeclaringClass().getName());
+    // String srcLine = getSourceLine(minfo.sm.getDeclaringClass().getName(),
+    // +currStmt.getJavaSourceStartLineNumber());
+
+    // for (String address : remoteMap.keySet()) {
+    // // App.p(address + ": " + remoteMap.get(address));
+    // if (srcLine.contains(address)) {
+    // App.p(srcLine);
+    // SootMethod wiredMethod = remoteMap.get(address);
+    // p("=========");
+    // p(currStmt);
+    // p("Matched " + wiredMethod);
+    // if (wiredMethod.getParameterCount() == 1) {
+    // for (Local plocal : wiredMethod.getActiveBody().getParameterLocals()) {
+    // for (Value arg : expr.getArgs()) {
+    // // p(arg.getType().toString());
+    // // p("++ " + plocal.getType().);
+    // // plocal.getType().
+    // String callerName = Utils.getDirectName(arg.getType().toString());
+    // String calleeName = Utils.getDirectName(plocal.getType().toString());
+
+    // // if (callerName.contains("Payment")) {
+    // // p("++ " + callerName + ", " + calleeName);
+    // // }
+    // if (Utils.typeMatch(callerName, calleeName)) {
+    // p("----- " + arg + " matched for remote " + plocal);
+    // if (currStmt instanceof AssignStmt) {
+    // p(((AssignStmt) currStmt).getLeftOp());
+    // }
+    // }
+    // }
+    // }
+    // }
+    // // App.p(expr.getArgs());
+    // }
+    // }
+    // }
+    // }
+
+    // }
+    // });
+    // }
+
+    public static void analyzeController() {
+        methodMap.forEach((s, minfo) -> {
+            if (s.contains("Controller")) {
+                SootMethod currMethod = minfo.sm;
+                SootClass sc = currMethod.getDeclaringClass();
+                String serviceURL = "";
+                String entryURL = "";
+                VisibilityAnnotationTag ctag = (VisibilityAnnotationTag) sc.getTag("VisibilityAnnotationTag");
+                if (ctag != null) {
+                    for (AnnotationTag annotation : ctag.getAnnotations()) {
+                        String aname = annotation.getType();
+                        if (aname.contains("RequestMapping")) {
+                            AnnotationElem elem = annotation.getElems().iterator().next();
+                            if (elem != null && elem instanceof AnnotationArrayElem) {
+                                AnnotationArrayElem arrayElem = (AnnotationArrayElem) elem;
+                                serviceURL = ((AnnotationStringElem) arrayElem.getValues().get(0)).getValue();
+                            }
+
+                        }
+                    }
+                }
+
+                VisibilityAnnotationTag tag = (VisibilityAnnotationTag) currMethod.getTag("VisibilityAnnotationTag");
+                if (tag != null) {
+                    for (AnnotationTag annotation : tag.getAnnotations()) {
+
+                        String aname = annotation.getType();
+                        if (aname.contains("Mapping")) {
+                            AnnotationElem elem = null;
+                            Iterator<AnnotationElem> iter = null;
+                            if (!annotation.getElems().isEmpty()) {
+                                iter = annotation.getElems().iterator();
+                                elem = iter.next();
+                            }
+                            if (elem != null && elem instanceof AnnotationArrayElem) {
+                                AnnotationArrayElem arrayElem = (AnnotationArrayElem) elem;
+                                entryURL = ((AnnotationStringElem) arrayElem.getValues().get(0)).getValue();
+                            }
+                            String reqType = "";
+                            if (iter != null && iter.hasNext()) {
+                                elem = iter.next();
+                                if (elem != null && elem instanceof AnnotationArrayElem) {
+                                    AnnotationArrayElem arrayElem = (AnnotationArrayElem) elem;
+                                    aname = arrayElem.getValues().get(0).toString();
+                                    reqType = Utils.getReqTypeString(aname);
+                                }
+
+                            }
+
+                            // List<ValueBox> paramBoxes = this.getCurrentParamBoxes();
+                            // paramBoxes.remove(0);
+
+                            String entireURL = serviceURL + entryURL;
+                            if (entireURL.contains("/{")) {
+                                entireURL = entireURL.substring(0, entireURL.indexOf("/{"));
+                            }
+                            entireURL = Utils.trimSlash(entireURL);
+                            // App.p(currMethod.getName() + ": " + entireURL + ", " + reqType);
+                            remoteMap.put(entireURL, currMethod);
+                        }
+                    }
+                }
+
+            }
+        });
+    }
+
+    public static void getSourceCodes() {
+        for (String s : services) {
+            String spath = base + s + scodeSuffix;
+            try (Stream<Path> stream = Files.walk(Paths.get(spath))) {
+                stream.filter(Files::isRegularFile)
+                        .forEach(file -> {
+                            String fstr = file.toString();
+                            // p(fstr);
+                            // p(spath);
+                            String sfilestr = fstr.substring(spath.length() + 1);
+                            sfilestr = sfilestr.substring(0, sfilestr.indexOf(".java"));
+                            sfilestr = sfilestr.replace("\\", ".");
+                            sourceMap.put(sfilestr, file);
+                            // if (fstr.contains("OrderOtherServiceImpl")) {
+                            // p(sfilestr);
+
+                            // }
+                        });
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -753,6 +933,7 @@ public class App {
             if (cls.toString().contains("conf.HttpAspect")) {
                 continue;
             }
+
             for (SootMethod sm : cls.getMethods()) {
                 if (sm.isAbstract()) {
                     continue;
