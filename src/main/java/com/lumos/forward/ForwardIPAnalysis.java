@@ -87,8 +87,6 @@ public class ForwardIPAnalysis {
                 boolean isReady = true;
                 for (IPNode pred : node.getPredecesors()) {
                     if (!visited.contains(pred) && !(canReach(node, pred))
-                    // && !pred.getStmt().toString().contains("<java.lang.Exception: void
-                    // printStackTrace()>")
                             && !unreacheableNodes.contains(pred)) {
                         if (!(pred.stmt.toString().contains("if") || pred.stmt.toString().contains("goto")
                                 || pred.stmt.toString().contains("return"))) {

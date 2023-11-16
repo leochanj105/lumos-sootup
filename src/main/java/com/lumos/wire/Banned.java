@@ -33,6 +33,7 @@ public class Banned {
             for (String n : name) {
                 if (!query.contains(n)) {
                     matched = false;
+                    break;
                 }
             }
             if (matched) {

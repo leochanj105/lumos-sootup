@@ -84,11 +84,8 @@ public class WireHTTP {
         if (wps == null) {
             wps = new HashMap<>();
 
-            // bannedStmts = new ArrayList<>();
-
             List<String> strs = Utils.readFrom(App.caseStudyPath + "httpWires");
             for (int i = 0; i < strs.size() / 5; i++) {
-                // App.p("!!! " + strs.get(i + 1));
                 int start = i * 5;
                 add(strs.get(start), Integer.valueOf(strs.get(start + 1)),
                         strs.get(start + 2),

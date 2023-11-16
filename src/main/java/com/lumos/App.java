@@ -152,6 +152,7 @@ public class App {
     public static boolean showIDNodesOnly = false;
     public static boolean showInitOnly = false;
     public static boolean analyzeControllerOnly = false;
+    public static boolean analyzeRepoOnly = true;
 
     public static Map<String, MethodInfo> methodMap;
 
@@ -173,8 +174,8 @@ public class App {
     public static Set<String> initList = new HashSet<>();
 
     public static String outputTPDir = "TP";
-    public static String outputTPFileName = "tps1";
-    public static boolean outputTP = false;
+    public static String outputTPFileName = "tpsclab";
+    public static boolean outputTP = true;
 
     public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
     public static String bcodeSuffix = "\\target\\classes";
@@ -250,6 +251,11 @@ public class App {
 
         if (compileJimpleOnly)
             return;
+        analyzeRepo();
+        analyzeDBFlow();
+        if (analyzeRepoOnly) {
+            return;
+        }
 
         analyzeController();
         // analyzeSend();
@@ -267,15 +273,6 @@ public class App {
         });
 
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
-        // getDB("save", "OrderRepository");
-        // App.p(".................................");
-        // getDB("save", "OrderOtherRepository");
-        // App.p(".................................");
-        // getDB("save", "AddMoneyRepository");
-        // App.p(".................................");
-        // getDB("save", "PaymentRepository");
-        // App.p(".................................");
-        // getDB("save", "LoginUserListRepository");
 
         // if (true) {
         // return;
@@ -329,6 +326,69 @@ public class App {
         }
     }
 
+    private static void analyzeDBFlow() {
+        String repoName = "orderRepository";
+        for (String method : methodMap.keySet()) {
+            MethodInfo minfo = methodMap.get(method);
+            for (Unit unit : minfo.sm.getActiveBody().getUnits()) {
+                Stmt stmt = (Stmt) unit;
+                if (stmt.containsInvokeExpr()) {
+                    InvokeExpr iexpr = stmt.getInvokeExpr();
+                    if (iexpr instanceof InstanceInvokeExpr) {
+                        InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                        if (inexpr.getMethod().getName().equals("save")) {
+                            // if()
+                            p("-----");
+                            p(stmt);
+                            p(inexpr.getBase().getType());
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    private static void analyzeRepo() {
+        classMap.forEach((name, sclass) -> {
+            if (name.contains("Repository")) {
+                // p(sclass.SIGNATURES);
+                String repoSig = sclass.getTag("SignatureTag").toString();
+                repoSig = repoSig.substring(0, repoSig.length() - 1);
+                String typeTuple = repoSig.substring(repoSig.indexOf("<"));
+                typeTuple = typeTuple.substring(2, typeTuple.length() - 2);
+                String type = typeTuple.substring(0, typeTuple.indexOf(";"));
+                // p(File.separator);
+                // p(File.pathSeparator);
+                type = type.replace("/", ".");
+                // p(type);
+                SootClass sc = searchClassExact(type);
+                p(sc);
+                p(sc.getShortName());
+                classMap.forEach((oname, osclass) -> {
+                    if (osclass.getShortName().equals(sc.getShortName())) {
+                        p("--" + osclass);
+                    }
+                });
+
+                p("");
+                // .forEach(t -> {
+                // p(t.getName());
+                // });
+            }
+        });
+        // p("Analyzing Repo saves...");
+        // getDB("save", "OrderRepository");
+        // App.p(".................................");
+        // getDB("save", "OrderOtherRepository");
+        // App.p(".................................");
+        // getDB("save", "AddMoneyRepository");
+        // App.p(".................................");
+        // getDB("save", "PaymentRepository");
+        // App.p(".................................");
+        // getDB("save", "LoginUserListRepository");
+    }
+
     public static void getDB(String... strs) {
         // List<Stmt>
         for (String method : methodMap.keySet()) {
@@ -355,61 +415,6 @@ public class App {
             }
         }
     }
-
-    // public static void analyzeSend() {
-    // methodMap.forEach((s, minfo) -> {
-    // Body currBody = minfo.sm.getActiveBody();
-    // for (Iterator iter = currBody.getUnits().snapshotIterator(); iter.hasNext();)
-    // {
-    // final Unit currUnit = (Unit) iter.next();
-    // Stmt currStmt = (Stmt) currUnit;
-    // if (currStmt.containsInvokeExpr()) {
-    // InvokeExpr expr = currStmt.getInvokeExpr();
-    // SootMethod invokedMethod = expr.getMethod();
-    // if (Utils.isCrossContext(invokedMethod.toString())) {
-    // // App.p("!!! " + currStmt);
-    // // App.p(minfo.sm.getDeclaringClass().getName());
-    // String srcLine = getSourceLine(minfo.sm.getDeclaringClass().getName(),
-    // +currStmt.getJavaSourceStartLineNumber());
-
-    // for (String address : remoteMap.keySet()) {
-    // // App.p(address + ": " + remoteMap.get(address));
-    // if (srcLine.contains(address)) {
-    // App.p(srcLine);
-    // SootMethod wiredMethod = remoteMap.get(address);
-    // p("=========");
-    // p(currStmt);
-    // p("Matched " + wiredMethod);
-    // if (wiredMethod.getParameterCount() == 1) {
-    // for (Local plocal : wiredMethod.getActiveBody().getParameterLocals()) {
-    // for (Value arg : expr.getArgs()) {
-    // // p(arg.getType().toString());
-    // // p("++ " + plocal.getType().);
-    // // plocal.getType().
-    // String callerName = Utils.getDirectName(arg.getType().toString());
-    // String calleeName = Utils.getDirectName(plocal.getType().toString());
-
-    // // if (callerName.contains("Payment")) {
-    // // p("++ " + callerName + ", " + calleeName);
-    // // }
-    // if (Utils.typeMatch(callerName, calleeName)) {
-    // p("----- " + arg + " matched for remote " + plocal);
-    // if (currStmt instanceof AssignStmt) {
-    // p(((AssignStmt) currStmt).getLeftOp());
-    // }
-    // }
-    // }
-    // }
-    // }
-    // // App.p(expr.getArgs());
-    // }
-    // }
-    // }
-    // }
-
-    // }
-    // });
-    // }
 
     public static void analyzeController() {
         methodMap.forEach((s, minfo) -> {
@@ -645,9 +650,9 @@ public class App {
                                     if (!bdef.getDefinedValue().getBase().getValue().toString().equals("null")) {
                                         App.p("New Provenance due to field: " + cvun + " at "
                                                 + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
-                                        tps.add(new TracePoint(bdef.getDefinedLocation().getStmt(),
-                                                bdef.getDefinedValue().getBase().getValue(),
-                                                bdef.getDefinedLocation().getMethodInfo().sm, cvun.getSuffix()));
+                                        // tps.add(new TracePoint(bdef.getDefinedLocation().getStmt(),
+                                        // bdef.getDefinedValue().getBase().getValue(),
+                                        // bdef.getDefinedLocation().getMethodInfo().sm, cvun.getSuffix()));
                                     }
                                 }
                             }
@@ -958,6 +963,38 @@ public class App {
 
         }
 
+    }
+
+    public static SootClass searchClassExact(String... str) {
+        for (String sig : classMap.keySet()) {
+            boolean match = true;
+            for (String s : str) {
+                if (!sig.toString().equals(s)) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                return classMap.get(sig);
+            }
+        }
+        return null;
+    }
+
+    public static SootClass searchClass(String... str) {
+        for (String sig : classMap.keySet()) {
+            boolean match = true;
+            for (String s : str) {
+                if (!sig.toString().contains(s)) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                return classMap.get(sig);
+            }
+        }
+        return null;
     }
 
     public static MethodInfo searchMethod(String... str) {
