@@ -75,7 +75,8 @@ public class Utils {
     }
 
     public static boolean specialMatch(String s1, String s2) {
-        return s1.equals("OutsidePaymentInfo") && s2.equals("PaymentInfo");
+        return (s1.equals("OutsidePaymentInfo") && s2.equals("PaymentInfo")) ||
+                (s1.equals("Information") && s2.equals("Information3"));
     }
 
     public static String getSourceLine(String className, int target) {
@@ -91,9 +92,13 @@ public class Utils {
             boolean beginFound = false;
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
+                // if (target == 360) {
+                // App.p(data);
+                // }
                 if (beginFound) {
                     String tdata = data.trim();
                     ans += tdata;
+                    // App.p(className + ", " + target + ", " + line + ", " + tdata + ", " + data);
                     if (tdata.charAt(tdata.length() - 1) == ';') {
                         break;
                     }

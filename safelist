@@ -47,6 +47,7 @@
 <com.google.gson.Gson: java.lang.Object fromJson(java.lang.String,java.lang.Class)>
 <java.util.UUID: java.lang.String toString()>
 <java.util.List: java.util.Iterator iterator()>
+<java.util.Set: java.util.Iterator iterator()>
 <java.util.Random: int nextInt(int)>
 <java.lang.String: boolean equals(java.lang.Object)>
 <java.lang.Boolean: boolean booleanValue()>
@@ -73,3 +74,7 @@
 <java.util.Iterator: java.lang.Object next()>
 <java.util.Random: boolean nextBoolean()>
 <java.lang.Throwable: void printStackTrace()>
+<org.springframework.data.redis.core.StringRedisTemplate: org.springframework.data.redis.core.ValueOperations opsForValue()>
+<org.springframework.data.redis.core.StringRedisTemplate: java.util.Set keys(java.lang.Object)>
+<org.springframework.data.redis.core.ValueOperations: java.lang.Object get(java.lang.Object)>
+<java.lang.Double: double doubleValue()>

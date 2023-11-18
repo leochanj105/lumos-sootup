@@ -297,6 +297,9 @@ public class InterProcedureGraph {
                             Value v2 = calleeinfo.getLocal(s2);
 
                             if (v1 == null || v2 == null) {
+                                // App.p(v1 + ", " + v2 + ", " + s1 + ", " + s2);
+                                App.p(calleeinfo.localMap);
+                                App.p(calleeinfo.sm.getSignature());
                                 App.p("Wiring null values!");
                                 App.panicni();
                             }

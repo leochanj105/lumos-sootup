@@ -152,7 +152,7 @@ public class App {
     public static boolean showIDNodesOnly = false;
     public static boolean showInitOnly = false;
     public static boolean analyzeControllerOnly = false;
-    public static boolean analyzeRepoOnly = true;
+    public static boolean analyzeRepoOnly = false;
 
     public static Map<String, MethodInfo> methodMap;
 
@@ -167,17 +167,17 @@ public class App {
 
     public static Set<IPNode> idnodes = new HashSet<>();
 
-    public static String caseStudyPath = "cases/f13/";
+    public static String caseStudyPath = "cases/f8/";
     public static String safeListPath = "safelist";
     public static Set<String> safeList = new HashSet<>();
 
     public static Set<String> initList = new HashSet<>();
 
     public static String outputTPDir = "TP";
-    public static String outputTPFileName = "tpsclab";
+    public static String outputTPFileName = "tps8";
     public static boolean outputTP = true;
 
-    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\lumos-experiment\\";
+    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f8\\";
     public static String bcodeSuffix = "\\target\\classes";
     public static String scodeSuffix = "\\src\\main\\java";
     public static Map<String, Path> sourceMap = new HashMap<>();
@@ -185,7 +185,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            "ts-launcher",
+            // "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -199,7 +199,7 @@ public class App {
             // "ts-admin-user-service",
             // "ts-assurance-service",
             // "ts-basic-service",
-            // "ts-config-service",
+            "ts-config-service",
             // "ts-consign-price-service",
             // "ts-consign-service",
             // "ts-contacts-service",
@@ -239,8 +239,11 @@ public class App {
         }
 
         analyzePath(pathMap);
+        App.p("Class file analysis finished");
+
         // analyzePath("xxxx\\classes");
         getSourceCodes();
+        App.p("Source code analysis finished");
         // if (1 - 2 < 0) {
         // getSourceCodes();
         // for (String s : methodMap.keySet()) {
@@ -251,14 +254,18 @@ public class App {
 
         if (compileJimpleOnly)
             return;
-        analyzeRepo();
-        analyzeDBFlow();
+
         if (analyzeRepoOnly) {
+            p("Analyzing Repo");
+            // analyzeRepo();
+            // analyzeDBFlow();
+            analyzeRedisFlow();
             return;
         }
 
-        analyzeController();
         // analyzeSend();
+        analyzeController();
+        App.p("Analyze controller finished");
         if (analyzeControllerOnly) {
             return;
         }
@@ -283,11 +290,19 @@ public class App {
         String firstStmt = graphConfig.get(1);
         String symptomStmt = graphConfig.get(2);
 
+        App.p("Starting building graph");
         ContextSensitiveInfo cinfo = igraph.build(entryMethod);
+        App.p("Build graph finished");
 
         long start = System.currentTimeMillis();
         IPNode firstNode = igraph.searchNode(firstStmt.split(","));
+        App.p("Starting node is: " + firstNode);
+        App.p("Analysis begins");
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
+        App.p("Analysis finished");
+        // if (true) {
+        // return;
+        // }
         // App.p(cinfo.getFirstNode().context.getStackLast().sm.);
         long analysisDuration = System.currentTimeMillis() - start;
 
@@ -313,12 +328,20 @@ public class App {
         }
 
         IPNode ipnode = igraph.searchNode(symptomStmt.split(","));
-        p(ipnode.stmt.toString());
+        p("Symptom node is: " + ipnode.stmt.toString());
 
-        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(),
-                ((JAssignStmt) ipnode.getStmt()).getLeftOp());
+        // ContextSensitiveValue cvalue =
+        // ContextSensitiveValue.getCValue(ipnode.getContext(),
+        // ((JAssignStmt) ipnode.getStmt()).getLeftOp());
+        Value symptom = getFieldRef(((JReturnStmt) ipnode.getStmt()).getOp(), "refund");
 
+        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(), symptom);
+
+        p("Symptom values are: " + cvalue);
         p2("Analysis time: " + analysisDuration);
+        List<IPNode> saveNodes = getSaveNodes(igraph, "OrderRepository", "status");
+        // if (true)
+        // return;
         Set<TracePoint> tps = getDependency(igraph, fia, ipnode, cvalue);
         p2("#TPs: " + tps.size());
         if (outputTP) {
@@ -326,10 +349,58 @@ public class App {
         }
     }
 
-    private static void analyzeDBFlow() {
+    public static Value getFieldRef(Value v, String name) {
+        SootClass sc = searchClassExact(v.getType().toString());
+        SootField sf = null;
+        for (SootField f : sc.getFields()) {
+            if (f.getName().equals(name)) {
+                sf = f;
+                break;
+            }
+        }
+        if (sf == null) {
+            System.out.println("Field not found!!");
+            return null;
+        }
+        return Jimple.v().newInstanceFieldRef(v, sf.makeRef());
+    }
+
+    private static List<IPNode> getSaveNodes(InterProcedureGraph igraph, String repoName, String field) {
+        List<IPNode> result = new ArrayList<>();
+        igraph.nodes.forEach(ipnode -> {
+            // p(ipnode);
+            Stmt stmt = ipnode.getStmt();
+            if (stmt.containsInvokeExpr()) {
+                InvokeExpr iexpr = stmt.getInvokeExpr();
+                if (iexpr instanceof InstanceInvokeExpr) {
+                    InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                    if (inexpr.getMethod().getName().equals("save")
+                            && inexpr.getBase().getType().toString().contains(repoName)) {
+                        // if()
+                        p("-----");
+                        // p(method + ":");
+                        p(ipnode);
+                        result.add(ipnode);
+                        // p(inexpr.getBase().getType());
+                        // hasSave = true;
+                    }
+                }
+            }
+
+            // String field = "status";
+            String setterName = "set" + field.substring(0, 1).toUpperCase() + field.substring(1);
+            String oclass = "order.domain.Order";
+            // p(setterName);
+
+        });
+        return result;
+    }
+
+    public static void analyzeRedisFlow() {
         String repoName = "orderRepository";
         for (String method : methodMap.keySet()) {
             MethodInfo minfo = methodMap.get(method);
+            boolean hasSave = false;
             for (Unit unit : minfo.sm.getActiveBody().getUnits()) {
                 Stmt stmt = (Stmt) unit;
                 if (stmt.containsInvokeExpr()) {
@@ -339,13 +410,66 @@ public class App {
                         if (inexpr.getMethod().getName().equals("save")) {
                             // if()
                             p("-----");
+                            p(method + ":");
                             p(stmt);
                             p(inexpr.getBase().getType());
+                            hasSave = true;
                         }
                     }
                 }
 
             }
+        }
+    }
+
+    public static void analyzeDBFlow() {
+        String repoName = "orderRepository";
+        for (String method : methodMap.keySet()) {
+            MethodInfo minfo = methodMap.get(method);
+            boolean hasSave = false;
+            for (Unit unit : minfo.sm.getActiveBody().getUnits()) {
+                Stmt stmt = (Stmt) unit;
+                if (stmt.containsInvokeExpr()) {
+                    InvokeExpr iexpr = stmt.getInvokeExpr();
+                    if (iexpr instanceof InstanceInvokeExpr) {
+                        InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                        if (inexpr.getMethod().getName().equals("save")) {
+                            // if()
+                            p("-----");
+                            p(method + ":");
+                            p(stmt);
+                            p(inexpr.getBase().getType());
+                            hasSave = true;
+                        }
+                    }
+                }
+
+            }
+            String field = "status";
+            String setterName = "set" + field.substring(0, 1).toUpperCase() + field.substring(1);
+            String oclass = "order.domain.Order";
+            // p(setterName);
+
+            if (hasSave) {
+                for (Unit unit : minfo.sm.getActiveBody().getUnits()) {
+                    Stmt stmt = (Stmt) unit;
+                    // p(stmt);
+                    if (stmt.containsInvokeExpr()) {
+                        InvokeExpr iexpr = stmt.getInvokeExpr();
+                        if (iexpr instanceof InstanceInvokeExpr) {
+                            InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                            if (inexpr.getMethod().getName().equals(setterName) &&
+                                    inexpr.getBase().getType().toString().contains(oclass)) {
+                                p("!!!");
+                                p(method + ":");
+                                p(stmt);
+                                p(inexpr.getBase().getType());
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 
@@ -475,6 +599,9 @@ public class App {
                             entireURL = Utils.trimSlash(entireURL);
                             // App.p(currMethod.getName() + ": " + entireURL + ", " + reqType);
                             remoteMap.put(entireURL, currMethod);
+                            // if (currMethod.getSignature().contains("getDrawbackPercent")) {
+                            // App.p(currMethod.getSignature());
+                            // }
                         }
                     }
                 }
@@ -510,6 +637,8 @@ public class App {
     public static Set<TracePoint> getDependency(InterProcedureGraph igraph, ForwardIPAnalysis fia, IPNode ipnode,
             ContextSensitiveValue cvalue) {
 
+        Set<String> DBreads = new HashSet<>();
+        Set<String> Rreads = new HashSet<>();
         IPFlowInfo cmap = fia.getAfter(ipnode);
 
         Set<IPNode> unresolvedNodes = new HashSet<>();
@@ -517,6 +646,10 @@ public class App {
         Set<IPNode> visitedNodes = new HashSet<>();
 
         // Set<Definition> satisfiedDefs = new HashSet<>();
+        // App.p(ipnode);
+        // App.p(fia.getBefore(igraph
+        // .searchNode("virtualinvoke $stack23.<java.io.PrintStream: void
+        // println(java.lang.String)>($stack24)")));
         for (Definition def : cmap.getDefinitionsByCV(cvalue)) {
             App.p(def.d());
             // Stmt defstmt = def.getDefinedLocation().getStmt();
@@ -617,7 +750,19 @@ public class App {
                     if (satdef.getDefinedLocation() != null) {
                         // unresolved = false;
                         unresolvedNodes.add(satdef.getDefinedLocation());
-                        App.p("Bcktrcking " + cv + " at " + satdef.d());
+                        Stmt defStmt = satdef.getDefinedLocation().getStmt();
+                        if (defStmt.containsInvokeExpr()) {
+                            InvokeExpr iexpr = defStmt.getInvokeExpr();
+                            SootMethod ism = iexpr.getMethod();
+                            if (ism.getDeclaringClass().getName().contains("Repository")
+                                    && ism.getName().contains("findBy")) {
+                                DBreads.add(defStmt + "::" + cv);
+                            } else if (ism.getDeclaringClass().getName().contains("ValueOperations") &&
+                                    ism.getName().contains("get")) {
+                                Rreads.add(defStmt + "::" + cv);
+                            }
+                        }
+                        App.p("Added Next Backtracking " + cv + " at " + satdef.d());
                     } else {
                         unresolves.add(satdef);
                     }
@@ -650,6 +795,18 @@ public class App {
                                     if (!bdef.getDefinedValue().getBase().getValue().toString().equals("null")) {
                                         App.p("New Provenance due to field: " + cvun + " at "
                                                 + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
+                                        Stmt defStmt = bdef.getDefinedLocation().getStmt();
+                                        if (defStmt.containsInvokeExpr()) {
+                                            InvokeExpr iexpr = defStmt.getInvokeExpr();
+                                            SootMethod ism = iexpr.getMethod();
+                                            if (ism.getDeclaringClass().getName().contains("Repository")
+                                                    && ism.getName().contains("findBy")) {
+                                                DBreads.add(defStmt + "::" + cvun);
+                                            } else if (ism.getDeclaringClass().getName().contains("ValueOperations") &&
+                                                    ism.getName().contains("get")) {
+                                                Rreads.add(defStmt + "::" + cvun);
+                                            }
+                                        }
                                         // tps.add(new TracePoint(bdef.getDefinedLocation().getStmt(),
                                         // bdef.getDefinedValue().getBase().getValue(),
                                         // bdef.getDefinedLocation().getMethodInfo().sm, cvun.getSuffix()));
@@ -671,6 +828,14 @@ public class App {
         long backtrackDuration = System.currentTimeMillis()
                 - start;
         p2("Backtrack time: " + backtrackDuration);
+        p("DB reads:");
+        DBreads.forEach(str -> {
+            p(str);
+        });
+        p("Redis reads:");
+        Rreads.forEach(str -> {
+            p(str);
+        });
         return tps;
     }
 
@@ -948,6 +1113,7 @@ public class App {
                 MethodInfo minfo = new MethodInfo(sm);
                 // Map<TracePoint, List<TracePoint>> depGMap = minfo.analyzeDef();
                 minfo.buildPostDominanceFrontier();
+
                 methodMap.put(sm.getSignature(), minfo);
                 // CompileUtils.bodyMap.put(sm.getSignature(), ((Body)
                 // sm.getActiveBody().clone()));
@@ -998,8 +1164,12 @@ public class App {
     }
 
     public static MethodInfo searchMethod(String... str) {
+        // App.p(methodMap.keySet().size());
         for (String sig : methodMap.keySet()) {
             boolean match = true;
+            // if (sig.contains("calculate")) {
+            // App.p(sig);
+            // }
             for (String s : str) {
                 if (!sig.toString().contains(s)) {
                     match = false;

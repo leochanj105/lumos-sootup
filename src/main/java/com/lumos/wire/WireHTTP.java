@@ -38,9 +38,9 @@ public class WireHTTP {
                     // p(currStmt);
                     // p("Matched " + wiredMethod);
                     HTTPReceiveWirePoint hwire = new HTTPReceiveWirePoint(
-                            wiredMethod.getSubSignature(), new ArrayList<>(),
+                            wiredMethod.getSignature(), new ArrayList<>(),
                             new ArrayList<>());
-                    if (wiredMethod.getParameterCount() == 1) {
+                    if (wiredMethod.getParameterCount() == 1 && !wiredMethod.getName().contains("verifyVIPToken")) {
                         for (Local plocal : wiredMethod.getActiveBody().getParameterLocals()) {
                             for (Value arg : expr.getArgs()) {
                                 // p(arg.getType().toString());
@@ -63,7 +63,7 @@ public class WireHTTP {
                                         String retName = ((AssignStmt) currStmt)
                                                 .getLeftOp()
                                                 .toString();
-                                        App.p("!!!! " + retName + ", " + arg
+                                        App.p("Wired ret, params, remote: " + retName + ", " + arg
                                                 + ", " + plocal);
                                         // hwire.setRetWireName(retName);
                                         return hwire;

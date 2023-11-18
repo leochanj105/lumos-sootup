@@ -4,3 +4,4 @@ AsyncTask
 Service
 Iterator
 Repository
+StringRedisTemplate
