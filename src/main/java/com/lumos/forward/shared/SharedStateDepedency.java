@@ -6,9 +6,9 @@ import soot.SootFieldRef;
 
 public class SharedStateDepedency {
     public String storeName;
-    public List<SootFieldRef> refs;
+    public List<String> refs;
 
-    public SharedStateDepedency(String storeName, List<SootFieldRef> refs) {
+    public SharedStateDepedency(String storeName, List<String> refs) {
         this.storeName = storeName;
         this.refs = refs;
     }

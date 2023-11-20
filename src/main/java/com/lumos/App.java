@@ -27,6 +27,8 @@ import java.util.HashSet;
 
 import com.lumos.analysis.MethodInfo;
 import com.lumos.analysis.ReachingDefAnalysis;
+import com.lumos.backtracking.PendingBackTracking;
+import com.lumos.backtracking.TracePoint;
 // import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
@@ -42,7 +44,6 @@ import com.lumos.forward.IPNode;
 import com.lumos.forward.IdentityNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.StmtNode;
-import com.lumos.forward.TracePoint;
 import com.lumos.forward.UniqueName;
 import com.lumos.forward.shared.SharedStateDepedency;
 import com.lumos.forward.shared.SharedStateRead;
@@ -50,6 +51,7 @@ import com.lumos.forward.shared.SharedStateWrite;
 import com.lumos.utils.Utils;
 import com.lumos.wire.Banned;
 
+import fj.P;
 import soot.Body;
 // import soot.toolkits.scalar.ForwardFlowAnalysis;
 // import sootup.java.sourcecode.frontend.WalaIRToJimpleConverter;
@@ -75,6 +77,7 @@ import soot.JastAddJ.Signatures.MethodSignature;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.InterfaceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Jimple;
@@ -165,9 +168,9 @@ public class App {
 
     public static Set<String> initList = new HashSet<>();
 
-    public static String outputTPDir = "TP";
-    public static String outputTPFileName = "tps8";
-    public static boolean outputTP = false;
+    public static String outputTPDir = "TPnew";
+    public static String outputTPFileName = "tps13";
+    public static boolean outputTP = true;
 
     public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f13\\";
     public static String bcodeSuffix = "\\target\\classes";
@@ -349,7 +352,11 @@ public class App {
 
         Set<SharedStateDepedency> stdeps = new HashSet<>();
         streads.forEach(stread -> {
-            p(stread);
+            // App.p(stread);
+            // App.p(stread.hashCode());
+            // App.p(stread.type.hashCode() + ", " + stread.rnode.hashCode() + ", " +
+            // stread.cvalue.hashCode() + ","
+            // + stread.refs.hashCode());
             String storeName = "";
             IPNode rnode = stread.rnode;
             InvokeExpr iexpr = rnode.getStmt().getInvokeExpr();
@@ -391,13 +398,17 @@ public class App {
         p2("#TPs: " + tps.size());
 
         p2("#TPs SW: " + tpsw.size());
+
         tpsw.removeAll(tps);
         p2("#TPs SW (additional): " + tpsw.size());
         tpsw.forEach(s -> {
             p(s.d());
         });
+        tps.addAll(tpsw);
         if (outputTP) {
             writeTPs(tps, outputTPDir, outputTPFileName);
+            writeSTReads(streads, outputTPDir, outputTPFileName);
+            writeSTWrites(saveNodes, outputTPDir, outputTPFileName);
         }
     }
 
@@ -414,9 +425,9 @@ public class App {
 
     public static Set<TracePoint> getDependency(InterProcedureGraph igraph, ForwardIPAnalysis fia, List<IPNode> ipnodes,
             List<List<ContextSensitiveValue>> cvalues, Set<SharedStateRead> streads) {
-        Set<IPNode> unresolvedNodes = new HashSet<>();
+        Set<PendingBackTracking> unresolvedNodes = new HashSet<>();
         Set<ContextSensitiveValue> visitedCVs = new HashSet<>();
-        Set<IPNode> visitedNodes = new HashSet<>();
+        Set<PendingBackTracking> visitedNodes = new HashSet<>();
 
         for (int i = 0; i < ipnodes.size(); i++) {
             IPNode ipnode = ipnodes.get(i);
@@ -427,7 +438,7 @@ public class App {
                     App.p(def.d());
                     // Stmt defstmt = def.getDefinedLocation().getStmt();
                     if (def.getDefinedLocation() != null) {
-                        unresolvedNodes.add(def.getDefinedLocation());
+                        unresolvedNodes.add(new PendingBackTracking(def.getDefinedLocation(), "normal"));
                     } else {
                         handleUnresolvedDeps(def, cvalue, fia, ipnode, unresolvedNodes, streads);
                     }
@@ -438,26 +449,43 @@ public class App {
         Set<TracePoint> tps = new HashSet<>();
         long start = System.currentTimeMillis();
         while (!unresolvedNodes.isEmpty()) {
-            IPNode node = unresolvedNodes.iterator().next();
-
-            unresolvedNodes.remove(node);
-            if (visitedNodes.contains(node)) {
+            PendingBackTracking ptrack = unresolvedNodes.iterator().next();
+            IPNode node = ptrack.getNode();
+            unresolvedNodes.remove(ptrack);
+            if (visitedNodes.contains(ptrack)) {
                 continue;
             }
-            visitedNodes.add(node);
+            visitedNodes.add(ptrack);
             // p(node);
             Stmt stmt = node.getStmt();
             App.p("\nBacktracking at " + node);
 
             for (IPNode cfnode : node.getCfDepNodes()) {
                 App.p("Adding control dep: " + cfnode + " for " + node);
-                unresolvedNodes.add(cfnode);
+                unresolvedNodes.add(new PendingBackTracking(cfnode, "normal"));
             }
 
+            if (ptrack.getMode().equals("cfonly")) {
+                p("Not continueing value deps for cfonly query: " + node);
+                continue;
+            }
+            // else if (ptrack.getMode().equals("list")) {
+            // p("Handling list definition");
+            // if (!(node.getStmt() instanceof JAssignStmt)) {
+            // if (node.getStmt().containsInvokeExpr()) {
+            // if
+            // (node.getStmt().getInvokeExpr().getMethod().getSignature().contains("add")) {
+            // Value ele = node.getStmt().getInvokeExpr().getArg(0);
+
+            // }
+            // }
+            // continue;
+            // } else {
+            // p("List def is assignment, treating as normal");
+            // }
+            // }
+
             for (ContextSensitiveValue cv : node.getUsed()) {
-                if (cv.getValue() instanceof JInstanceFieldRef) {
-                    p("???? " + node);
-                }
                 if (Banned.isTypeBanned(cv.getValue().getType().toString())) {
                     p("Not tracking banned type: " + cv.getValue().getType());
                     continue;
@@ -486,6 +514,15 @@ public class App {
                     p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
                     continue;
                 }
+                if (cv.getValue() instanceof JInstanceFieldRef) {
+                    p("Adding cf dep queries for base: " + cv);
+                    Set<Definition> baseDefs = fia.getBefore(node).getDefinitionsByCV(getBaseCV(cv));
+                    for (Definition def : baseDefs) {
+                        if (def.getDefinedLocation() != null) {
+                            unresolvedNodes.add(new PendingBackTracking(def.getDefinedLocation(), "cfonly"));
+                        }
+                    }
+                }
                 if (!cv.getValue().toString().equals("null")) {
                     if (node.isSingleAssign()) {
                         App.p("Not tracing uses of a identity assignment node: " + node);
@@ -508,8 +545,8 @@ public class App {
                 for (Definition satdef : satisfiedDefs) {
                     if (satdef.getDefinedLocation() != null) {
                         // unresolved = false;
-                        unresolvedNodes.add(satdef.getDefinedLocation());
-                        checkSTread(satdef, streads, satdef.getDefinedLocation(), cv, Collections.emptyList());
+                        unresolvedNodes.add(new PendingBackTracking(satdef.getDefinedLocation(), "normal"));
+                        checkSTread(satdef, streads, Collections.emptyList());
                         App.p("Added Next Backtracking " + cv + " at " + satdef.d());
                     } else {
                         unresolves.add(satdef);
@@ -520,7 +557,6 @@ public class App {
                     for (Definition satdef : unresolves) {
                         handleUnresolvedDeps(satdef, cv, fia, node, unresolvedNodes, streads);
                     }
-
                 }
 
             }
@@ -531,6 +567,14 @@ public class App {
                 - start;
         p2("Backtrack time: " + backtrackDuration);
         return tps;
+    }
+
+    public static ContextSensitiveValue getBaseCV(ContextSensitiveValue cv) {
+        Value v = cv.getValue();
+        if (v instanceof JInstanceFieldRef) {
+            return ContextSensitiveValue.getCValue(cv.getContext(), ((JInstanceFieldRef) v).getBase());
+        }
+        return null;
     }
 
     public static Value getFieldRef(Value v, String name) {
@@ -580,7 +624,7 @@ public class App {
                 InvokeExpr iexpr = stmt.getInvokeExpr();
                 if (iexpr instanceof InstanceInvokeExpr) {
                     InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
-                    SharedStateWrite swrite = new SharedStateWrite(ipnode, new HashSet<>());
+                    SharedStateWrite swrite = new SharedStateWrite("Repository", ipnode, new HashSet<>());
                     for (SharedStateDepedency stdep : stdeps) {
                         String storeName = stdep.storeName;
                         String writeOPName = "";
@@ -607,7 +651,7 @@ public class App {
                                 }
                             }
 
-                            List<String> strRefs = refToString(stdep.refs);
+                            List<String> strRefs = stdep.refs;
                             if (strRefs.size() > 0) {
                                 objVal = getFieldRef(inexpr.getArg(0), strRefs);
                             } else {
@@ -735,6 +779,17 @@ public class App {
             }
 
         }
+    }
+
+    public static String mergeStr(List<String> strs, String separator) {
+        String res = "";
+        for (int i = 0; i < strs.size(); i++) {
+            res += strs.get(i);
+            if (i != strs.size() - 1) {
+                res += separator;
+            }
+        }
+        return res;
     }
 
     private static void analyzeRepo() {
@@ -899,7 +954,7 @@ public class App {
     }
 
     public static void handleUnresolvedDeps(Definition satdef, ContextSensitiveValue cv, ForwardIPAnalysis fia,
-            IPNode node, Set<IPNode> unresolvedNodes, Set<SharedStateRead> streads) {
+            IPNode node, Set<PendingBackTracking> unresolvedNodes, Set<SharedStateRead> streads) {
         App.p(">>>>>Unresolved " + cv + " with " + satdef);
         Value defVal = satdef.getDefinedValue().getBase().getValue();
         if ((defVal instanceof Constant) && !(defVal instanceof NullConstant)) {
@@ -920,14 +975,57 @@ public class App {
                 App.p(bdef.getDefinedLocation());
                 if (bdef.getDefinedLocation() != null) {
                     alternative = true;
-                    unresolvedNodes.add(bdef.getDefinedLocation());
+                    unresolvedNodes.add(new PendingBackTracking(bdef.getDefinedLocation(), "normal"));
+
                     if (!bdef.getDefinedValue().getBase().getValue().toString().equals("null")) {
-                        App.p("New Provenance due to field: " + cvun + " at "
-                                + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
-                        // Stmt defStmt = bdef.getDefinedLocation().getStmt();
-                        // if (defStmt.containsInvokeExpr()) {
-                        checkSTread(bdef, streads, bdef.getDefinedLocation(), cvbase, cvun.getSuffix());
-                        // }
+                        IPNode dloc = bdef.getDefinedLocation();
+                        App.p("New Provenance due to field: " + cvun + " at " +
+                                dloc + " with base " + bdef.getDefinedValue());
+
+                        if (dloc.getStmt() instanceof JAssignStmt) {
+                            JAssignStmt astmt = (JAssignStmt) bdef.getDefinedLocation().getStmt();
+                            if (astmt.getRightOp() instanceof InstanceInvokeExpr) {
+                                Value basev = ((InstanceInvokeExpr) astmt.getRightOp()).getBase();
+                                if (basev.getType().toString()
+                                        .contains("Iterator")) {
+                                    p("This provenance is due to an iterator; resolve further...");
+                                    Set<Definition> iterDefs = fia.getBefore(bdef.getDefinedLocation())
+                                            .getDefinitionsByCV(
+                                                    ContextSensitiveValue.getCValue(dloc.getContext(), basev));
+
+                                    IPNode iterDefLoc;
+                                    for (Definition def : iterDefs) {
+                                        // p(def.d());
+                                        Stmt defStmt = def.getDefinedLocation().getStmt();
+                                        if (defStmt.containsInvokeExpr()
+                                                && defStmt.getInvokeExpr().getMethod().getName().equals("iterator")) {
+                                            Value src = ((InstanceInvokeExpr) defStmt.getInvokeExpr()).getBase();
+                                            p("Found source: " + src);
+                                            Set<Definition> collectionDefs = fia.getBefore(bdef.getDefinedLocation())
+                                                    .getDefinitionsByCV(
+                                                            ContextSensitiveValue.getCValue(dloc.getContext(), src));
+                                            for (Definition cdef : collectionDefs) {
+                                                // p(cdef.d());
+                                                if (cdef.getDefinedLocation() != null) {
+                                                    IPNode collectionUseNode = cdef.getDefinedLocation();
+                                                    p("Checking source of iterator: " + collectionUseNode);
+                                                    // cdef.get
+                                                    checkSTread(cdef, streads, cvun.getSuffix());
+                                                    // if (src.getType().toString().contains("List")) {
+                                                    // PendingBackTracking listRef = new PendingBackTracking(
+                                                    // collectionUseNode, "list");
+                                                    // listRef.setRefs(cvun.getSuffix());
+                                                    // unresolvedNodes.add(listRef);
+                                                    // }
+                                                }
+                                            }
+                                            // break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        checkSTread(bdef, streads, cvun.getSuffix());
                     }
                 }
             }
@@ -937,18 +1035,26 @@ public class App {
         }
     }
 
-    public static void checkSTread(Definition satdef, Set<SharedStateRead> streads, IPNode defLocation,
-            ContextSensitiveValue cv, List<SootFieldRef> refs) {
+    public static void checkSTread(Definition satdef, Set<SharedStateRead> streads,
+            List<SootFieldRef> refs) {
         Stmt defStmt = satdef.getDefinedLocation().getStmt();
+        IPNode defLocation = satdef.getDefinedLocation();
         if (defStmt.containsInvokeExpr()) {
             InvokeExpr iexpr = defStmt.getInvokeExpr();
             SootMethod ism = iexpr.getMethod();
+
             if (ism.getDeclaringClass().getName().contains("Repository")
                     && ism.getName().contains("findBy")) {
-                streads.add(new SharedStateRead("Repository", defLocation, cv, refs));
+                ContextSensitiveValue cvread = ContextSensitiveValue.getCValue(satdef.getDefinedLocation().getContext(),
+                        ((JAssignStmt) defStmt).getLeftOp());
+                SharedStateRead stread = new SharedStateRead("Repository", defLocation, cvread, refs);
+                streads.add(stread);
+
             } else if (ism.getDeclaringClass().getName().contains("ValueOperations") &&
                     ism.getName().contains("get")) {
-                streads.add(new SharedStateRead("ValueOperations", defLocation, cv, refs));
+                ContextSensitiveValue cvread = ContextSensitiveValue.getCValue(satdef.getDefinedLocation().getContext(),
+                        ((JAssignStmt) defStmt).getLeftOp());
+                streads.add(new SharedStateRead("ValueOperations", defLocation, cvread, refs));
             }
         }
     }
@@ -1023,14 +1129,6 @@ public class App {
 
                         Stmt stmt = iter.next();
 
-                        // for (Unit uu : usedBody.getUnits()) {
-                        // if (stmt.toString().contains("if $stack72")) {
-                        // App.p(stmt);
-                        // App.p(((JIfStmt) stmt).getTarget());
-                        // // App.panicni();
-                        // }
-                        // }
-                        // App.p(stmt + "\n" + mdata);
                         Value base = CompileUtils.findLocal(stmt, baseStr);
                         if (base.getType().toString().contains("List")) {
                             continue;
@@ -1087,18 +1185,65 @@ public class App {
         }
         File file = new File(outputDir + File.separator + name);
         try {
-            // FileOutputStream fileOut = new FileOutputStream(file);
             FileWriter fileWriter = new FileWriter(file);
             PrintWriter printWriter = new PrintWriter(fileWriter);
+            printWriter.println("valueTPs");
             for (TracePoint tp : tps) {
                 printWriter.println(tp.d(",,"));
             }
-            // ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            // out.writeObject(obj);
-            // out.close();
             printWriter.close();
-            // fileOut.close();
             System.out.printf("TP data is saved in " + file.getAbsolutePath());
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    public static void writeSTReads(Set<SharedStateRead> streads, String path, String name) {
+        name = name + "_stread";
+        File outputDir = new File(path);
+        if (!outputDir.exists()) {
+            outputDir.mkdir();
+        }
+        File file = new File(outputDir + File.separator + name);
+        try {
+            FileWriter fileWriter = new FileWriter(file);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            printWriter.println("STreads");
+            Map<String, List<String>> readPts = new HashMap<>();
+            for (SharedStateRead stread : streads) {
+                String sd = stread.shortd(",,");
+                if (!readPts.containsKey(sd)) {
+                    readPts.put(sd, new ArrayList<>());
+                }
+                // p("yyyy " + stread.refs + ", " + mergeStr(stread.refs, ","));
+                readPts.get(sd).add(mergeStr(stread.refs, ","));
+            }
+            for (String rpt : readPts.keySet()) {
+                printWriter.println(rpt + ",," + readPts.get(rpt));
+            }
+            printWriter.close();
+            System.out.printf("STread data is saved in " + file.getAbsolutePath());
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    public static void writeSTWrites(Set<SharedStateWrite> stwrites, String path, String name) {
+        name = name + "_stwrite";
+        File outputDir = new File(path);
+        if (!outputDir.exists()) {
+            outputDir.mkdir();
+        }
+        File file = new File(outputDir + File.separator + name);
+        try {
+            FileWriter fileWriter = new FileWriter(file);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            printWriter.println("STwrites");
+            for (SharedStateWrite stwrite : stwrites) {
+                printWriter.println(stwrite.d(",,"));
+            }
+            printWriter.close();
+            System.out.printf("STwrite data is saved in " + file.getAbsolutePath());
         } catch (IOException i) {
             i.printStackTrace();
         }

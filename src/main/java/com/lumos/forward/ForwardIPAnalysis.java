@@ -24,6 +24,7 @@ import soot.Unit;
 import soot.Value;
 import soot.ValueBox;
 import soot.jimple.Constant;
+import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
@@ -110,6 +111,23 @@ public class ForwardIPAnalysis {
 
             IPFlowInfo out = copy(in);
             node.flow(out);
+
+            // if (node.getStmt().toString().contains(
+            // "interfaceinvoke $stack37.<java.util.Iterator: java.lang.Object next()>()"))
+            // {
+            // App.p("xxxxxxxxxxx " + node);
+            // in.getDefinitionsByCV(ContextSensitiveValue.getCValue(node.getContext(),
+            // ((InstanceInvokeExpr) node.getStmt().getInvokeExpr()).getBase())).forEach(d
+            // -> {
+            // App.p(d.d());
+            // });
+            // App.p("-----------");
+            // out.getDefinitionsByCV(ContextSensitiveValue.getCValue(node.getContext(),
+            // ((InstanceInvokeExpr) node.getStmt().getInvokeExpr()).getBase())).forEach(d
+            // -> {
+            // App.p(d.d());
+            // });
+            // }
 
             if (isNotEqual(out, liveOut.get(node)) || node.equals(firstNode)) {
                 for (IPNode succ : node.getSuccessors()) {
