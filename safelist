@@ -65,6 +65,7 @@
 <inside_payment.repository.AddMoneyRepository: java.lang.Object save(java.lang.Object)>
 <javax.servlet.http.Cookie: java.lang.String getName()>
 <java.io.PrintStream: void println(java.lang.String)>
+<java.io.PrintStream: void println(java.lang.Object)>
 <inside_payment.repository.AddMoneyRepository: java.util.List findByUserId(java.lang.String)>
 <sso.repository.AccountRepository: sso.domain.Account findById(java.util.UUID)>
 <org.springframework.messaging.support.MessageBuilder: org.springframework.messaging.Message build()>
@@ -78,3 +79,14 @@
 <org.springframework.data.redis.core.StringRedisTemplate: java.util.Set keys(java.lang.Object)>
 <org.springframework.data.redis.core.ValueOperations: java.lang.Object get(java.lang.Object)>
 <java.lang.Double: double doubleValue()>
+<java.lang.String: int length()>
+<org.springframework.util.LinkedMultiValueMap: void <init>()>
+<org.springframework.util.MultiValueMap: void add(java.lang.Object,java.lang.Object)>
+<java.lang.String: boolean contains(java.lang.CharSequence)>
+<sso.repository.AccountRepository: sso.domain.Account findByEmail(java.lang.String)>
+<org.springframework.data.redis.core.StringRedisTemplate: java.lang.Boolean hasKey(java.lang.Object)>
+<org.springframework.data.redis.core.ValueOperations: void set(java.lang.Object,java.lang.Object)>
+<javax.servlet.http.Cookie: void <init>(java.lang.String,java.lang.String)>
+<javax.servlet.http.Cookie: void setPath(java.lang.String)>
+<javax.servlet.http.Cookie: void setMaxAge(int)>
+<javax.servlet.http.HttpServletResponse: void addCookie(javax.servlet.http.Cookie)>

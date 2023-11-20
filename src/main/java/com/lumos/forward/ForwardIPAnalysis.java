@@ -38,19 +38,16 @@ public class ForwardIPAnalysis {
     public final Map<IPNode, IPFlowInfo> liveOut = new HashMap<>();
 
     public ForwardIPAnalysis(InterProcedureGraph igraph, IPNode firstNode) {
+        // App.p("!!! " + firstNode.getSuccessors());
         Set<IPNode> workList = new HashSet<>();
         for (IPNode node : igraph.nodes) {
             // Unit unit = it.next();
             liveIn.put(node, new IPFlowInfo());
             liveOut.put(node, new IPFlowInfo());
-            // if (node.getPredecesors() == null) {
-            // App.p(((WrapperNode) node).getEnter());
-            // }
-            // if (node.getPredecesors().isEmpty()) {
-            if (node.equals(firstNode))
+            if (node.equals(firstNode)) {
                 workList.add(node);
-            // App.p(node);
-            // }
+                // App.p("!!! " + node);
+            }
         }
 
         Set<IPNode> unreacheableNodes = new HashSet<>();
@@ -58,7 +55,6 @@ public class ForwardIPAnalysis {
         for (IPNode node : igraph.nodes) {
             for (IPNode pred : node.getPredecesors()) {
                 if (!canReach(firstNode, pred)) {
-                    // App.p("!!!!!!! " + node + ", " + pred);
                     unreacheableNodes.add(node);
                 }
             }
@@ -81,7 +77,7 @@ public class ForwardIPAnalysis {
             // HashSet<IPNode> visitedNodes = new HashSet<>();
             // while (!queue.isEmpty()) {
             IPNode node = workList.iterator().next();
-
+            // App.p("!!! " + node);
             workList.remove(node);
             if (!node.equals(firstNode)) {
                 boolean isReady = true;
@@ -101,22 +97,7 @@ public class ForwardIPAnalysis {
                 }
             }
             visited.add(node);
-            // if (workList.size() < 50) {
-            // for (IPNode nd : workList) {
-            // // App.p(nd + ", " + nd.getContext());
-            // // if (!liveIn.get(nd).getCurrMapping().isEmpty())
-            // // App.p(liveOut.get(nd));
-            // }
-            // // App.p("\n\n\n\n");
-            // // App.p(liveOut);
-            // if (round > 4010) {
-            // break;
-            // }
-            // }
 
-            // visitedNodes.add(node);
-
-            // IPFlowInfo in = copy(liveIn.get(node));
             IPFlowInfo in = new IPFlowInfo();
             for (IPNode pred : node.getPredecesors()) {
                 in = merge(in, liveOut.get(pred));
@@ -130,24 +111,16 @@ public class ForwardIPAnalysis {
             IPFlowInfo out = copy(in);
             node.flow(out);
 
-            if (isNotEqual(out, liveOut.get(node))) {
-                // fixed = false;
-                // if (round > 4000) {
-                // App.p("*************** " + node + ", " + node.getContext());
-
-                // App.p(out);
-                // App.p("---------");
-                // App.p(liveOut.get(node));
-                // }
+            if (isNotEqual(out, liveOut.get(node)) || node.equals(firstNode)) {
                 for (IPNode succ : node.getSuccessors()) {
                     // if (!workList.contains(succ)) {
                     workList.add(succ);
+                    // App.p("!!! " + succ);
                     // }
                 }
                 liveOut.put(node, out);
             }
 
-            // }
         }
 
     }
@@ -177,24 +150,11 @@ public class ForwardIPAnalysis {
 
     public IPFlowInfo copy(IPFlowInfo original) {
         IPFlowInfo newm = new IPFlowInfo(original);
-
-        // for (Value v : original.aliasMap.keySet()) {
-        // newm.aliasMap.put(v, original.aliasMap.get(v));
-        // }
         return newm;
     }
 
     private IPFlowInfo merge(IPFlowInfo f1, IPFlowInfo f2) {
         IPFlowInfo f3 = copy(f1);
-        // for (ContextSensitiveValue cv : f2.getUniqueNames().keySet()) {
-        // Map<ContextSensitiveValue, Set<UniqueName>> fun = f3.getUniqueNames();
-        // if (!fun.containsKey(cv)) {
-        // fun.put(cv, new HashSet<>());
-        // }
-        // for (UniqueName un : f2.getUniqueNames().get(cv)) {
-        // fun.get(cv).add(un);
-        // }
-        // }
 
         for (UniqueName un : f2.getCurrMapping().keySet()) {
             Map<UniqueName, Set<Definition>> mapping = f3.getCurrMapping();

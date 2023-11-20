@@ -7,7 +7,7 @@ import com.lumos.forward.IPNode;
 
 public class SharedStateWrite {
     public IPNode wnode;
-    public Set<String> fields;
+    public Set<List<String>> fields;
 
     @Override
     public int hashCode() {
@@ -45,7 +45,7 @@ public class SharedStateWrite {
         return "SharedStateWrite [wnode=" + wnode + ", fields=" + fields + "]";
     }
 
-    public SharedStateWrite(IPNode wnode, Set<String> fields) {
+    public SharedStateWrite(IPNode wnode, Set<List<String>> fields) {
         this.wnode = wnode;
         this.fields = fields;
     }

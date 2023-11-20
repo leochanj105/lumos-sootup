@@ -1,7 +1,6 @@
 package com.lumos;
 
 import java.nio.file.Paths;
-import java.sql.Ref;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,17 +11,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.swing.text.AbstractDocument.Content;
-
-import org.glassfish.jaxb.runtime.v2.runtime.reflect.Lister.Pack;
-import org.glassfish.jaxb.runtime.v2.schemagen.Util;
-
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -57,10 +49,7 @@ import com.lumos.forward.shared.SharedStateRead;
 import com.lumos.forward.shared.SharedStateWrite;
 import com.lumos.utils.Utils;
 import com.lumos.wire.Banned;
-import com.lumos.wire.HTTPReceiveWirePoint;
-import com.lumos.wire.WireHTTP;
 
-import polyglot.ast.Assign;
 import soot.Body;
 // import soot.toolkits.scalar.ForwardFlowAnalysis;
 // import sootup.java.sourcecode.frontend.WalaIRToJimpleConverter;
@@ -83,7 +72,6 @@ import soot.Value;
 import soot.ValueBox;
 import soot.JastAddJ.Signatures.FieldSignature;
 import soot.JastAddJ.Signatures.MethodSignature;
-import soot.jbco.util.BodyBuilder;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.InstanceInvokeExpr;
@@ -171,7 +159,7 @@ public class App {
 
     public static Set<IPNode> idnodes = new HashSet<>();
 
-    public static String caseStudyPath = "cases/f8/";
+    public static String caseStudyPath = "cases/f13/";
     public static String safeListPath = "safelist";
     public static Set<String> safeList = new HashSet<>();
 
@@ -181,7 +169,7 @@ public class App {
     public static String outputTPFileName = "tps8";
     public static boolean outputTP = false;
 
-    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f8\\";
+    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f13\\";
     public static String bcodeSuffix = "\\target\\classes";
     public static String scodeSuffix = "\\src\\main\\java";
     public static Map<String, Path> sourceMap = new HashMap<>();
@@ -189,7 +177,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            // "ts-launcher",
+            "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -210,7 +198,7 @@ public class App {
             // "ts-execute-service",
             // "ts-food-map-service",
             // "ts-food-service",
-            // "ts-login-service",
+            "ts-login-service",
             // "ts-notification-service",
             // "ts-preserve-other-service",
             // "ts-preserve-service",
@@ -227,7 +215,7 @@ public class App {
             // "ts-travel-plan-service",
             // "ts-travel-service",
             // "ts-travel2-service",
-            // "ts-verification-code-service"
+            "ts-verification-code-service"
     };
 
     public static void main(String[] args) {
@@ -304,10 +292,7 @@ public class App {
         App.p("Analysis begins");
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
         App.p("Analysis finished");
-        // if (true) {
-        // return;
-        // }
-        // App.p(cinfo.getFirstNode().context.getStackLast().sm.);
+
         long analysisDuration = System.currentTimeMillis() - start;
 
         if (showInitOnly) {
@@ -334,14 +319,23 @@ public class App {
         IPNode ipnode = igraph.searchNode(symptomStmt.split(","));
         p("Symptom node is: " + ipnode.stmt.toString());
 
+        List<ContextSensitiveValue> symptomCvalues = new ArrayList<>();
+        // f13
+        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(),
+                ((JAssignStmt) ipnode.getStmt()).getLeftOp());
+
+        // f8
+        // Value symptom = getFieldRef(((JReturnStmt) ipnode.getStmt()).getOp(),
+        // "refund");
+        // ContextSensitiveValue cvalue =
+        // ContextSensitiveValue.getCValue(ipnode.getContext(), symptom);
+
+        // f8login
         // ContextSensitiveValue cvalue =
         // ContextSensitiveValue.getCValue(ipnode.getContext(),
-        // ((JAssignStmt) ipnode.getStmt()).getLeftOp());
-        Value symptom = getFieldRef(((JReturnStmt) ipnode.getStmt()).getOp(),
-                "refund");
+        // ipnode.getStmt().getInvokeExpr().getArg(0));
 
-        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(), symptom);
-
+        symptomCvalues.add(cvalue);
         p("Symptom values are: " + cvalue);
         p2("Analysis time: " + analysisDuration);
 
@@ -350,7 +344,8 @@ public class App {
         // List<IPNode> DBreads = new ArrayList<>();
         // List<String> fields = new ArrayList<>();
         Set<SharedStateRead> streads = new HashSet<>();
-        Set<TracePoint> tps = getDependency(igraph, fia, ipnode, cvalue, streads);
+        Set<TracePoint> tps = getDependency(igraph, fia, Collections.singletonList(ipnode),
+                Collections.singletonList(symptomCvalues), streads);
 
         Set<SharedStateDepedency> stdeps = new HashSet<>();
         streads.forEach(stread -> {
@@ -368,13 +363,174 @@ public class App {
             // p(stdep);
         });
         Set<SharedStateWrite> saveNodes = getSaveNodes(igraph, fia, stdeps);
-        saveNodes.forEach(sw -> {
-            p(sw);
-        });
+        List<IPNode> swnodes = new ArrayList<>();
+        List<List<ContextSensitiveValue>> swcvalues = new ArrayList<>();
+        p("Now tracking shared state write dependencies");
+        for (SharedStateWrite sw : saveNodes) {
+            // App.p(sw.wnode.getStmt().getInvokeExpr().getArgs());
+
+            swnodes.add(sw.wnode);
+            List<ContextSensitiveValue> currCvalues = new ArrayList<>();
+            // p(getRepoName(sw.wnode));
+            if (getBaseType(sw.wnode).contains("Repository")) {
+                for (Value arg : sw.wnode.getStmt().getInvokeExpr().getArgs()) {
+                    // p(arg);
+                    for (List<String> refs : sw.fields) {
+                        Value crvalue = getFieldRef(arg, refs);
+                        // p(crvalue);
+                        currCvalues.add(ContextSensitiveValue.getCValue(sw.wnode.getContext(), crvalue));
+                    }
+                    p(sw.wnode + ",  " + currCvalues);
+                }
+            }
+            swcvalues.add(currCvalues);
+        }
+        Set<SharedStateRead> streads2 = new HashSet<>();
+        Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues, streads2);
+
         p2("#TPs: " + tps.size());
+
+        p2("#TPs SW: " + tpsw.size());
+        tpsw.removeAll(tps);
+        p2("#TPs SW (additional): " + tpsw.size());
+        tpsw.forEach(s -> {
+            p(s.d());
+        });
         if (outputTP) {
             writeTPs(tps, outputTPDir, outputTPFileName);
         }
+    }
+
+    public static String getBaseType(IPNode ipnode) {
+        if (!ipnode.stmt.containsInvokeExpr()) {
+            return null;
+        }
+        InvokeExpr iexpr = ipnode.stmt.getInvokeExpr();
+        if (iexpr instanceof InstanceInvokeExpr) {
+            return ((InstanceInvokeExpr) iexpr).getBase().getType().toString();
+        }
+        return null;
+    }
+
+    public static Set<TracePoint> getDependency(InterProcedureGraph igraph, ForwardIPAnalysis fia, List<IPNode> ipnodes,
+            List<List<ContextSensitiveValue>> cvalues, Set<SharedStateRead> streads) {
+        Set<IPNode> unresolvedNodes = new HashSet<>();
+        Set<ContextSensitiveValue> visitedCVs = new HashSet<>();
+        Set<IPNode> visitedNodes = new HashSet<>();
+
+        for (int i = 0; i < ipnodes.size(); i++) {
+            IPNode ipnode = ipnodes.get(i);
+            IPFlowInfo cmap = fia.getAfter(ipnode);
+            List<ContextSensitiveValue> currValues = cvalues.get(i);
+            for (ContextSensitiveValue cvalue : currValues) {
+                for (Definition def : cmap.getDefinitionsByCV(cvalue)) {
+                    App.p(def.d());
+                    // Stmt defstmt = def.getDefinedLocation().getStmt();
+                    if (def.getDefinedLocation() != null) {
+                        unresolvedNodes.add(def.getDefinedLocation());
+                    } else {
+                        handleUnresolvedDeps(def, cvalue, fia, ipnode, unresolvedNodes, streads);
+                    }
+                }
+            }
+        }
+
+        Set<TracePoint> tps = new HashSet<>();
+        long start = System.currentTimeMillis();
+        while (!unresolvedNodes.isEmpty()) {
+            IPNode node = unresolvedNodes.iterator().next();
+
+            unresolvedNodes.remove(node);
+            if (visitedNodes.contains(node)) {
+                continue;
+            }
+            visitedNodes.add(node);
+            // p(node);
+            Stmt stmt = node.getStmt();
+            App.p("\nBacktracking at " + node);
+
+            for (IPNode cfnode : node.getCfDepNodes()) {
+                App.p("Adding control dep: " + cfnode + " for " + node);
+                unresolvedNodes.add(cfnode);
+            }
+
+            for (ContextSensitiveValue cv : node.getUsed()) {
+                if (cv.getValue() instanceof JInstanceFieldRef) {
+                    p("???? " + node);
+                }
+                if (Banned.isTypeBanned(cv.getValue().getType().toString())) {
+                    p("Not tracking banned type: " + cv.getValue().getType());
+                    continue;
+                }
+
+                boolean isConstant = false;
+                boolean isOnlyReturn = false;
+                Value constval = null;
+                if (cv.getValue() instanceof Constant) {
+                    // App.p(" !! ! " + cv);
+                    isConstant = true;
+                    constval = cv.getValue();
+                }
+                Set<Definition> satisfiedDefs = null;
+                if (!isConstant) {
+                    satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
+                    if (satisfiedDefs.size() == 1) {
+                        Definition onlyDef = satisfiedDefs.iterator().next();
+                        if ((onlyDef.getDefinedValue().getBase().getValue()) instanceof Constant) {
+                            isConstant = true;
+                            constval = onlyDef.getDefinedValue().getBase().getValue();
+                        }
+                    }
+                }
+                if (isConstant) {
+                    p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
+                    continue;
+                }
+                if (!cv.getValue().toString().equals("null")) {
+                    if (node.isSingleAssign()) {
+                        App.p("Not tracing uses of a identity assignment node: " + node);
+                    } else {
+                        TracePoint provTP = null;
+                        if (cv.getValue() instanceof JInstanceFieldRef) {
+                            JInstanceFieldRef cvref = ((JInstanceFieldRef) cv.getValue());
+                            Value vbase = cvref.getBase();
+                            List<SootFieldRef> suf = Collections.singletonList(cvref.getFieldRef());
+                            provTP = new TracePoint(node.getStmt(), vbase, node.getMethodInfo().sm, suf);
+                        } else {
+                            provTP = new TracePoint(node.getStmt(), cv.getValue(), node.getMethodInfo().sm);
+                        }
+                        App.p("Potential Provenance value: " + cv);
+                        tps.add(provTP);
+                    }
+                }
+                Set<Definition> unresolves = new HashSet<>();
+
+                for (Definition satdef : satisfiedDefs) {
+                    if (satdef.getDefinedLocation() != null) {
+                        // unresolved = false;
+                        unresolvedNodes.add(satdef.getDefinedLocation());
+                        checkSTread(satdef, streads, satdef.getDefinedLocation(), cv, Collections.emptyList());
+                        App.p("Added Next Backtracking " + cv + " at " + satdef.d());
+                    } else {
+                        unresolves.add(satdef);
+                    }
+                }
+
+                if (!unresolves.isEmpty()) {
+                    for (Definition satdef : unresolves) {
+                        handleUnresolvedDeps(satdef, cv, fia, node, unresolvedNodes, streads);
+                    }
+
+                }
+
+            }
+
+        }
+
+        long backtrackDuration = System.currentTimeMillis()
+                - start;
+        p2("Backtrack time: " + backtrackDuration);
+        return tps;
     }
 
     public static Value getFieldRef(Value v, String name) {
@@ -437,6 +593,20 @@ public class App {
                                 && inexpr.getBase().getType().toString().contains(storeName)) {
                             // for( field: stdep.refs)
                             Value objVal = null;
+                            boolean mayNotFromAnotherRepo = false;
+                            IPFlowInfo cmap = fia.getAfter(ipnode);
+                            for (Definition def : cmap.getDefinitionsByCV(
+                                    ContextSensitiveValue.getCValue(ipnode.getContext(), inexpr.getArg(0)))) {
+                                if (def.getDefinedLocation() != null) {
+                                    if (def.getDefinedLocation().getStmt().containsInvokeExpr()) {
+                                        if (!getBaseType(def.getDefinedLocation()).contains("Repository")) {
+                                            mayNotFromAnotherRepo = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
                             List<String> strRefs = refToString(stdep.refs);
                             if (strRefs.size() > 0) {
                                 objVal = getFieldRef(inexpr.getArg(0), strRefs);
@@ -447,7 +617,7 @@ public class App {
                             p("-----");
                             // p(method + ":");
                             p(ipnode);
-                            IPFlowInfo cmap = fia.getAfter(ipnode);
+
                             boolean resolved = false;
                             for (Definition def : cmap.getDefinitionsByCV(cvobj)) {
                                 if (def.getDefinedLocation() != null) {
@@ -455,9 +625,9 @@ public class App {
                                     break;
                                 }
                             }
-                            if (resolved) {
+                            if (mayNotFromAnotherRepo || resolved) {
                                 p("Resolved for :" + cvobj);
-                                swrite.fields.add(strRefs.toString());
+                                swrite.fields.add(strRefs);
                             }
 
                             // result.add(ipnode);
@@ -479,6 +649,7 @@ public class App {
 
         }
         return result;
+
     }
 
     public static List<String> refToString(List<SootFieldRef> refs) {
@@ -727,216 +898,59 @@ public class App {
         }
     }
 
-    public static Set<TracePoint> getDependency(InterProcedureGraph igraph, ForwardIPAnalysis fia, IPNode ipnode,
-            ContextSensitiveValue cvalue, Set<SharedStateRead> streads) {
-
-        // Set<String> DBreads = new HashSet<>();
-        // Set<String> Rreads = new HashSet<>();
-        IPFlowInfo cmap = fia.getAfter(ipnode);
-
-        Set<IPNode> unresolvedNodes = new HashSet<>();
-        Set<ContextSensitiveValue> visitedCVs = new HashSet<>();
-        Set<IPNode> visitedNodes = new HashSet<>();
-
-        // Set<Definition> satisfiedDefs = new HashSet<>();
-        // App.p(ipnode);
-        // App.p(fia.getBefore(igraph
-        // .searchNode("virtualinvoke $stack23.<java.io.PrintStream: void
-        // println(java.lang.String)>($stack24)")));
-        for (Definition def : cmap.getDefinitionsByCV(cvalue)) {
-            App.p(def.d());
-            // Stmt defstmt = def.getDefinedLocation().getStmt();
-            unresolvedNodes.add(def.getDefinedLocation());
+    public static void handleUnresolvedDeps(Definition satdef, ContextSensitiveValue cv, ForwardIPAnalysis fia,
+            IPNode node, Set<IPNode> unresolvedNodes, Set<SharedStateRead> streads) {
+        App.p(">>>>>Unresolved " + cv + " with " + satdef);
+        Value defVal = satdef.getDefinedValue().getBase().getValue();
+        if ((defVal instanceof Constant) && !(defVal instanceof NullConstant)) {
+            p("Not tracking constant: " + cv + " with constant value " + defVal);
+            return;
         }
+        App.p(satdef.getDefinedValue());
+        UniqueName cvun = satdef.getDefinedValue();
+        // if (!cvun.getBase().toString().contains("null")) {
+        App.p("Try resolving base:");
+        ContextSensitiveValue cvbase = cvun.getBase();
+        Set<Definition> resbasedefs = fia.getBefore(node).getDefinitionsByCV(cvbase);
+        App.p(resbasedefs);
 
-        Set<TracePoint> tps = new HashSet<>();
-        long start = System.currentTimeMillis();
-        while (!unresolvedNodes.isEmpty()) {
-            IPNode node = unresolvedNodes.iterator().next();
-
-            unresolvedNodes.remove(node);
-            if (visitedNodes.contains(node)) {
-                continue;
-            }
-            visitedNodes.add(node);
-            Stmt stmt = node.getStmt();
-            App.p("\nBacktracking at " + node);
-
-            // MethodInfo minfo = null;
-            // minfo = node.getContext().getStackLast();
-            for (IPNode cfnode : node.getCfDepNodes()) {
-                // IPNode cfnode = igraph.getIPNode(node.getContext(), cfstmt);
-                App.p("Adding control dep: " + cfnode + " for " + node);
-                unresolvedNodes.add(cfnode);
-            }
-            // CallSite csite = node.getContext().getLastCallSite();
-            // if (csite.getCallingStmt() != null) {
-            // for (Stmt cfstmt : node.getContext().getStackSecondToLast().cfDependency
-            // .get(csite.getCallingStmt())) {
-            // IPNode cfnode = igraph.getIPNode(node.getContext().getParent(), cfstmt);
-            // App.p("Adding control dep: " + cfnode + " for " + node);
-            // unresolvedNodes.add(cfnode);
-            // }
-            // }
-
-            for (ContextSensitiveValue cv : node.getUsed()) {
-                if (Banned.isTypeBanned(cv.getValue().getType().toString())) {
-                    p("Not tracking banned type: " + cv.getValue().getType());
-                    continue;
-                }
-
-                boolean isConstant = false;
-                boolean isOnlyReturn = false;
-                Value constval = null;
-                if (cv.getValue() instanceof Constant) {
-                    // App.p(" !! ! " + cv);
-                    isConstant = true;
-                    constval = cv.getValue();
-                }
-                Set<Definition> satisfiedDefs = null;
-                if (!isConstant) {
-                    satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
-                    if (satisfiedDefs.size() == 1) {
-                        Definition onlyDef = satisfiedDefs.iterator().next();
-                        if ((onlyDef.getDefinedValue().getBase().getValue()) instanceof Constant) {
-                            isConstant = true;
-                            constval = onlyDef.getDefinedValue().getBase().getValue();
-                        }
-                        // if (onlyDef.getDefinedLocation().getStmt() instanceof JReturnStmt) {
-                        // isOnlyReturn = true;
+        boolean alternative = false;
+        if (!resbasedefs.isEmpty()) {
+            for (Definition bdef : resbasedefs) {
+                App.p(bdef.getDefinedLocation());
+                if (bdef.getDefinedLocation() != null) {
+                    alternative = true;
+                    unresolvedNodes.add(bdef.getDefinedLocation());
+                    if (!bdef.getDefinedValue().getBase().getValue().toString().equals("null")) {
+                        App.p("New Provenance due to field: " + cvun + " at "
+                                + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
+                        // Stmt defStmt = bdef.getDefinedLocation().getStmt();
+                        // if (defStmt.containsInvokeExpr()) {
+                        checkSTread(bdef, streads, bdef.getDefinedLocation(), cvbase, cvun.getSuffix());
                         // }
                     }
                 }
-                if (isConstant) {
-                    p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
-                    continue;
-                }
-                if (!cv.getValue().toString().equals("null")) {
-                    if (node.isSingleAssign()) {
-                        // if (node instanceof IdentityNode) {
-                        // App.idnodes.add(node);
-                        // }
-                        App.p("Not tracing uses of a identity assignment node: " + node);
-                    } else {
-                        TracePoint provTP = null;
-                        if (cv.getValue() instanceof JInstanceFieldRef) {
-                            JInstanceFieldRef cvref = ((JInstanceFieldRef) cv.getValue());
-                            Value vbase = cvref.getBase();
-                            List<SootFieldRef> suf = Collections.singletonList(cvref.getFieldRef());
-                            provTP = new TracePoint(node.getStmt(), vbase, node.getMethodInfo().sm, suf);
-                        } else {
-                            provTP = new TracePoint(node.getStmt(), cv.getValue(), node.getMethodInfo().sm);
-                        }
-                        App.p("Potential Provenance value: " + cv);
-                        tps.add(provTP);
-                    }
-                }
-
-                // boolean unresolved = true;
-                // List<Value> constants = new ArrayList<>();
-                // if (isOnlyReturn) {
-
-                // }
-                Set<Definition> unresolves = new HashSet<>();
-
-                for (Definition satdef : satisfiedDefs) {
-                    if (satdef.getDefinedLocation() != null) {
-                        // unresolved = false;
-                        unresolvedNodes.add(satdef.getDefinedLocation());
-                        Stmt defStmt = satdef.getDefinedLocation().getStmt();
-                        if (defStmt.containsInvokeExpr()) {
-                            InvokeExpr iexpr = defStmt.getInvokeExpr();
-                            SootMethod ism = iexpr.getMethod();
-                            if (ism.getDeclaringClass().getName().contains("Repository")
-                                    && ism.getName().contains("findBy")) {
-                                // DBreads.add(defStmt + "::" + cv);
-                                streads.add(new SharedStateRead("Repository", satdef.getDefinedLocation(), cv,
-                                        Collections.emptyList()));
-
-                            } else if (ism.getDeclaringClass().getName().contains("ValueOperations") &&
-                                    ism.getName().contains("get")) {
-                                streads.add(new SharedStateRead("ValueOperations", satdef.getDefinedLocation(), cv,
-                                        Collections.emptyList()));
-                            }
-                        }
-                        App.p("Added Next Backtracking " + cv + " at " + satdef.d());
-                    } else {
-                        unresolves.add(satdef);
-                    }
-                }
-
-                if (!unresolves.isEmpty()) {
-                    for (Definition satdef : unresolves) {
-                        App.p(">>>>>Unresolved " + cv + " with " + satdef);
-                        Value defVal = satdef.getDefinedValue().getBase().getValue();
-                        if ((defVal instanceof Constant) && !(defVal instanceof NullConstant)) {
-                            p("Not tracking constant: " + cv + " with constant value " + defVal);
-                            continue;
-                        }
-                        App.p(satdef.getDefinedValue());
-                        UniqueName cvun = satdef.getDefinedValue();
-                        // if (!cvun.getBase().toString().contains("null")) {
-                        App.p("Try resolving base:");
-                        ContextSensitiveValue cvbase = cvun.getBase();
-                        Set<Definition> resbasedefs = fia.getBefore(node).getDefinitionsByCV(cvbase);
-                        App.p(resbasedefs);
-
-                        boolean alternative = false;
-                        if (!resbasedefs.isEmpty()) {
-                            for (Definition bdef : resbasedefs) {
-                                App.p(bdef.getDefinedLocation());
-                                if (bdef.getDefinedLocation() != null) {
-
-                                    alternative = true;
-                                    unresolvedNodes.add(bdef.getDefinedLocation());
-                                    if (!bdef.getDefinedValue().getBase().getValue().toString().equals("null")) {
-                                        App.p("New Provenance due to field: " + cvun + " at "
-                                                + bdef.getDefinedLocation() + " with base " + bdef.getDefinedValue());
-                                        Stmt defStmt = bdef.getDefinedLocation().getStmt();
-                                        if (defStmt.containsInvokeExpr()) {
-                                            InvokeExpr iexpr = defStmt.getInvokeExpr();
-                                            SootMethod ism = iexpr.getMethod();
-                                            if (ism.getDeclaringClass().getName().contains("Repository")
-                                                    && ism.getName().contains("findBy")) {
-                                                streads.add(new SharedStateRead("Repository", bdef.getDefinedLocation(),
-                                                        cvbase, cvun.getSuffix()));
-                                            } else if (ism.getDeclaringClass().getName().contains("ValueOperations") &&
-                                                    ism.getName().contains("get")) {
-                                                streads.add(new SharedStateRead("ValueOperations",
-                                                        bdef.getDefinedLocation(),
-                                                        cvbase, cvun.getSuffix()));
-                                            }
-                                        }
-                                        // tps.add(new TracePoint(bdef.getDefinedLocation().getStmt(),
-                                        // bdef.getDefinedValue().getBase().getValue(),
-                                        // bdef.getDefinedLocation().getMethodInfo().sm, cvun.getSuffix()));
-                                    }
-                                }
-                            }
-                        }
-                        if (!alternative) {
-                            App.p("Can't resolve " + cvun + " at all");
-                        }
-                    }
-
-                }
-
             }
-
         }
+        if (!alternative) {
+            App.p("Can't resolve " + cvun + " at all");
+        }
+    }
 
-        long backtrackDuration = System.currentTimeMillis()
-                - start;
-        p2("Backtrack time: " + backtrackDuration);
-        // p("DB reads:");
-        // DBreads.forEach(str -> {
-        // p(str);
-        // });
-        // p("Redis reads:");
-        // Rreads.forEach(str -> {
-        // p(str);
-        // });
-        return tps;
+    public static void checkSTread(Definition satdef, Set<SharedStateRead> streads, IPNode defLocation,
+            ContextSensitiveValue cv, List<SootFieldRef> refs) {
+        Stmt defStmt = satdef.getDefinedLocation().getStmt();
+        if (defStmt.containsInvokeExpr()) {
+            InvokeExpr iexpr = defStmt.getInvokeExpr();
+            SootMethod ism = iexpr.getMethod();
+            if (ism.getDeclaringClass().getName().contains("Repository")
+                    && ism.getName().contains("findBy")) {
+                streads.add(new SharedStateRead("Repository", defLocation, cv, refs));
+            } else if (ism.getDeclaringClass().getName().contains("ValueOperations") &&
+                    ism.getName().contains("get")) {
+                streads.add(new SharedStateRead("ValueOperations", defLocation, cv, refs));
+            }
+        }
     }
 
     public static void readTPs(String path, String name) {

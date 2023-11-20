@@ -2,6 +2,7 @@ package com.lumos.wire;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -87,10 +88,12 @@ public class WireHTTP {
             List<String> strs = Utils.readFrom(App.caseStudyPath + "httpWires");
             for (int i = 0; i < strs.size() / 5; i++) {
                 int start = i * 5;
+                // App.p(strs);
                 add(strs.get(start), Integer.valueOf(strs.get(start + 1)),
                         strs.get(start + 2),
-                        strs.get(start + 3).split(","),
-                        strs.get(start + 4).split(","));
+                        strs.get(start + 3).trim().split(","),
+                        strs.get(start + 4).trim().split(","));
+
             }
         }
         for (RequestWirePoint wp : wps.keySet()) {
@@ -105,10 +108,22 @@ public class WireHTTP {
 
     public static void add(String reqMethod, int lineNum, String recvMethod, String[] reqParams,
             String[] recvParams) {
-        RequestWirePoint reqp = new RequestWirePoint(reqMethod, lineNum);
-        List<String> reqarr = Arrays.asList(reqParams);
+        // App.p(reqMethod);
+        // App.p(reqParams.length);
+        // App.p(recvParams.length);
 
-        List<String> recvarr = Arrays.asList(recvParams);
+        RequestWirePoint reqp = new RequestWirePoint(reqMethod, lineNum);
+
+        List<String> reqarr = new ArrayList<>(), recvarr = new ArrayList<>();
+        // if (reqParams.length == 1 && recv){
+
+        // }
+        // else {
+        Collections.addAll(reqarr, reqParams);
+        reqarr.removeAll(Collections.singleton(""));
+        Collections.addAll(recvarr, recvParams);
+        recvarr.removeAll(Collections.singleton(""));
+
         HTTPReceiveWirePoint recvp = new HTTPReceiveWirePoint(recvMethod, reqarr, recvarr);
         // App.p("AAAA " + reqp + ", " + recvp);
         wps.put(reqp, recvp);

@@ -135,7 +135,8 @@ public class StmtNode extends IPNode {
                 for (Definition def : possibleDefinitions) {
                     currDefs.add(Definition.getDefinition(def.definedValue, this));
                 }
-
+                // App.p("----");
+                // App.p(unames);
                 for (UniqueName uname : unames) {
                     if (unames.size() == 1) {
                         out.clearDefinition(uname);
@@ -143,10 +144,14 @@ public class StmtNode extends IPNode {
                     } else {
                         if (!out.getCurrMapping().containsKey(uname)) {
                             App.p2(uname);
-                            App.p2(this.stmt);
-                            App.panicni();
+                            App.p(this.getContext());
+                            App.p2(stmt.getJavaSourceStartLineNumber() + ": " + this.stmt);
+                            // App.p(stmt.getJavaSourceStartLineNumber());
+                            // App.p(out.getCurrMapping());
+                            // App.panicni();
+
                         }
-                        out.getCurrMapping().get(uname).addAll(currDefs);
+                        out.putDefinition(uname, currDefs);
                     }
                 }
             } else {

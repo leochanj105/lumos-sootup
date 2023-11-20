@@ -93,19 +93,12 @@ public class IPFlowInfo {
     public Set<UniqueName> getUniqueNamesForRef(ContextSensitiveValue cv) {
         JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
         Set<Definition> baseDefs = getDefinitionsByCV(cv.getContext(), ref.getBase());
-        // if (cv.getContext().toString().contains("sendOrderCancel,<init>")) {
-        // App.p("!!!! " + cv + ", " + baseDefs);
-        // }
 
         Set<UniqueName> unames = new HashSet<>();
 
         for (Definition def : baseDefs) {
             UniqueName unref = null;
-            // if (def.getDefinedValue().getBase().toString().equals("null")) {
-            // unref = new UniqueName(def.getDefinedValue(), null);
-            // } else {
             unref = new UniqueName(def.getDefinedValue(), ref.getFieldRef());
-            // }
             unames.add(unref);
         }
         return unames;
@@ -138,19 +131,12 @@ public class IPFlowInfo {
 
         Set<Definition> defs = currMapping.get(un);
         if (defs == null || defs.isEmpty()) {
-            // if (v.getValue().getType() instanceof RefLikeType) {
-            // UniqueName u = new UniqueName(cv);
             currMapping.put(un, new HashSet<>());
             resultDefs.add(Definition.getDefinition(un, null));
-            // }
         } else {
             resultDefs.addAll(defs);
         }
 
-        // if (resultNames.isEmpty()) {
-        // App.p("!!!!!!!! " + cv + ", " + cv.getValue().getClass() + ", "
-        // + (cv.getValue().getType() instanceof RefLikeType));
-        // }
         return resultDefs;
 
     }
