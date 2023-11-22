@@ -1,4 +1,4 @@
-package com.lumos.compile;
+package com.lumos.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

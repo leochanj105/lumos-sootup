@@ -31,7 +31,6 @@ import com.lumos.backtracking.PendingBackTracking;
 import com.lumos.backtracking.TracePoint;
 // import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
-import com.lumos.compile.CompileUtils;
 import com.lumos.forward.CallSite;
 import com.lumos.forward.ContextSensitiveInfo;
 import com.lumos.forward.ContextSensitiveValue;
@@ -49,6 +48,7 @@ import com.lumos.forward.node.StmtNode;
 import com.lumos.forward.shared.SharedStateDepedency;
 import com.lumos.forward.shared.SharedStateRead;
 import com.lumos.forward.shared.SharedStateWrite;
+import com.lumos.utils.CompileUtils;
 import com.lumos.utils.Utils;
 import com.lumos.wire.Banned;
 
