@@ -32,20 +32,20 @@ import com.lumos.backtracking.TracePoint;
 // import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
-import com.lumos.forward.AbstractAddress;
 import com.lumos.forward.CallSite;
 import com.lumos.forward.ContextSensitiveInfo;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
-import com.lumos.forward.EnterNode;
-import com.lumos.forward.ExitNode;
 import com.lumos.forward.ForwardIPAnalysis;
-import com.lumos.forward.IPFlowInfo;
-import com.lumos.forward.IPNode;
-import com.lumos.forward.IdentityNode;
 import com.lumos.forward.InterProcedureGraph;
-import com.lumos.forward.StmtNode;
-import com.lumos.forward.RefBasedAddress;
+import com.lumos.forward.memory.AbstractAddress;
+import com.lumos.forward.memory.Memory;
+import com.lumos.forward.memory.RefBasedAddress;
+import com.lumos.forward.node.EnterNode;
+import com.lumos.forward.node.ExitNode;
+import com.lumos.forward.node.IPNode;
+import com.lumos.forward.node.IdentityNode;
+import com.lumos.forward.node.StmtNode;
 import com.lumos.forward.shared.SharedStateDepedency;
 import com.lumos.forward.shared.SharedStateRead;
 import com.lumos.forward.shared.SharedStateWrite;
@@ -433,7 +433,7 @@ public class App {
 
         for (int i = 0; i < ipnodes.size(); i++) {
             IPNode ipnode = ipnodes.get(i);
-            IPFlowInfo cmap = fia.getAfter(ipnode);
+            Memory cmap = fia.getAfter(ipnode);
             List<ContextSensitiveValue> currValues = cvalues.get(i);
             for (ContextSensitiveValue cvalue : currValues) {
                 for (Definition def : cmap.getDefinitionsByCV(cvalue)) {
@@ -672,7 +672,7 @@ public class App {
                             // for( field: stdep.refs)
                             Value objVal = null;
                             boolean mayNotFromAnotherRepo = false;
-                            IPFlowInfo cmap = fia.getAfter(ipnode);
+                            Memory cmap = fia.getAfter(ipnode);
                             for (Definition def : cmap.getDefinitionsByCV(
                                     ContextSensitiveValue.getCValue(ipnode.getContext(), inexpr.getArg(0)))) {
                                 if (def.getDefinedLocation() != null) {

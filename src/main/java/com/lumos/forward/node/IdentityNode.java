@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.lumos.App;
-import com.lumos.forward.AbstractAddress;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
-import com.lumos.forward.IPFlowInfo;
-import com.lumos.forward.RefBasedAddress;
+import com.lumos.forward.memory.AbstractAddress;
+import com.lumos.forward.memory.Memory;
+import com.lumos.forward.memory.RefBasedAddress;
 import com.lumos.utils.Utils;
 import com.lumos.wire.IdentityWire;
 
@@ -114,7 +114,7 @@ public class IdentityNode extends IPNode {
         this.type = "identity";
     }
 
-    public boolean handleComposite(IPFlowInfo out) {
+    public boolean handleCollection(Memory out) {
         // Rules for composite data structures
         InvokeExpr iexpr = stmt.getInvokeExpr();
         if (stmt instanceof InvokeStmt) {
@@ -169,7 +169,7 @@ public class IdentityNode extends IPNode {
     }
 
     @Override
-    public void flow(IPFlowInfo out) {
+    public void flow(Memory out) {
         if (isEmptyInit()) {
             return;
         }
@@ -178,16 +178,14 @@ public class IdentityNode extends IPNode {
             App.idnodes.add(this);
         }
 
-        if (handleComposite(out)) {
+        if (handleCollection(out)) {
             return;
         }
 
         for (ContextSensitiveValue cvlop : cvdefs) {
-
             if (isSafeOverwrite()) {
                 out.clearDefinition(cvlop);
             }
-            // App.p("xxxxxx " + this.stmt);
             if (idMode.equals("CONSERVATIVE") || ((cvuses.size() > 1 || cvuses.size() == 0)
                     || !isSingleIdAssign())) {
                 RefBasedAddress un = new RefBasedAddress(cvlop);

@@ -9,8 +9,8 @@ import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
-import com.lumos.forward.IPFlowInfo;
 import com.lumos.forward.InterProcedureGraph;
+import com.lumos.forward.memory.Memory;
 
 // import fj.data.Set;
 import soot.jimple.Stmt;
@@ -105,7 +105,7 @@ public abstract class IPNode {
         return cfDepNodes;
     }
 
-    public abstract void flow(IPFlowInfo out);
+    public abstract void flow(Memory out);
 
     public abstract Set<ContextSensitiveValue> getUsed();
 

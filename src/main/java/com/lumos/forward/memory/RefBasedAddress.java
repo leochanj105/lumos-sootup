@@ -1,7 +1,9 @@
-package com.lumos.forward;
+package com.lumos.forward.memory;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.lumos.forward.ContextSensitiveValue;
 
 import soot.SootFieldRef;
 

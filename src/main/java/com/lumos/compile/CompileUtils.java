@@ -17,7 +17,7 @@ import java.util.Map;
 
 import com.lumos.App;
 import com.lumos.forward.ContextSensitiveValue;
-import com.lumos.forward.RefBasedAddress;
+import com.lumos.forward.memory.RefBasedAddress;
 
 import jas.StringCP;
 import soot.Body;

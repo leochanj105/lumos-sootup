@@ -7,8 +7,8 @@ import com.lumos.App;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
-import com.lumos.forward.IPFlowInfo;
-import com.lumos.forward.RefBasedAddress;
+import com.lumos.forward.memory.Memory;
+import com.lumos.forward.memory.RefBasedAddress;
 import com.lumos.utils.Utils;
 
 import soot.Local;
@@ -63,7 +63,7 @@ public class StmtNode extends IPNode {
     }
 
     @Override
-    public void flow(IPFlowInfo out) {
+    public void flow(Memory out) {
         Stmt stmt = this.getStmt();
         if (stmt instanceof JIdentityStmt) {
             return;

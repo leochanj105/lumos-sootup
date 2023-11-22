@@ -1,4 +1,6 @@
-package com.lumos.forward;
+package com.lumos.forward.memory;
+
+import com.lumos.forward.ContextSensitiveValue;
 
 public interface AbstractAddress {
     public ContextSensitiveValue getBase();

@@ -6,7 +6,7 @@ import java.util.Set;
 import com.lumos.App;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
-import com.lumos.forward.IPFlowInfo;
+import com.lumos.forward.memory.Memory;
 
 import soot.jimple.Stmt;
 
@@ -28,7 +28,7 @@ public class NoopNode extends IPNode {
     }
 
     @Override
-    public void flow(IPFlowInfo out) {
+    public void flow(Memory out) {
 
     }
 

@@ -15,6 +15,8 @@ import javax.annotation.Nonnull;
 
 import com.lumos.App;
 import com.lumos.common.Dependency;
+import com.lumos.forward.memory.AbstractAddress;
+import com.lumos.forward.memory.Memory;
 import com.lumos.forward.node.IPNode;
 
 import fj.P;
@@ -36,16 +38,16 @@ import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.interaction.FlowInfo;
 
 public class ForwardIPAnalysis {
-    public final Map<IPNode, IPFlowInfo> liveIn = new HashMap<>();
-    public final Map<IPNode, IPFlowInfo> liveOut = new HashMap<>();
+    public final Map<IPNode, Memory> liveIn = new HashMap<>();
+    public final Map<IPNode, Memory> liveOut = new HashMap<>();
 
     public ForwardIPAnalysis(InterProcedureGraph igraph, IPNode firstNode) {
         // App.p("!!! " + firstNode.getSuccessors());
         Set<IPNode> workList = new HashSet<>();
         for (IPNode node : igraph.nodes) {
             // Unit unit = it.next();
-            liveIn.put(node, new IPFlowInfo());
-            liveOut.put(node, new IPFlowInfo());
+            liveIn.put(node, new Memory());
+            liveOut.put(node, new Memory());
             if (node.equals(firstNode)) {
                 workList.add(node);
                 // App.p("!!! " + node);
@@ -98,7 +100,7 @@ public class ForwardIPAnalysis {
             }
             visited.add(node);
 
-            IPFlowInfo in = new IPFlowInfo();
+            Memory in = new Memory();
             for (IPNode pred : node.getPredecesors()) {
                 in = merge(in, liveOut.get(pred));
             }
@@ -108,7 +110,7 @@ public class ForwardIPAnalysis {
                 liveIn.put(node, in);
             }
 
-            IPFlowInfo out = copy(in);
+            Memory out = copy(in);
             node.flow(out);
 
             if (isNotEqual(out, liveOut.get(node)) || node.equals(firstNode)) {
@@ -148,13 +150,13 @@ public class ForwardIPAnalysis {
         return false;
     }
 
-    public IPFlowInfo copy(IPFlowInfo original) {
-        IPFlowInfo newm = new IPFlowInfo(original);
+    public Memory copy(Memory original) {
+        Memory newm = new Memory(original);
         return newm;
     }
 
-    private IPFlowInfo merge(IPFlowInfo f1, IPFlowInfo f2) {
-        IPFlowInfo f3 = copy(f1);
+    private Memory merge(Memory f1, Memory f2) {
+        Memory f3 = copy(f1);
 
         for (AbstractAddress un : f2.getCurrMapping().keySet()) {
             Map<AbstractAddress, Set<Definition>> mapping = f3.getCurrMapping();
@@ -170,15 +172,15 @@ public class ForwardIPAnalysis {
 
     }
 
-    private boolean isNotEqual(IPFlowInfo f1, IPFlowInfo f2) {
+    private boolean isNotEqual(Memory f1, Memory f2) {
         return !f1.equals(f2);
     }
 
-    public IPFlowInfo getBefore(IPNode node) {
+    public Memory getBefore(IPNode node) {
         return this.liveIn.get(node);
     }
 
-    public IPFlowInfo getAfter(IPNode node) {
+    public Memory getAfter(IPNode node) {
         return this.liveOut.get(node);
     }
 }

@@ -1,4 +1,4 @@
-package com.lumos.forward;
+package com.lumos.forward.memory;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,6 +11,9 @@ import java.util.Set;
 import org.glassfish.jaxb.core.v2.model.core.Ref;
 
 import com.lumos.App;
+import com.lumos.forward.Context;
+import com.lumos.forward.ContextSensitiveValue;
+import com.lumos.forward.Definition;
 
 import soot.Local;
 import soot.RefLikeType;
@@ -19,7 +22,7 @@ import soot.jimple.Jimple;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JInstanceFieldRef;
 
-public class IPFlowInfo {
+public class Memory {
     Map<AbstractAddress, Set<Definition>> currMapping;
 
     public Map<AbstractAddress, Set<Definition>> getCurrMapping() {
@@ -42,7 +45,7 @@ public class IPFlowInfo {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        IPFlowInfo other = (IPFlowInfo) obj;
+        Memory other = (Memory) obj;
         if (currMapping == null) {
             if (other.currMapping != null)
                 return false;
@@ -55,11 +58,11 @@ public class IPFlowInfo {
         this.currMapping = currMapping;
     }
 
-    public IPFlowInfo() {
+    public Memory() {
         this.currMapping = new HashMap<>();
     }
 
-    public IPFlowInfo(IPFlowInfo other) {
+    public Memory(Memory other) {
         this();
 
         Map<AbstractAddress, Set<Definition>> mappings = other.getCurrMapping();

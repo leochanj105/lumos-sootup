@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.lumos.App;
-import com.lumos.forward.AbstractAddress;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
-import com.lumos.forward.IPFlowInfo;
-import com.lumos.forward.RefBasedAddress;
+import com.lumos.forward.memory.AbstractAddress;
+import com.lumos.forward.memory.Memory;
+import com.lumos.forward.memory.RefBasedAddress;
 
 import soot.Local;
 import soot.SootMethod;
@@ -104,7 +104,7 @@ public class ExitNode extends IPNode {
     }
 
     @Override
-    public void flow(IPFlowInfo out) {
+    public void flow(Memory out) {
         // ExitNode enode = (ExitNode) node;
         ContextSensitiveValue cvcaller = getRet();
 

@@ -12,7 +12,7 @@ import com.lumos.forward.CallSite;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
-import com.lumos.forward.IPFlowInfo;
+import com.lumos.forward.memory.Memory;
 
 // import fj.data.HashSet;
 // import polyglot.ast.Call;
@@ -113,7 +113,7 @@ public class EnterNode extends IPNode {
     }
 
     @Override
-    public void flow(IPFlowInfo out) {
+    public void flow(Memory out) {
         // EnterNode enode = (EnterNode) node;
 
         for (List<ContextSensitiveValue> aliasp : getAliasPairs()) {
