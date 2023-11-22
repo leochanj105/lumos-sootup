@@ -120,11 +120,13 @@ public class InterProcedureGraph {
         if (minfo == null && (Utils.isCrossContext(mname))) {
             HTTPReceiveWirePoint hwire = WireHTTP.templateWire(stmt, context.getStackLast());
             if (hwire == null) {
+                // App.p(stmt + ", " + stmt.getJavaSourceStartLineNumber());
                 hwire = WireHTTP.get(lastMethod,
                         stmt.getJavaSourceStartLineNumber());
             }
             if (hwire != null) {
                 String target = hwire.targetMethod;
+
                 minfo = searchMethod(target);
                 if (minfo != null) {
                     App.p("wired remote " + target);

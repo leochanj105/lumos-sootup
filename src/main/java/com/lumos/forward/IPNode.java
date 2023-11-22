@@ -28,10 +28,10 @@ public abstract class IPNode {
     }
 
     // public void setIgraph(InterProcedureGraph igraph) {
-    //     this.igraph = igraph;
+    // this.igraph = igraph;
     // }
 
-    public abstract boolean isSingleAssign();
+    public abstract boolean isSingleIdAssign();
 
     public MethodInfo getMethodInfo() {
         return context.getStackLast();
@@ -104,6 +104,12 @@ public abstract class IPNode {
     public abstract void flow(IPFlowInfo out);
 
     public abstract Set<ContextSensitiveValue> getUsed();
+
+    public Set<ContextSensitiveValue> getUsed(Set<ContextSensitiveValue> implicits) {
+        return getUsed();
+    };
+    // public abstract Set<ContextSensitiveValue> getUsed(Set<ContextSensitiveValue>
+    // implicits)();
 
     @Override
     public int hashCode() {

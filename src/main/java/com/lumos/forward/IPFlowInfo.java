@@ -105,10 +105,8 @@ public class IPFlowInfo {
     }
 
     public Set<Definition> getDefinitionsByCV(ContextSensitiveValue cv) {
-        //
         Set<Definition> resultDefs = new HashSet<>();
         if (cv.getValue() instanceof JInstanceFieldRef) {
-            // return currMapping.get(cv);
             for (UniqueName unref : getUniqueNamesForRef(cv)) {
                 Set<Definition> definitions = new HashSet<>();
                 Set<Definition> heapDefs = currMapping.get(unref);

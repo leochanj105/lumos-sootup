@@ -44,6 +44,11 @@ public class Utils {
         return str;
     }
 
+    public static boolean isCompositeType(String tstr) {
+        return (tstr.contains("List") || (tstr.contains("Set") || (tstr.contains("Map"))))
+                || (tstr.contains("[]"));
+    }
+
     public static String getReqTypeString(Object req) {
         String reqString = req.toString().toUpperCase();
         // System.out.println(reqString);

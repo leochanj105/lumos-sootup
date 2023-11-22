@@ -392,19 +392,20 @@ public class App {
             }
             swcvalues.add(currCvalues);
         }
-        Set<SharedStateRead> streads2 = new HashSet<>();
-        Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues, streads2);
+        // Set<SharedStateRead> streads2 = new HashSet<>();
+        // Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
+        // streads2);
 
         p2("#TPs: " + tps.size());
 
-        p2("#TPs SW: " + tpsw.size());
+        // p2("#TPs SW: " + tpsw.size());
 
-        tpsw.removeAll(tps);
-        p2("#TPs SW (additional): " + tpsw.size());
-        tpsw.forEach(s -> {
-            p(s.d());
-        });
-        tps.addAll(tpsw);
+        // tpsw.removeAll(tps);
+        // p2("#TPs SW (additional): " + tpsw.size());
+        // tpsw.forEach(s -> {
+        // p(s.d());
+        // });
+        // tps.addAll(tpsw);
         if (outputTP) {
             writeTPs(tps, outputTPDir, outputTPFileName);
             writeSTReads(streads, outputTPDir, outputTPFileName);
@@ -465,10 +466,10 @@ public class App {
                 unresolvedNodes.add(new PendingBackTracking(cfnode, "normal"));
             }
 
-            if (ptrack.getMode().equals("cfonly")) {
-                p("Not continueing value deps for cfonly query: " + node);
-                continue;
-            }
+            // if (ptrack.getMode().equals("cfonly")) {
+            // p("Not continueing value deps for cfonly query: " + node);
+            // continue;
+            // }
             // else if (ptrack.getMode().equals("list")) {
             // p("Handling list definition");
             // if (!(node.getStmt() instanceof JAssignStmt)) {
@@ -484,18 +485,20 @@ public class App {
             // p("List def is assignment, treating as normal");
             // }
             // }
+            Set<ContextSensitiveValue> implicits = new HashSet<>();
+            Set<ContextSensitiveValue> alluses = node.getUsed(implicits);
+            alluses.addAll(implicits);
+            for (ContextSensitiveValue cv : alluses) {
 
-            for (ContextSensitiveValue cv : node.getUsed()) {
-                if (Banned.isTypeBanned(cv.getValue().getType().toString())) {
-                    p("Not tracking banned type: " + cv.getValue().getType());
-                    continue;
-                }
+                // if (cv.getValue().getType().toString().contains("AsyncResult")) {
+                // p("!!! " + node);
+                // }
+                boolean isImplicit = implicits.contains(cv);
 
+                // Test if this is a constant with a deterministic value
                 boolean isConstant = false;
-                boolean isOnlyReturn = false;
                 Value constval = null;
                 if (cv.getValue() instanceof Constant) {
-                    // App.p(" !! ! " + cv);
                     isConstant = true;
                     constval = cv.getValue();
                 }
@@ -514,18 +517,32 @@ public class App {
                     p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
                     continue;
                 }
-                if (cv.getValue() instanceof JInstanceFieldRef) {
-                    p("Adding cf dep queries for base: " + cv);
-                    Set<Definition> baseDefs = fia.getBefore(node).getDefinitionsByCV(getBaseCV(cv));
-                    for (Definition def : baseDefs) {
-                        if (def.getDefinedLocation() != null) {
-                            unresolvedNodes.add(new PendingBackTracking(def.getDefinedLocation(), "cfonly"));
-                        }
-                    }
-                }
+
+                // if (cv.getValue() instanceof JInstanceFieldRef) {
+                // p("Adding cf dep queries for base: " + cv);
+                // Set<Definition> baseDefs =
+                // fia.getBefore(node).getDefinitionsByCV(getBaseCV(cv));
+                // for (Definition def : baseDefs) {
+                // if (def.getDefinedLocation() != null) {
+                // unresolvedNodes.add(new PendingBackTracking(def.getDefinedLocation(),
+                // "cfonly"));
+                // }
+                // }
+                // }
+
+                boolean isTypeBanned = Banned.isTypeBanned(cv.getValue().getType().toString());
+                boolean isBase = ptrack.getMode().equals("base");
+                // boolean isCFOnly = node.isSingleIdAssign() &&
+                // ptrack.getMode().equals("cfonly");
+                boolean isSingleIdAssign = node.isSingleIdAssign();
                 if (!cv.getValue().toString().equals("null")) {
-                    if (node.isSingleAssign()) {
+                    if (isSingleIdAssign) {
                         App.p("Not tracing uses of a identity assignment node: " + node);
+                    } else if (isTypeBanned) {
+                        p("Not tracking banned type: " + cv.getValue().getType());
+                    } else if (isImplicit) {
+                        // p(implicits);
+                        p("Not tracking implicit value: " + cv.getValue());
                     } else {
                         TracePoint provTP = null;
                         if (cv.getValue() instanceof JInstanceFieldRef) {
@@ -540,14 +557,16 @@ public class App {
                         tps.add(provTP);
                     }
                 }
+
                 Set<Definition> unresolves = new HashSet<>();
 
                 for (Definition satdef : satisfiedDefs) {
                     if (satdef.getDefinedLocation() != null) {
                         // unresolved = false;
-                        unresolvedNodes.add(new PendingBackTracking(satdef.getDefinedLocation(), "normal"));
+                        String nmode = isTypeBanned || (isSingleIdAssign && isBase) || isImplicit ? "base" : "normal";
+                        unresolvedNodes.add(new PendingBackTracking(satdef.getDefinedLocation(), nmode));
                         checkSTread(satdef, streads, Collections.emptyList());
-                        App.p("Added Next Backtracking " + cv + " at " + satdef.d());
+                        App.p("Added Next Backtracking " + cv + " at " + satdef.d() + " with mode " + nmode);
                     } else {
                         unresolves.add(satdef);
                     }
@@ -1187,9 +1206,15 @@ public class App {
         try {
             FileWriter fileWriter = new FileWriter(file);
             PrintWriter printWriter = new PrintWriter(fileWriter);
+
+            List<String> lines = new ArrayList<>();
             printWriter.println("valueTPs");
             for (TracePoint tp : tps) {
-                printWriter.println(tp.d(",,"));
+                lines.add(tp.d(",,"));
+            }
+            lines.sort(null);
+            for (String l : lines) {
+                printWriter.println(l);
             }
             printWriter.close();
             System.out.printf("TP data is saved in " + file.getAbsolutePath());
@@ -1218,8 +1243,15 @@ public class App {
                 // p("yyyy " + stread.refs + ", " + mergeStr(stread.refs, ","));
                 readPts.get(sd).add(mergeStr(stread.refs, ","));
             }
+
+            List<String> lines = new ArrayList<>();
             for (String rpt : readPts.keySet()) {
-                printWriter.println(rpt + ",," + readPts.get(rpt));
+                lines.add(rpt + ",," + readPts.get(rpt));
+            }
+
+            lines.sort(null);
+            for (String l : lines) {
+                printWriter.println(l);
             }
             printWriter.close();
             System.out.printf("STread data is saved in " + file.getAbsolutePath());
@@ -1238,10 +1270,21 @@ public class App {
         try {
             FileWriter fileWriter = new FileWriter(file);
             PrintWriter printWriter = new PrintWriter(fileWriter);
+
             printWriter.println("STwrites");
+            List<String> lines = new ArrayList<>();
             for (SharedStateWrite stwrite : stwrites) {
-                printWriter.println(stwrite.d(",,"));
+                lines.add(stwrite.d(",,"));
             }
+
+            lines.sort(null);
+            for (String l : lines) {
+                printWriter.println(l);
+            }
+
+            // for (SharedStateWrite stwrite : stwrites) {
+            // printWriter.println(stwrite.d(",,"));
+            // }
             printWriter.close();
             System.out.printf("STwrite data is saved in " + file.getAbsolutePath());
         } catch (IOException i) {

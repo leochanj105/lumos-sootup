@@ -166,7 +166,7 @@ public class ExitNode extends IPNode {
     }
 
     @Override
-    public boolean isSingleAssign() {
+    public boolean isSingleIdAssign() {
         return false;
     }
 

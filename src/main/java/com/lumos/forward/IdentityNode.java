@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Set;
 
 import com.lumos.App;
+import com.lumos.utils.Utils;
 import com.lumos.wire.IdentityWire;
 
+import soot.Local;
 import soot.SootMethod;
 import soot.Value;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
+import soot.jimple.InvokeStmt;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
@@ -54,7 +57,8 @@ public class IdentityNode extends IPNode {
                 for (Value arg : iexpr.getArgs()) {
                     cvuses.add(ContextSensitiveValue.getCValue(context, arg));
                 }
-                if ((stmt instanceof JAssignStmt) && (iexpr instanceof InstanceInvokeExpr)) {
+                // if ((stmt instanceof JAssignStmt) && (iexpr instanceof InstanceInvokeExpr)) {
+                if (!isSingleIdAssign() && iexpr instanceof InstanceInvokeExpr) {
                     cvuses.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
                 }
             } else {
@@ -94,7 +98,7 @@ public class IdentityNode extends IPNode {
         }
 
         if (App.showInitOnly) {
-            if (isSingleAssign()) {
+            if (isSingleIdAssign()) {
                 if (iexpr.getMethod().getSignature().contains("<init>") && !isEmptyInit()) {
                     App.initList.add(iexpr.getMethod().getSignature());
                 }
@@ -104,32 +108,82 @@ public class IdentityNode extends IPNode {
         this.type = "identity";
     }
 
+    public boolean handleComposite(IPFlowInfo out) {
+        // Rules for composite data structures
+        InvokeExpr iexpr = stmt.getInvokeExpr();
+        if (stmt instanceof InvokeStmt) {
+            if (iexpr instanceof InstanceInvokeExpr) {
+                InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                String tstr = inexpr.getBase().getType().toString();
+                String mstr = inexpr.getMethod().getName();
+                ContextSensitiveValue cvlop, cvrop;
+                if (mstr.equals("add")
+                        && (tstr.contains("List") || tstr.contains("Set"))) {
+                    cvlop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
+                    cvrop = ContextSensitiveValue.getCValue(context, inexpr.getArg(0));
+                    Set<Definition> defs = out.getDefinitionsByCV(cvrop);
+                    out.putDefinition(cvlop, defs);
+                    return true;
+                } else if (mstr.equals("put")
+                        && (tstr.contains("Map"))) {
+                    cvlop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
+                    cvrop = ContextSensitiveValue.getCValue(context, inexpr.getArg(1));
+                    Set<Definition> defs = out.getDefinitionsByCV(cvrop);
+                    out.putDefinition(cvlop, defs);
+                    return true;
+                }
+            }
+        }
+        if (stmt instanceof JAssignStmt) {
+            ContextSensitiveValue cvlop, cvrop;
+            if (iexpr instanceof InstanceInvokeExpr) {
+                InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                if ((inexpr.getMethod().getName().equals("iterator")
+                        && inexpr.getBase().getType().toString().contains("List"))
+                        // || (inexpr.getMethod().getName().equals("next")
+                        // && inexpr.getBase().getType().toString().contains("Iterator"))
+                        || (inexpr.getMethod().getName().equals("get")
+                                && inexpr.getBase().getType().toString().contains("List"))) {
+                    if (inexpr.getMethod().getName().equals("next")
+                            && inexpr.getBase().getType().toString().contains("Iterator")) {
+                        // App.p("xxxxxxx " + this);
+                    }
+
+                    cvlop = ContextSensitiveValue.getCValue(context,
+                            ((JAssignStmt) stmt).getLeftOp());
+                    out.clearDefinition(cvlop);
+                    cvrop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
+                    Set<Definition> defs = out.getDefinitionsByCV(cvrop);
+                    out.putDefinition(cvlop, defs);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public void flow(IPFlowInfo out) {
-        // EnterNode enode = (EnterNode) node;
-        // String stmtStr = this.stmt.getInvokeExpr().toString();
         if (isEmptyInit()) {
             return;
         }
-
-        // if (stmtStr.contains("javax.servlet.http.Cookie: java.lang.String
-        // getValue()>")) {
-        // return;
-        // }
 
         if (App.showIDNodesOnly) {
             App.idnodes.add(this);
         }
 
-        // if ((!visible) && cvuses.size() > 1) {
-        // App.panicni();
-        // }
+        if (handleComposite(out)) {
+            return;
+        }
 
         for (ContextSensitiveValue cvlop : cvdefs) {
             UniqueName un = new UniqueName(cvlop);
-            out.clearDefinition(cvlop);
+            if (isSafeOverwrite()) {
+                out.clearDefinition(cvlop);
+            }
+            // App.p("xxxxxx " + this.stmt);
             if (idMode.equals("CONSERVATIVE") || ((cvuses.size() > 1 || cvuses.size() == 0)
-                    || !isSingleAssign())) {
+                    || !isSingleIdAssign())) {
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
             } else {
                 for (ContextSensitiveValue cvrop : cvuses) {
@@ -146,9 +200,13 @@ public class IdentityNode extends IPNode {
 
     }
 
+    public boolean isSafeOverwrite() {
+        return isSingleIdAssign() || (stmt instanceof JAssignStmt);
+    }
+
     @Override
-    public boolean isSingleAssign() {
-        return isEmptyInit() || (getUsed().size() == 1
+    public boolean isSingleIdAssign() {
+        return isEmptyInit() || (cvuses.size() == 1
                 && IdentityWire.findWire(this.stmt.getInvokeExpr().getMethod().getSignature().toString()));
     }
 
@@ -159,7 +217,24 @@ public class IdentityNode extends IPNode {
 
     @Override
     public Set<ContextSensitiveValue> getUsed() {
-        return cvuses;
+        return getUsed(null);
+    }
+
+    @Override
+    public Set<ContextSensitiveValue> getUsed(Set<ContextSensitiveValue> implicits) {
+        Set<ContextSensitiveValue> results = new HashSet<>();
+        for (ContextSensitiveValue cv : cvuses) {
+            Value v = cv.getValue();
+            String tstr = v.getType().toString();
+            if (v instanceof Local && Utils.isCompositeType(tstr)) {
+                if (implicits != null) {
+                    implicits.add(cv);
+                }
+            } else {
+                results.add(cv);
+            }
+        }
+        return results;
     }
 
     @Override

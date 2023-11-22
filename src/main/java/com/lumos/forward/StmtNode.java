@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.lumos.App;
+import com.lumos.utils.Utils;
 
 import soot.Local;
 import soot.RefLikeType;
@@ -15,6 +16,7 @@ import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
 import soot.jimple.internal.JIdentityStmt;
+import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
@@ -69,26 +71,26 @@ public class StmtNode extends IPNode {
             }
             ContextSensitiveValue cvlop = null;
             ContextSensitiveValue cvrop = null;
+            // Make sure a field variable is "static"
             if (lop instanceof StaticFieldRef) {
                 cvlop = ContextSensitiveValue.getCValue(Context.emptyContext(), lop);
-                // Value xx = ((StaticFieldRef) lop).getField();
             } else {
                 cvlop = ContextSensitiveValue.getCValue(getContext(), lop);
             }
 
             if (rop instanceof StaticFieldRef) {
+
                 cvrop = ContextSensitiveValue.getCValue(Context.emptyContext(), rop);
             } else {
                 cvrop = ContextSensitiveValue.getCValue(getContext(), rop);
             }
-            // ContextSensitiveValue cvrop = ContextSensitiveValue.getCValue(getContext(),
-            // rop);
 
             Set<Definition> defs = new HashSet<>();
             if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)
                     || (rop instanceof StaticFieldRef)) {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
             } else {
+                // App.p("xxxx " + this.stmt);
                 defs.add(Definition.getDefinition(new UniqueName(cvlop), this));
             }
             // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
@@ -135,8 +137,6 @@ public class StmtNode extends IPNode {
                 for (Definition def : possibleDefinitions) {
                     currDefs.add(Definition.getDefinition(def.definedValue, this));
                 }
-                // App.p("----");
-                // App.p(unames);
                 for (UniqueName uname : unames) {
                     if (unames.size() == 1) {
                         out.clearDefinition(uname);
@@ -146,9 +146,6 @@ public class StmtNode extends IPNode {
                             App.p2(uname);
                             App.p(this.getContext());
                             App.p2(stmt.getJavaSourceStartLineNumber() + ": " + this.stmt);
-                            // App.p(stmt.getJavaSourceStartLineNumber());
-                            // App.p(out.getCurrMapping());
-                            // App.panicni();
 
                         }
                         out.putDefinition(uname, currDefs);
@@ -163,6 +160,11 @@ public class StmtNode extends IPNode {
 
     @Override
     public Set<ContextSensitiveValue> getUsed() {
+        return getUsed(null);
+    }
+
+    @Override
+    public Set<ContextSensitiveValue> getUsed(Set<ContextSensitiveValue> implicits) {
         Set<ContextSensitiveValue> cvused = new HashSet<>();
         if (stmt instanceof JReturnStmt) {
             Value ret = ((JReturnStmt) stmt).getOp();
@@ -172,23 +174,50 @@ public class StmtNode extends IPNode {
             // This "banned" is to ensure that if a reference is used, its
             // base is not added
             Set<Value> banned = new HashSet<>();
+            App.p("-------");
             for (ValueBox vbox : stmt.getUseBoxes()) {
+
                 Value use = vbox.getValue();
+                // App.p(use + ", ___" + use.getUseBoxes().size() + ", ___" + use.getClass());
+
                 if (banned.contains(use)) {
                     continue;
                 }
+                // Left Op is ref
                 if ((stmt instanceof JAssignStmt)
                         && ((JAssignStmt) stmt).getLeftOp().getUseBoxes().contains(vbox)) {
+                    if (implicits != null) {
+                        implicits.add(ContextSensitiveValue.getCValue(getContext(), vbox.getValue()));
+                        // App.p("Implicit: " + vbox.getValue());
+                    }
                     continue;
                 }
 
                 if ((use instanceof Local) || (use instanceof JInstanceFieldRef) || (use instanceof StaticFieldRef)
                         || (use instanceof Constant)) {
-                    ContextSensitiveValue cvuse = ContextSensitiveValue.getCValue(getContext(), use);
-                    cvused.add(cvuse);
                     if (use instanceof JInstanceFieldRef) {
                         banned.add(((JInstanceFieldRef) use).getBase());
+                        if (implicits != null) {
+                            implicits
+                                    .add(ContextSensitiveValue.getCValue(context, ((JInstanceFieldRef) use).getBase()));
+                            App.p("Implicit: " + ((JInstanceFieldRef) use).getBase());
+                        }
                     }
+                    String tstr = use.getType().toString();
+                    if ((use instanceof Local) && (stmt instanceof JAssignStmt) && Utils.isCompositeType(tstr)) {
+                        if (implicits != null) {
+                            // App.p(implicits);
+                            implicits.add(ContextSensitiveValue.getCValue(context, use));
+                            App.p("Implicit: " + use + ", " + tstr);
+                        }
+                    } else {
+                        ContextSensitiveValue cvuse = ContextSensitiveValue.getCValue(getContext(), use);
+                        cvused.add(cvuse);
+                        App.p("Use: " + use + ", " + use.getClass() + ", " + use.getType());
+                    }
+
+                } else {
+                    App.p(use + ", ___" + use.getUseBoxes().size() + ", ___" + use.getClass());
                 }
             }
 
@@ -197,8 +226,26 @@ public class StmtNode extends IPNode {
     }
 
     @Override
-    public boolean isSingleAssign() {
-        return getUsed().size() <= 1;
+    public boolean isSingleIdAssign() {
+        // return !(this.stmt instanceof JIfStmt) && getUsed().size() <= 1;
+
+        if (stmt instanceof JReturnStmt) {
+            return true;
+        }
+        if (!(stmt instanceof JAssignStmt)) {
+            return false;
+        }
+        Value rightop = ((JAssignStmt) stmt).getRightOp();
+        // int leftFieldRef = (((JAssignStmt) stmt).getLeftOp() instanceof
+        // JInstanceFieldRef) ? 1 : 0;
+        // Set<ContextSensitiveValue> implicits = new HashSet<>();
+        // Set<ContextSensitiveValue> explicits = getUsed(implicits);
+        // if (implicits.size() + explicits.size() - leftFieldRef <= 1) {
+        // return true;
+        // }
+        return (rightop instanceof Local) || (rightop instanceof JInstanceFieldRef) ||
+                (rightop instanceof StaticFieldRef) || (rightop instanceof Constant) ||
+                (rightop instanceof JCastExpr);
     }
 
 }

@@ -41,7 +41,8 @@ public class WireHTTP {
                     HTTPReceiveWirePoint hwire = new HTTPReceiveWirePoint(
                             wiredMethod.getSignature(), new ArrayList<>(),
                             new ArrayList<>());
-                    if (wiredMethod.getParameterCount() == 1 && !wiredMethod.getName().contains("verifyVIPToken")) {
+                    if (wiredMethod.getParameterCount() == 1 && !wiredMethod.getName().contains("verifyVIPToken")
+                            && !wiredMethod.getName().contains("verifyLoginToken")) {
                         for (Local plocal : wiredMethod.getActiveBody().getParameterLocals()) {
                             for (Value arg : expr.getArgs()) {
                                 // p(arg.getType().toString());
@@ -95,10 +96,12 @@ public class WireHTTP {
                         strs.get(start + 4).trim().split(","));
 
             }
+
         }
+        // App.p("%%%%% " + reqMethod + ", " + lineNum);
         for (RequestWirePoint wp : wps.keySet()) {
+            // App.p("!!! " + wp.reqMethod + " , " + wp.lineNum);
             if (reqMethod.contains(wp.reqMethod) && lineNum == wp.lineNum) {
-                // App.p("!!! " + reqMethod + ", " + wps.get(wp));
                 return wps.get(wp);
             }
         }
@@ -123,7 +126,7 @@ public class WireHTTP {
         reqarr.removeAll(Collections.singleton(""));
         Collections.addAll(recvarr, recvParams);
         recvarr.removeAll(Collections.singleton(""));
-
+        App.p(reqp);
         HTTPReceiveWirePoint recvp = new HTTPReceiveWirePoint(recvMethod, reqarr, recvarr);
         // App.p("AAAA " + reqp + ", " + recvp);
         wps.put(reqp, recvp);
