@@ -91,7 +91,7 @@ public class StmtNode extends IPNode {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
             } else {
                 // App.p("xxxx " + this.stmt);
-                defs.add(Definition.getDefinition(new UniqueName(cvlop), this));
+                defs.add(Definition.getDefinition(new RefBasedAddress(cvlop), this));
             }
             // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
             if ((lop instanceof Local) || (lop instanceof StaticFieldRef)) {
@@ -110,7 +110,7 @@ public class StmtNode extends IPNode {
                 } else {
                     Set<Definition> newdefs = new HashSet<>();
                     for (Definition def : defs) {
-                        UniqueName value = def.getDefinedValue();
+                        RefBasedAddress value = def.getDefinedValue();
                         newdefs.add(Definition.getDefinition(value, this));
                     }
                     out.clearDefinition(cvlop);
@@ -122,7 +122,7 @@ public class StmtNode extends IPNode {
                 // App.p(defs.size());
                 // }
             } else if (lop instanceof JInstanceFieldRef) {
-                Set<UniqueName> unames = out.getUniqueNamesForRef(cvlop);
+                Set<RefBasedAddress> unames = out.getUniqueNamesForRef(cvlop);
 
                 Set<Definition> possibleDefinitions = out.getDefinitionsByCV(cvrop);
                 // if (context.toString().contains("doErrorQueue,sendOrderCancel,<init>")) {
@@ -137,7 +137,7 @@ public class StmtNode extends IPNode {
                 for (Definition def : possibleDefinitions) {
                     currDefs.add(Definition.getDefinition(def.definedValue, this));
                 }
-                for (UniqueName uname : unames) {
+                for (RefBasedAddress uname : unames) {
                     if (unames.size() == 1) {
                         out.clearDefinition(uname);
                         out.putDefinition(uname, currDefs);

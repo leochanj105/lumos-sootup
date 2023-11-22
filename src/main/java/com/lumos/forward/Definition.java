@@ -8,12 +8,12 @@ import com.lumos.App;
 // import soot.Value;
 
 public class Definition {
-    public UniqueName definedValue;
+    public RefBasedAddress definedValue;
     public IPNode definedLocation;
 
-    public static Map<UniqueName, Map<IPNode, Definition>> cache = new HashMap<>();
+    public static Map<RefBasedAddress, Map<IPNode, Definition>> cache = new HashMap<>();
 
-    private Definition(UniqueName definedValue, IPNode definedLocation) {
+    private Definition(RefBasedAddress definedValue, IPNode definedLocation) {
         this.definedValue = definedValue;
         this.definedLocation = definedLocation;
     }
@@ -31,7 +31,7 @@ public class Definition {
         return result;
     }
 
-    public static Definition getDefinition(UniqueName un, IPNode node) {
+    public static Definition getDefinition(RefBasedAddress un, IPNode node) {
         Map<IPNode, Definition> map1 = cache.get(un);
         if (map1 == null) {
             map1 = new HashMap<>();
@@ -79,11 +79,11 @@ public class Definition {
         return true;
     }
 
-    public UniqueName getDefinedValue() {
+    public RefBasedAddress getDefinedValue() {
         return definedValue;
     }
 
-    public void setDefinedValue(UniqueName definedValue) {
+    public void setDefinedValue(RefBasedAddress definedValue) {
         this.definedValue = definedValue;
     }
 

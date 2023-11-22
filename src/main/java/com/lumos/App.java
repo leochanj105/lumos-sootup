@@ -44,7 +44,7 @@ import com.lumos.forward.IPNode;
 import com.lumos.forward.IdentityNode;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.StmtNode;
-import com.lumos.forward.UniqueName;
+import com.lumos.forward.RefBasedAddress;
 import com.lumos.forward.shared.SharedStateDepedency;
 import com.lumos.forward.shared.SharedStateRead;
 import com.lumos.forward.shared.SharedStateWrite;
@@ -489,10 +489,6 @@ public class App {
             Set<ContextSensitiveValue> alluses = node.getUsed(implicits);
             alluses.addAll(implicits);
             for (ContextSensitiveValue cv : alluses) {
-
-                // if (cv.getValue().getType().toString().contains("AsyncResult")) {
-                // p("!!! " + node);
-                // }
                 boolean isImplicit = implicits.contains(cv);
 
                 // Test if this is a constant with a deterministic value
@@ -502,9 +498,27 @@ public class App {
                     isConstant = true;
                     constval = cv.getValue();
                 }
-                Set<Definition> satisfiedDefs = null;
+
+                if (isConstant) {
+                    p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
+                    continue;
+                }
+
+                // Set<Definition> satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
+                Set<Definition> satisfiedDefs = new HashSet<>();
+
+                Map<RefBasedAddress, Set<Definition>> currMem = fia.getBefore(node).getCurrMapping();
+                if (node instanceof IdentityNode && !((IdentityNode) node).isSingleIdAssign()) {
+                    for (RefBasedAddress ra : currMem.keySet()) {
+                        if (ra.getBase().equals(cv)) {
+                            satisfiedDefs.addAll(currMem.get(ra));
+                        }
+                    }
+                } else {
+                    satisfiedDefs.addAll((fia.getBefore(node).getDefinitionsByCV(cv)));
+                }
+
                 if (!isConstant) {
-                    satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
                     if (satisfiedDefs.size() == 1) {
                         Definition onlyDef = satisfiedDefs.iterator().next();
                         if ((onlyDef.getDefinedValue().getBase().getValue()) instanceof Constant) {
@@ -512,10 +526,6 @@ public class App {
                             constval = onlyDef.getDefinedValue().getBase().getValue();
                         }
                     }
-                }
-                if (isConstant) {
-                    p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
-                    continue;
                 }
 
                 // if (cv.getValue() instanceof JInstanceFieldRef) {
@@ -537,12 +547,14 @@ public class App {
                 boolean isSingleIdAssign = node.isSingleIdAssign();
                 if (!cv.getValue().toString().equals("null")) {
                     if (isSingleIdAssign) {
-                        App.p("Not tracing uses of a identity assignment node: " + node);
+                        p("Not tracing uses of a identity assignment node: " + node);
                     } else if (isTypeBanned) {
                         p("Not tracking banned type: " + cv.getValue().getType());
                     } else if (isImplicit) {
                         // p(implicits);
                         p("Not tracking implicit value: " + cv.getValue());
+                    } else if (isConstant) {
+                        p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
                     } else {
                         TracePoint provTP = null;
                         if (cv.getValue() instanceof JInstanceFieldRef) {
@@ -983,7 +995,7 @@ public class App {
             return;
         }
         App.p(satdef.getDefinedValue());
-        UniqueName cvun = satdef.getDefinedValue();
+        RefBasedAddress cvun = satdef.getDefinedValue();
         // if (!cvun.getBase().toString().contains("null")) {
         App.p("Try resolving base:");
         ContextSensitiveValue cvbase = cvun.getBase();

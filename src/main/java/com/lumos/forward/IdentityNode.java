@@ -177,17 +177,24 @@ public class IdentityNode extends IPNode {
         }
 
         for (ContextSensitiveValue cvlop : cvdefs) {
-            UniqueName un = new UniqueName(cvlop);
+
             if (isSafeOverwrite()) {
                 out.clearDefinition(cvlop);
             }
             // App.p("xxxxxx " + this.stmt);
             if (idMode.equals("CONSERVATIVE") || ((cvuses.size() > 1 || cvuses.size() == 0)
                     || !isSingleIdAssign())) {
+                RefBasedAddress un = new RefBasedAddress(cvlop);
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
             } else {
                 for (ContextSensitiveValue cvrop : cvuses) {
-                    Set<Definition> defs = out.getDefinitionsByCV(cvrop);
+                    Set<Definition> defs = new HashSet<>();
+                    for (RefBasedAddress ra : out.getCurrMapping().keySet()) {
+                        if (ra.getBase().equals(cvrop)) {
+                            defs.addAll(out.getCurrMapping().get(ra));
+                        }
+                    }
+                    // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
                     Set<Definition> newdefs = new HashSet<>();
                     for (Definition def : defs) {
                         newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));

@@ -103,7 +103,7 @@ public class ExitNode extends IPNode {
         ContextSensitiveValue cvcaller = getRet();
 
         if (isRemote) {
-            for (UniqueName un : out.getCurrMapping().keySet()) {
+            for (RefBasedAddress un : out.getCurrMapping().keySet()) {
                 Context original = un.getBase().getContext();
                 // App.p(original + ", " + un);
                 boolean modified = false;
@@ -141,7 +141,7 @@ public class ExitNode extends IPNode {
 
                     // if (cvcallee.getValue() instanceof NullConstant) {
                     if (cvcallee.getValue() instanceof Constant) {
-                        out.putDefinition(cvcallee, Definition.getDefinition(new UniqueName(cvcallee), retNode));
+                        out.putDefinition(cvcallee, Definition.getDefinition(new RefBasedAddress(cvcallee), retNode));
                     }
                     for (Definition def : defs) {
                         retdefs.add(Definition.getDefinition(def.definedValue, retNode));

@@ -5,10 +5,9 @@ import java.util.List;
 
 import soot.SootFieldRef;
 
-public class UniqueName {
+public class RefBasedAddress implements AbstractAddress {
 
     public ContextSensitiveValue base;
-    // public List<SootFieldRef> suffix;
     public List<SootFieldRef> suffix;
 
     public List<SootFieldRef> getSuffix() {
@@ -27,7 +26,7 @@ public class UniqueName {
         this.base = base;
     }
 
-    public UniqueName(ContextSensitiveValue base, List<SootFieldRef> suffix) {
+    public RefBasedAddress(ContextSensitiveValue base, List<SootFieldRef> suffix) {
         this.base = base;
         this.suffix = new ArrayList<>();
         if (suffix != null) {
@@ -35,12 +34,12 @@ public class UniqueName {
         }
     }
 
-    public UniqueName(UniqueName un, SootFieldRef ref) {
+    public RefBasedAddress(RefBasedAddress un, SootFieldRef ref) {
         this(un.getBase(), un.getSuffix());
         this.append(ref);
     }
 
-    public UniqueName(ContextSensitiveValue cv) {
+    public RefBasedAddress(ContextSensitiveValue cv) {
         this(cv, null);
     }
 
@@ -69,7 +68,7 @@ public class UniqueName {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        UniqueName other = (UniqueName) obj;
+        RefBasedAddress other = (RefBasedAddress) obj;
         if (base == null) {
             if (other.base != null)
                 return false;

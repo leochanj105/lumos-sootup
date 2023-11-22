@@ -21,7 +21,7 @@ import soot.jimple.internal.JInstanceFieldRef;
 
 public class IPFlowInfo {
     // Map<ContextSensitiveValue, Set<UniqueName>> uniqueNames;
-    Map<UniqueName, Set<Definition>> currMapping;
+    Map<RefBasedAddress, Set<Definition>> currMapping;
     // IPNode ipnode;
 
     // public IPNode getIpnode() {
@@ -32,7 +32,7 @@ public class IPFlowInfo {
     // this.ipnode = ipnode;
     // }
 
-    public Map<UniqueName, Set<Definition>> getCurrMapping() {
+    public Map<RefBasedAddress, Set<Definition>> getCurrMapping() {
         return currMapping;
     }
 
@@ -61,7 +61,7 @@ public class IPFlowInfo {
         return true;
     }
 
-    public void setCurrMapping(Map<UniqueName, Set<Definition>> currMapping) {
+    public void setCurrMapping(Map<RefBasedAddress, Set<Definition>> currMapping) {
         this.currMapping = currMapping;
     }
 
@@ -73,9 +73,9 @@ public class IPFlowInfo {
     public IPFlowInfo(IPFlowInfo other) {
         this();
 
-        Map<UniqueName, Set<Definition>> mappings = other.getCurrMapping();
+        Map<RefBasedAddress, Set<Definition>> mappings = other.getCurrMapping();
 
-        for (UniqueName un : mappings.keySet()) {
+        for (RefBasedAddress un : mappings.keySet()) {
             Set<Definition> unames = new HashSet<>();
             for (Definition un2 : mappings.get(un)) {
                 unames.add(un2);
@@ -90,15 +90,15 @@ public class IPFlowInfo {
         return getDefinitionsByCV(cv);
     }
 
-    public Set<UniqueName> getUniqueNamesForRef(ContextSensitiveValue cv) {
+    public Set<RefBasedAddress> getUniqueNamesForRef(ContextSensitiveValue cv) {
         JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
         Set<Definition> baseDefs = getDefinitionsByCV(cv.getContext(), ref.getBase());
 
-        Set<UniqueName> unames = new HashSet<>();
+        Set<RefBasedAddress> unames = new HashSet<>();
 
         for (Definition def : baseDefs) {
-            UniqueName unref = null;
-            unref = new UniqueName(def.getDefinedValue(), ref.getFieldRef());
+            RefBasedAddress unref = null;
+            unref = new RefBasedAddress(def.getDefinedValue(), ref.getFieldRef());
             unames.add(unref);
         }
         return unames;
@@ -107,7 +107,7 @@ public class IPFlowInfo {
     public Set<Definition> getDefinitionsByCV(ContextSensitiveValue cv) {
         Set<Definition> resultDefs = new HashSet<>();
         if (cv.getValue() instanceof JInstanceFieldRef) {
-            for (UniqueName unref : getUniqueNamesForRef(cv)) {
+            for (RefBasedAddress unref : getUniqueNamesForRef(cv)) {
                 Set<Definition> definitions = new HashSet<>();
                 Set<Definition> heapDefs = currMapping.get(unref);
                 if (heapDefs != null) {
@@ -121,10 +121,10 @@ public class IPFlowInfo {
             }
             return resultDefs;
         }
-        UniqueName un = new UniqueName(cv);
+        RefBasedAddress un = new RefBasedAddress(cv);
 
         if (cv.getValue() instanceof StaticFieldRef) {
-            un = new UniqueName(ContextSensitiveValue.getCValue(Context.emptyContext(), cv.getValue()));
+            un = new RefBasedAddress(ContextSensitiveValue.getCValue(Context.emptyContext(), cv.getValue()));
         }
 
         Set<Definition> defs = currMapping.get(un);
@@ -139,7 +139,7 @@ public class IPFlowInfo {
 
     }
 
-    public void clearDefinition(UniqueName un) {
+    public void clearDefinition(RefBasedAddress un) {
         if (!currMapping.containsKey(un)) {
             currMapping.put(un, new HashSet<>());
         } else {
@@ -148,17 +148,17 @@ public class IPFlowInfo {
     }
 
     public void clearDefinition(ContextSensitiveValue cv) {
-        clearDefinition(new UniqueName(cv));
+        clearDefinition(new RefBasedAddress(cv));
     }
 
-    public void putDefinition(UniqueName un, Definition def) {
+    public void putDefinition(RefBasedAddress un, Definition def) {
         if (!currMapping.containsKey(un)) {
             currMapping.put(un, new HashSet<>());
         }
         currMapping.get(un).add(def);
     }
 
-    public void putDefinition(UniqueName un, Set<Definition> defs) {
+    public void putDefinition(RefBasedAddress un, Set<Definition> defs) {
         if (!currMapping.containsKey(un)) {
             currMapping.put(un, new HashSet<>());
         }
@@ -166,7 +166,7 @@ public class IPFlowInfo {
     }
 
     public void putDefinition(ContextSensitiveValue cv, Definition def) {
-        UniqueName un = new UniqueName(cv);
+        RefBasedAddress un = new RefBasedAddress(cv);
         putDefinition(un, def);
     }
 
@@ -175,17 +175,17 @@ public class IPFlowInfo {
         putDefinition(cv, def);
     }
 
-    public void putDefinition(Context c, Value v, UniqueName uname) {
+    public void putDefinition(Context c, Value v, RefBasedAddress uname) {
         ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
         putDefinition(cv, Definition.getDefinition(uname, null));
     }
 
-    public void putDefinition(ContextSensitiveValue cv, UniqueName uname) {
+    public void putDefinition(ContextSensitiveValue cv, RefBasedAddress uname) {
         putDefinition(cv, Definition.getDefinition(uname, null));
     }
 
     public void putDefinition(ContextSensitiveValue cv, Set<Definition> defs) {
-        UniqueName un = new UniqueName(cv);
+        RefBasedAddress un = new RefBasedAddress(cv);
         putDefinition(un, defs);
     }
 
@@ -196,11 +196,11 @@ public class IPFlowInfo {
 
     public void putDefinition(Context c, Value v) {
         ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
-        putDefinition(cv, new UniqueName(cv, null));
+        putDefinition(cv, new RefBasedAddress(cv, null));
     }
 
     public void putDefinition(ContextSensitiveValue cv) {
-        putDefinition(cv, new UniqueName(cv, null));
+        putDefinition(cv, new RefBasedAddress(cv, null));
     }
 
     // public Map<ContextSensitiveValue, Set<UniqueName>> getUniqueNames() {
@@ -222,7 +222,7 @@ public class IPFlowInfo {
         // result += "\n";
         // }
         result += "\nMapping:\n";
-        for (UniqueName un : currMapping.keySet()) {
+        for (RefBasedAddress un : currMapping.keySet()) {
             result += un + ": " + currMapping.get(un);
             result += "\n";
         }
@@ -240,7 +240,7 @@ public class IPFlowInfo {
         // result += "\n";
         // }
         result += "\nMapping:\n";
-        for (UniqueName un : currMapping.keySet()) {
+        for (RefBasedAddress un : currMapping.keySet()) {
             if (un.toString().contains(target)) {
                 result += un + ": " + currMapping.get(un);
                 result += "\n";

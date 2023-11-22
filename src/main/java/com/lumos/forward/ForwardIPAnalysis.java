@@ -174,8 +174,8 @@ public class ForwardIPAnalysis {
     private IPFlowInfo merge(IPFlowInfo f1, IPFlowInfo f2) {
         IPFlowInfo f3 = copy(f1);
 
-        for (UniqueName un : f2.getCurrMapping().keySet()) {
-            Map<UniqueName, Set<Definition>> mapping = f3.getCurrMapping();
+        for (RefBasedAddress un : f2.getCurrMapping().keySet()) {
+            Map<RefBasedAddress, Set<Definition>> mapping = f3.getCurrMapping();
             if (!mapping.containsKey(un)) {
                 mapping.put(un, new HashSet<>());
             }
