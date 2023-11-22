@@ -13,6 +13,7 @@ import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.Constant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.NullConstant;
 import soot.jimple.StaticFieldRef;
@@ -133,32 +134,19 @@ public class ExitNode extends IPNode {
             for (IPNode retNode : getReturnStmtNodes()) {
                 Stmt stmt = retNode.getStmt();
                 if (stmt instanceof JReturnStmt) {
-                    // Value vv = ((JReturnStmt) stmt).getOp();
                     ContextSensitiveValue cvcallee = ContextSensitiveValue.getCValue(retNode.getContext(),
                             ((JReturnStmt) stmt).getOp());
-                    // if (!cvcallee.getValue().toString().contains("null")) {
-                    // for (UniqueName un : out.getUniqueNames().get(cvcallee)) {
-                    // out.putUname(cvcaller, un);
-                    // }
                     Set<Definition> defs = out.getDefinitionsByCV(cvcallee);
                     Set<Definition> retdefs = new HashSet<>();
-                    // if (cvcallee.getValue().toString().contains("$r1")) {
 
-                    if (cvcallee.getValue() instanceof NullConstant) {
+                    // if (cvcallee.getValue() instanceof NullConstant) {
+                    if (cvcallee.getValue() instanceof Constant) {
                         out.putDefinition(cvcallee, Definition.getDefinition(new UniqueName(cvcallee), retNode));
-                        // App.p(cvcallee + ", " + retNode);
-                        // App.panicni();
-                        // }
-                        // App.p("!!!!!!!! " + defs);
                     }
                     for (Definition def : defs) {
                         retdefs.add(Definition.getDefinition(def.definedValue, retNode));
-                        // retdefs.add(Definition.getDefinition(def.definedValue, this));
                     }
                     out.putDefinition(cvcaller, retdefs);
-                    // out.putDefinition(cvcaller, retdefs);
-                    // App.p("!!! " + cvcaller + ", " + cvcallee);
-                    // }
                 }
             }
         }

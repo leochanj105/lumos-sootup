@@ -563,7 +563,9 @@ public class App {
                 for (Definition satdef : satisfiedDefs) {
                     if (satdef.getDefinedLocation() != null) {
                         // unresolved = false;
-                        String nmode = isTypeBanned || (isSingleIdAssign && isBase) || isImplicit ? "base" : "normal";
+                        // String nmode = isTypeBanned || (isSingleIdAssign && isBase) || isImplicit ?
+                        // "base" : "normal";
+                        String nmode = (isSingleIdAssign && isBase) ? "base" : "normal";
                         unresolvedNodes.add(new PendingBackTracking(satdef.getDefinedLocation(), nmode));
                         checkSTread(satdef, streads, Collections.emptyList());
                         App.p("Added Next Backtracking " + cv + " at " + satdef.d() + " with mode " + nmode);
