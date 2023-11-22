@@ -1,9 +1,11 @@
 package com.lumos.forward.memory;
 
+import org.glassfish.jaxb.core.v2.model.core.Ref;
+
 import com.lumos.forward.ContextSensitiveValue;
 
 public class CollectionContentAddress implements AbstractAddress {
-    public ContextSensitiveValue base;
+    public RefBasedAddress base;
 
     public String type;
 
@@ -43,9 +45,13 @@ public class CollectionContentAddress implements AbstractAddress {
         return true;
     }
 
-    public CollectionContentAddress(ContextSensitiveValue base, String type) {
+    public CollectionContentAddress(RefBasedAddress base, String type) {
         this.base = base;
         this.type = type;
+    }
+
+    public CollectionContentAddress(ContextSensitiveValue cv, String type) {
+        this(new RefBasedAddress(cv), type);
     }
 
     public String getType() {
@@ -58,12 +64,12 @@ public class CollectionContentAddress implements AbstractAddress {
 
     @Override
     public ContextSensitiveValue getBase() {
-        return base;
+        return base.getBase();
     }
 
     @Override
     public void setBase(ContextSensitiveValue cv) {
-        this.base = cv;
+        this.base = new RefBasedAddress(cv);
     }
 
 }

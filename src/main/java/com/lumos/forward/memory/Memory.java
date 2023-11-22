@@ -82,6 +82,16 @@ public class Memory {
         return getDefinitionsByCV(cv);
     }
 
+    public Set<CollectionContentAddress> getAddressesForCollection(ContextSensitiveValue cv, String ctype) {
+        Set<Definition> baseDefs = getDefinitionsByCV(cv);
+        Set<CollectionContentAddress> addresses = new HashSet<>();
+        for (Definition def : baseDefs) {
+            CollectionContentAddress addr = new CollectionContentAddress(def.getDefinedValue(), ctype);
+            addresses.add(addr);
+        }
+        return addresses;
+    }
+
     public Set<RefBasedAddress> getUniqueNamesForRef(ContextSensitiveValue cv) {
         JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
         Set<Definition> baseDefs = getDefinitionsByCV(cv.getContext(), ref.getBase());
@@ -96,6 +106,26 @@ public class Memory {
         return unames;
     }
 
+    // public Set<Definition> getDefinitionsByCV(ContextSensitiveValue cv) {
+    // return getDefinitionsByCV(cv, null);
+    // }
+
+    public Set<Definition> getDefinitionsByCV(ContextSensitiveValue cv, String ctype) {
+        Set<Definition> resultDefs = new HashSet<>();
+        for (CollectionContentAddress unref : getAddressesForCollection(cv, ctype)) {
+            Set<Definition> definitions = new HashSet<>();
+            Set<Definition> heapDefs = currMapping.get(unref);
+            if (heapDefs != null) {
+                definitions.addAll(heapDefs);
+            } else {
+                // definitions.add(Definition.getDefinition(unref, null));
+                this.currMapping.put(unref, definitions);
+            }
+            resultDefs.addAll(definitions);
+        }
+        return resultDefs;
+    }
+
     public Set<Definition> getDefinitionsByCV(ContextSensitiveValue cv) {
         Set<Definition> resultDefs = new HashSet<>();
         if (cv.getValue() instanceof JInstanceFieldRef) {
@@ -108,12 +138,16 @@ public class Memory {
                     definitions.add(Definition.getDefinition(unref, null));
                     this.currMapping.put(unref, definitions);
                 }
-                // }
                 resultDefs.addAll(definitions);
             }
             return resultDefs;
         }
+        // AbstractAddress un = null;
+        // if (ctype == null) {
         RefBasedAddress un = new RefBasedAddress(cv);
+        // } else {
+        // un = new CollectionContentAddress(cv, ctype);
+        // }
 
         if (cv.getValue() instanceof StaticFieldRef) {
             un = new RefBasedAddress(ContextSensitiveValue.getCValue(Context.emptyContext(), cv.getValue()));
@@ -131,7 +165,7 @@ public class Memory {
 
     }
 
-    public void clearDefinition(RefBasedAddress un) {
+    public void clearDefinition(AbstractAddress un) {
         if (!currMapping.containsKey(un)) {
             currMapping.put(un, new HashSet<>());
         } else {
@@ -143,14 +177,14 @@ public class Memory {
         clearDefinition(new RefBasedAddress(cv));
     }
 
-    public void putDefinition(RefBasedAddress un, Definition def) {
+    public void putDefinition(AbstractAddress un, Definition def) {
         if (!currMapping.containsKey(un)) {
             currMapping.put(un, new HashSet<>());
         }
         currMapping.get(un).add(def);
     }
 
-    public void putDefinition(RefBasedAddress un, Set<Definition> defs) {
+    public void putDefinition(AbstractAddress un, Set<Definition> defs) {
         if (!currMapping.containsKey(un)) {
             currMapping.put(un, new HashSet<>());
         }
@@ -181,6 +215,11 @@ public class Memory {
         putDefinition(un, defs);
     }
 
+    public void putDefinition(ContextSensitiveValue cv, String ctype, Set<Definition> defs) {
+        CollectionContentAddress un = new CollectionContentAddress(cv, ctype);
+        putDefinition(un, defs);
+    }
+
     public void putDefinition(Context c, Value v, Set<Definition> defs) {
         ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
         putDefinition(cv, defs);
@@ -195,42 +234,21 @@ public class Memory {
         putDefinition(cv, new RefBasedAddress(cv, null));
     }
 
-    // public Map<ContextSensitiveValue, Set<UniqueName>> getUniqueNames() {
-    // return uniqueNames;
-    // }
-
-    // public void setUniqueNames(Map<ContextSensitiveValue, Set<UniqueName>>
-    // original) {
-    // this.uniqueNames = original;
-    // }
-
     @Override
     public String toString() {
         String result = "";
         result += "IPFlowInfo: \n";
-        // result += "UniqueNames:\n";
-        // for (ContextSensitiveValue cv : uniqueNames.keySet()) {
-        // result += cv + ": " + uniqueNames.get(cv);
-        // result += "\n";
-        // }
         result += "\nMapping:\n";
         for (AbstractAddress un : currMapping.keySet()) {
             result += un + ": " + currMapping.get(un);
             result += "\n";
         }
-        // [uniqueNames=" + uniqueNames + ", currMapping=" + currMapping + "]";
         return result;
     }
 
-    // @Override
     public String ssimple(String target) {
         String result = "";
         result += "IPFlowInfo: \n";
-        // result += "UniqueNames:\n";
-        // for (ContextSensitiveValue cv : uniqueNames.keySet()) {
-        // result += cv + ": " + uniqueNames.get(cv);
-        // result += "\n";
-        // }
         result += "\nMapping:\n";
         for (AbstractAddress un : currMapping.keySet()) {
             if (un.toString().contains(target)) {
@@ -238,7 +256,6 @@ public class Memory {
                 result += "\n";
             }
         }
-        // [uniqueNames=" + uniqueNames + ", currMapping=" + currMapping + "]";
         return result;
     }
 

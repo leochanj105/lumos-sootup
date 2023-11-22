@@ -85,12 +85,8 @@ public class ExitNode extends IPNode {
         this.sm = stmt.getInvokeExpr().getMethod();
         this.context = context;
         this.stmt = stmt;
-        // List<CallSite> ctrace = context.getCtrace();
-        // lastCall = context.getLastCallSite();
         this.type = "exit";
         isRemote = false;
-        // List<Stmt> rets = new ArrayList<>();
-        // this.ret = ret;
     }
 
     @Override
@@ -105,7 +101,6 @@ public class ExitNode extends IPNode {
 
     @Override
     public void flow(Memory out) {
-        // ExitNode enode = (ExitNode) node;
         ContextSensitiveValue cvcaller = getRet();
 
         if (isRemote) {
@@ -113,7 +108,6 @@ public class ExitNode extends IPNode {
                 if (addr instanceof RefBasedAddress) {
                     RefBasedAddress un = (RefBasedAddress) addr;
                     Context original = un.getBase().getContext();
-                    // App.p(original + ", " + un);
                     boolean modified = false;
                     if (!this.context.parentOf(original)) {
                         for (Definition def : out.getCurrMapping().get(un)) {

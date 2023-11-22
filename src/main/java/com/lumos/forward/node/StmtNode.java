@@ -7,6 +7,7 @@ import com.lumos.App;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
+import com.lumos.forward.memory.CollectionContentAddress;
 import com.lumos.forward.memory.Memory;
 import com.lumos.forward.memory.RefBasedAddress;
 import com.lumos.utils.Utils;
@@ -18,6 +19,7 @@ import soot.ValueBox;
 import soot.jimple.Constant;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
+import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
 import soot.jimple.internal.JIdentityStmt;
@@ -71,11 +73,43 @@ public class StmtNode extends IPNode {
             JAssignStmt astmt = (JAssignStmt) stmt;
             Value lop = astmt.getLeftOp();
             Value rop = astmt.getRightOp();
+
             if (rop instanceof JCastExpr) {
                 rop = ((JCastExpr) rop).getOp();
             }
+
             ContextSensitiveValue cvlop = null;
             ContextSensitiveValue cvrop = null;
+
+            Set<Definition> defs = new HashSet<>();
+            if (rop instanceof JArrayRef) {
+                Value base = ((JArrayRef) rop).getBase();
+                cvlop = ContextSensitiveValue.getCValue(context, lop);
+                cvrop = ContextSensitiveValue.getCValue(context, base);
+                defs.addAll(out.getDefinitionsByCV(cvrop, "Elements"));
+                Set<Definition> newdefs = new HashSet<>();
+                for (Definition def : defs) {
+                    newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
+                }
+                out.putDefinition(cvlop, newdefs);
+                return;
+            }
+            if (lop instanceof JArrayRef) {
+                Value base = ((JArrayRef) lop).getBase();
+                cvlop = ContextSensitiveValue.getCValue(context, base);
+                cvrop = ContextSensitiveValue.getCValue(context, rop);
+                defs.addAll(out.getDefinitionsByCV(cvrop));
+                Set<Definition> currDefs = new HashSet<>();
+                for (Definition def : defs) {
+                    currDefs.add(Definition.getDefinition(def.definedValue, this));
+                }
+                Set<CollectionContentAddress> unames = out.getAddressesForCollection(cvlop, "Elements");
+                for (CollectionContentAddress uname : unames) {
+                    out.putDefinition(uname, currDefs);
+                }
+                return;
+            }
+
             // Make sure a field variable is "static"
             if (lop instanceof StaticFieldRef) {
                 cvlop = ContextSensitiveValue.getCValue(Context.emptyContext(), lop);
@@ -84,13 +118,11 @@ public class StmtNode extends IPNode {
             }
 
             if (rop instanceof StaticFieldRef) {
-
                 cvrop = ContextSensitiveValue.getCValue(Context.emptyContext(), rop);
             } else {
                 cvrop = ContextSensitiveValue.getCValue(getContext(), rop);
             }
 
-            Set<Definition> defs = new HashSet<>();
             if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)
                     || (rop instanceof StaticFieldRef)) {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
@@ -179,7 +211,7 @@ public class StmtNode extends IPNode {
             // This "banned" is to ensure that if a reference is used, its
             // base is not added
             Set<Value> banned = new HashSet<>();
-            App.p("-------");
+            // App.p("-------");
             for (ValueBox vbox : stmt.getUseBoxes()) {
 
                 Value use = vbox.getValue();
@@ -222,7 +254,7 @@ public class StmtNode extends IPNode {
                     }
 
                 } else {
-                    App.p(use + ", ___" + use.getUseBoxes().size() + ", ___" + use.getClass());
+                    App.p(use + ", " + use.getUseBoxes().size() + ", " + use.getClass());
                 }
             }
 
@@ -232,8 +264,6 @@ public class StmtNode extends IPNode {
 
     @Override
     public boolean isSingleIdAssign() {
-        // return !(this.stmt instanceof JIfStmt) && getUsed().size() <= 1;
-
         if (stmt instanceof JReturnStmt) {
             return true;
         }
@@ -241,13 +271,6 @@ public class StmtNode extends IPNode {
             return false;
         }
         Value rightop = ((JAssignStmt) stmt).getRightOp();
-        // int leftFieldRef = (((JAssignStmt) stmt).getLeftOp() instanceof
-        // JInstanceFieldRef) ? 1 : 0;
-        // Set<ContextSensitiveValue> implicits = new HashSet<>();
-        // Set<ContextSensitiveValue> explicits = getUsed(implicits);
-        // if (implicits.size() + explicits.size() - leftFieldRef <= 1) {
-        // return true;
-        // }
         return (rightop instanceof Local) || (rightop instanceof JInstanceFieldRef) ||
                 (rightop instanceof StaticFieldRef) || (rightop instanceof Constant) ||
                 (rightop instanceof JCastExpr);

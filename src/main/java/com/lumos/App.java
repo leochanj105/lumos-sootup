@@ -38,6 +38,7 @@ import com.lumos.forward.Definition;
 import com.lumos.forward.ForwardIPAnalysis;
 import com.lumos.forward.InterProcedureGraph;
 import com.lumos.forward.memory.AbstractAddress;
+import com.lumos.forward.memory.CollectionContentAddress;
 import com.lumos.forward.memory.Memory;
 import com.lumos.forward.memory.RefBasedAddress;
 import com.lumos.forward.node.EnterNode;
@@ -89,6 +90,7 @@ import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.AbstractInstanceInvokeExpr;
 import soot.jimple.internal.AbstractInvokeExpr;
+import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
 import soot.jimple.internal.JGotoStmt;
@@ -97,6 +99,7 @@ import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.jimple.internal.JInvokeStmt;
+import soot.jimple.internal.JLengthExpr;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
 import soot.jimple.internal.JVirtualInvokeExpr;
@@ -453,6 +456,7 @@ public class App {
         while (!unresolvedNodes.isEmpty()) {
             PendingBackTracking ptrack = unresolvedNodes.iterator().next();
             IPNode node = ptrack.getNode();
+            String pmode = ptrack.getMode();
             unresolvedNodes.remove(ptrack);
             if (visitedNodes.contains(ptrack)) {
                 continue;
@@ -486,6 +490,80 @@ public class App {
             // p("List def is assignment, treating as normal");
             // }
             // }
+            boolean collectionFound = false;
+            if (node instanceof IdentityNode) {
+                InvokeExpr iexpr = stmt.getInvokeExpr();
+                if (stmt instanceof InvokeStmt) {
+                    if (iexpr instanceof InstanceInvokeExpr) {
+                        InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                        String tstr = inexpr.getBase().getType().toString();
+                        String mstr = inexpr.getMethod().getName();
+                        if (mstr.equals("add")
+                                && (tstr.contains("List") || tstr.contains("Set"))) {
+                            // normal: trace element all, +cbase with base
+                            // base: +cbase with base, +param all for set
+                            collectionFound = true;
+                        } else if (mstr.equals("put")
+                                && (tstr.contains("Map"))) {
+                            // normal: trace k all, value current
+                            // base: trace k all
+                            // +cbase with base
+                            collectionFound = true;
+                        }
+                    }
+                }
+                if (stmt instanceof JAssignStmt) {
+                    if (iexpr instanceof InstanceInvokeExpr) {
+                        InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
+                        String tstr = inexpr.getBase().getType().toString();
+                        String mstr = inexpr.getMethod().getName();
+                        if (mstr.equals("get") && tstr.contains("Map")
+                                || (mstr.equals("get") && tstr.contains("List"))) {
+                            // +backtrack collection with same, + cbase with base, trace param all
+                            collectionFound = true;
+                        } else if ((mstr.equals("iterator"))) {
+                            // +backtrack collection with same, +cbase with base, trace none
+                            collectionFound = true;
+                        } else if ((mstr.equals("next") && tstr.contains("Iterator"))) {
+                            // both: +backtrack iter with same, trace none
+                            collectionFound = true;
+                        } else if ((mstr.equals("hasNext") && tstr.contains("Iterator"))) {
+                            // +backtrack iter with base trace none
+                            collectionFound = true;
+                        } else if (mstr.equals("containsKey") && tstr.contains("Map")) {
+                            // +backtrack collection with base, + cbase with base, trace param all
+                            collectionFound = true;
+                        } else if (mstr.equals("contains") && (tstr.contains("List") || tstr.contains("Set"))) {
+                            // +backtrack collection with normal, + cbase with base, trace param all
+                            collectionFound = true;
+                        } else if (mstr.equals("size") && (tstr.contains("List") || tstr.contains("Set"))) {
+                            // +backtrack collection with (base for list, normal for set), + cbase with
+                            // base, trace none
+                            collectionFound = true;
+                        }
+                    }
+                }
+            } else if (node instanceof StmtNode) {
+                if (stmt instanceof JAssignStmt) {
+                    JAssignStmt astmt = (JAssignStmt) stmt;
+                    Value lop = astmt.getLeftOp();
+                    Value rop = astmt.getRightOp();
+                    if (rop instanceof JArrayRef) {
+                        // +backtrack collection with same, + cbase with base, trace param
+                        collectionFound = true;
+                    } else if (rop instanceof JLengthExpr) {
+                        // +cbase with base
+                        collectionFound = true;
+                    } else if (lop instanceof JArrayRef) {
+                        // trace param, +cbase with base
+                        // normal: trace element current
+                        collectionFound = true;
+                    }
+                }
+            }
+            if (collectionFound) {
+                continue;
+            }
             Set<ContextSensitiveValue> implicits = new HashSet<>();
             Set<ContextSensitiveValue> alluses = node.getUsed(implicits);
             alluses.addAll(implicits);
@@ -501,7 +579,7 @@ public class App {
                 }
 
                 if (isConstant) {
-                    p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
+                    p("Not tracking value that is a constant! " + cv + " as const " + constval);
                     continue;
                 }
 
@@ -529,22 +607,8 @@ public class App {
                     }
                 }
 
-                // if (cv.getValue() instanceof JInstanceFieldRef) {
-                // p("Adding cf dep queries for base: " + cv);
-                // Set<Definition> baseDefs =
-                // fia.getBefore(node).getDefinitionsByCV(getBaseCV(cv));
-                // for (Definition def : baseDefs) {
-                // if (def.getDefinedLocation() != null) {
-                // unresolvedNodes.add(new PendingBackTracking(def.getDefinedLocation(),
-                // "cfonly"));
-                // }
-                // }
-                // }
-
                 boolean isTypeBanned = Banned.isTypeBanned(cv.getValue().getType().toString());
                 boolean isBase = ptrack.getMode().equals("base");
-                // boolean isCFOnly = node.isSingleIdAssign() &&
-                // ptrack.getMode().equals("cfonly");
                 boolean isSingleIdAssign = node.isSingleIdAssign();
                 if (!cv.getValue().toString().equals("null")) {
                     if (isSingleIdAssign) {
@@ -555,7 +619,7 @@ public class App {
                         // p(implicits);
                         p("Not tracking implicit value: " + cv.getValue());
                     } else if (isConstant) {
-                        p("Not tracking value that is known as a constant! " + cv + " as const " + constval);
+                        p("Not tracking value known to be a deterministic constant! " + cv + " as " + constval);
                     } else {
                         TracePoint provTP = null;
                         if (cv.getValue() instanceof JInstanceFieldRef) {
@@ -1013,7 +1077,7 @@ public class App {
 
                     if (!bdef.getDefinedValue().getBase().getValue().toString().equals("null")) {
                         IPNode dloc = bdef.getDefinedLocation();
-                        App.p("New Provenance due to field: " + cvun + " at " +
+                        App.p("New Provenance due to base: " + cvun + " at " +
                                 dloc + " with base " + bdef.getDefinedValue());
 
                         if (dloc.getStmt() instanceof JAssignStmt) {
