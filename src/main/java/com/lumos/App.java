@@ -509,15 +509,16 @@ public class App {
                 Set<Definition> satisfiedDefs = new HashSet<>();
 
                 Map<AbstractAddress, Set<Definition>> currMem = fia.getBefore(node).getCurrMapping();
-                if (node instanceof IdentityNode && !((IdentityNode) node).isSingleIdAssign()) {
-                    for (AbstractAddress ra : currMem.keySet()) {
-                        if (ra.getBase().equals(cv)) {
-                            satisfiedDefs.addAll(currMem.get(ra));
-                        }
-                    }
-                } else {
-                    satisfiedDefs.addAll((fia.getBefore(node).getDefinitionsByCV(cv)));
-                }
+                // if (node instanceof IdentityNode && !((IdentityNode)
+                // node).isSingleIdAssign()) {
+                // for (AbstractAddress ra : currMem.keySet()) {
+                // if (ra.getBase().equals(cv)) {
+                // satisfiedDefs.addAll(currMem.get(ra));
+                // }
+                // }
+                // } else {
+                satisfiedDefs.addAll((fia.getBefore(node).getDefinitionsByCV(cv)));
+                // }
 
                 if (!isConstant) {
                     if (satisfiedDefs.size() == 1) {
@@ -545,6 +546,7 @@ public class App {
                 boolean isBase = ptrack.getMode().equals("base");
                 // boolean isCFOnly = node.isSingleIdAssign() &&
                 // ptrack.getMode().equals("cfonly");
+                boolean isCompositeType = Utils.isCompositeType(cv.getValue().getType().toString());
                 boolean isSingleIdAssign = node.isSingleIdAssign();
                 if (!cv.getValue().toString().equals("null")) {
                     if (isSingleIdAssign) {
@@ -578,7 +580,7 @@ public class App {
                         // unresolved = false;
                         // String nmode = isTypeBanned || (isSingleIdAssign && isBase) || isImplicit ?
                         // "base" : "normal";
-                        String nmode = (isSingleIdAssign && isBase) ? "base" : "normal";
+                        String nmode = ((isSingleIdAssign || isCompositeType) && isBase) ? "base" : "normal";
                         unresolvedNodes.add(new PendingBackTracking(satdef.getDefinedLocation(), nmode));
                         checkSTread(satdef, streads, Collections.emptyList());
                         App.p("Added Next Backtracking " + cv + " at " + satdef.d() + " with mode " + nmode);
@@ -587,7 +589,7 @@ public class App {
                     }
                 }
 
-                if (!unresolves.isEmpty()) {
+                if (!unresolves.isEmpty() && !isTypeBanned) {
                     for (Definition satdef : unresolves) {
                         handleUnresolvedDeps(satdef, cv, fia, node, unresolvedNodes, streads);
                     }

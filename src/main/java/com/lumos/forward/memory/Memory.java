@@ -80,6 +80,19 @@ public class Memory {
     public Set<Definition> getDefinitionsByCV(Context c, Value v) {
         ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
         return getDefinitionsByCV(cv);
+
+    }
+
+    public Set<RefBasedAddress> getUniqueNamesForCollection(ContextSensitiveValue cv) {
+        // JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
+        Set<Definition> baseDefs = getDefinitionsByCV(cv);
+
+        Set<RefBasedAddress> unames = new HashSet<>();
+        for (Definition def : baseDefs) {
+            RefBasedAddress unref = def.getDefinedValue();
+            unames.add(unref);
+        }
+        return unames;
     }
 
     public Set<RefBasedAddress> getUniqueNamesForRef(ContextSensitiveValue cv) {
@@ -98,6 +111,7 @@ public class Memory {
 
     public Set<Definition> getDefinitionsByCV(ContextSensitiveValue cv) {
         Set<Definition> resultDefs = new HashSet<>();
+
         if (cv.getValue() instanceof JInstanceFieldRef) {
             for (RefBasedAddress unref : getUniqueNamesForRef(cv)) {
                 Set<Definition> definitions = new HashSet<>();
@@ -112,6 +126,26 @@ public class Memory {
                 resultDefs.addAll(definitions);
             }
             return resultDefs;
+        } else {
+            String tstr = cv.getValue().getType().toString();
+            // if (tstr.contains("List")
+            // || tstr.contains("Set")
+            // || tstr.contains("Iterator")
+            // || tstr.contains("Map")
+            // || tstr.contains("[]")) {
+            // for (RefBasedAddress unref : getUniqueNamesForCollection(cv)) {
+            // Set<Definition> definitions = new HashSet<>();
+            // Set<Definition> heapDefs = currMapping.get(unref);
+            // if (heapDefs != null) {
+            // definitions.addAll(heapDefs);
+            // } else {
+            // definitions.add(Definition.getDefinition(unref, null));
+            // this.currMapping.put(unref, definitions);
+            // }
+            // resultDefs.addAll(definitions);
+            // }
+            // return resultDefs;
+            // }
         }
         RefBasedAddress un = new RefBasedAddress(cv);
 

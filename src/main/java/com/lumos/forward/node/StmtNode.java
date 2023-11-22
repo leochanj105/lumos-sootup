@@ -7,6 +7,7 @@ import com.lumos.App;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
+import com.lumos.forward.memory.CollectionContentAddress;
 import com.lumos.forward.memory.Memory;
 import com.lumos.forward.memory.RefBasedAddress;
 import com.lumos.utils.Utils;
@@ -18,6 +19,7 @@ import soot.ValueBox;
 import soot.jimple.Constant;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
+import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
 import soot.jimple.internal.JIdentityStmt;
@@ -76,6 +78,41 @@ public class StmtNode extends IPNode {
             }
             ContextSensitiveValue cvlop = null;
             ContextSensitiveValue cvrop = null;
+
+            Set<Definition> defs = new HashSet<>();
+            if (rop instanceof JArrayRef) {
+                Value base = ((JArrayRef) rop).getBase();
+                cvlop = ContextSensitiveValue.getCValue(context, lop);
+                cvrop = ContextSensitiveValue.getCValue(context, base);
+                out.clearDefinition(cvlop);
+                Set<RefBasedAddress> unames = out.getUniqueNamesForCollection(cvrop);
+                for (RefBasedAddress uname : unames) {
+                    defs.addAll(out.getCurrMapping().get(uname));
+                }
+                Set<Definition> newdefs = new HashSet<>();
+                for (Definition def : defs) {
+                    newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
+                }
+
+                out.putDefinition(cvlop, newdefs);
+
+                return;
+            }
+            if (lop instanceof JArrayRef) {
+                Value base = ((JArrayRef) lop).getBase();
+                cvlop = ContextSensitiveValue.getCValue(context, base);
+                cvrop = ContextSensitiveValue.getCValue(context, rop);
+                defs.addAll(out.getDefinitionsByCV(cvrop));
+                Set<Definition> currDefs = new HashSet<>();
+                for (Definition def : defs) {
+                    currDefs.add(Definition.getDefinition(def.definedValue, this));
+                }
+                Set<RefBasedAddress> unames = out.getUniqueNamesForCollection(cvlop);
+                for (RefBasedAddress uname : unames) {
+                    out.putDefinition(uname, currDefs);
+                }
+                return;
+            }
             // Make sure a field variable is "static"
             if (lop instanceof StaticFieldRef) {
                 cvlop = ContextSensitiveValue.getCValue(Context.emptyContext(), lop);
@@ -90,7 +127,7 @@ public class StmtNode extends IPNode {
                 cvrop = ContextSensitiveValue.getCValue(getContext(), rop);
             }
 
-            Set<Definition> defs = new HashSet<>();
+            // Set<Definition> defs = new HashSet<>();
             if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)
                     || (rop instanceof StaticFieldRef)) {
                 defs.addAll(out.getDefinitionsByCV(cvrop));

@@ -16,6 +16,7 @@ import com.lumos.utils.Utils;
 import com.lumos.wire.IdentityWire;
 
 import soot.Local;
+import soot.SootClass;
 import soot.SootMethod;
 import soot.Value;
 import soot.jimple.InstanceInvokeExpr;
@@ -110,62 +111,94 @@ public class IdentityNode extends IPNode {
                 }
             }
         }
-
+        // boolean toShow = false;
+        // Set<ContextSensitiveValue> cvs = new HashSet<>(cvdefs);
+        if (!stmt.toString().contains("<java.lang.Object: void <init>") && !stmt.toString().contains("findBy")
+                && !stmt.toString().contains("save")) {
+            for (ContextSensitiveValue cv : cvdefs) {
+                String cname = cv.getValue().getType().toString();
+                SootClass sc = App.searchClass(cname);
+                if (sc != null || cname.contains("Object")) {
+                    // toShow = true;
+                    // break;
+                    App.p("ooo " + stmt + "," + stmt.getJavaSourceStartLineNumber() + ", " + sc + ", " + cv);
+                }
+            }
+        }
         this.type = "identity";
     }
 
     public boolean handleCollection(Memory out) {
         // Rules for composite data structures
+
+        boolean handled = false;
         InvokeExpr iexpr = stmt.getInvokeExpr();
+        ContextSensitiveValue cvlop = null, cvrop = null;
+        Set<Definition> defs = new HashSet<>();
         if (stmt instanceof InvokeStmt) {
             if (iexpr instanceof InstanceInvokeExpr) {
                 InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
                 String tstr = inexpr.getBase().getType().toString();
                 String mstr = inexpr.getMethod().getName();
-                ContextSensitiveValue cvlop, cvrop;
+
                 if (mstr.equals("add")
                         && (tstr.contains("List") || tstr.contains("Set"))) {
                     cvlop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
                     cvrop = ContextSensitiveValue.getCValue(context, inexpr.getArg(0));
-                    Set<Definition> defs = out.getDefinitionsByCV(cvrop);
-                    out.putDefinition(cvlop, defs);
-                    return true;
+
+                    handled = true;
                 } else if (mstr.equals("put")
                         && (tstr.contains("Map"))) {
                     cvlop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
                     cvrop = ContextSensitiveValue.getCValue(context, inexpr.getArg(1));
-                    Set<Definition> defs = out.getDefinitionsByCV(cvrop);
-                    out.putDefinition(cvlop, defs);
-                    return true;
+                    handled = true;
+                }
+            }
+            if (handled) {
+                defs.addAll(out.getDefinitionsByCV(cvrop));
+                Set<RefBasedAddress> unames = out.getUniqueNamesForCollection(cvlop);
+                if (unames == null || unames.isEmpty()) {
+                    App.p("This can't be unresolved");
+                    App.panicni();
+                }
+                Set<Definition> currDefs = new HashSet<>();
+                for (Definition def : defs) {
+                    currDefs.add(Definition.getDefinition(def.definedValue, this));
+                }
+                for (RefBasedAddress uname : unames) {
+                    out.putDefinition(uname, currDefs);
                 }
             }
         }
         if (stmt instanceof JAssignStmt) {
-            ContextSensitiveValue cvlop, cvrop;
             if (iexpr instanceof InstanceInvokeExpr) {
                 InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
-                if ((inexpr.getMethod().getName().equals("iterator")
-                        && inexpr.getBase().getType().toString().contains("List"))
-                        // || (inexpr.getMethod().getName().equals("next")
-                        // && inexpr.getBase().getType().toString().contains("Iterator"))
-                        || (inexpr.getMethod().getName().equals("get")
-                                && inexpr.getBase().getType().toString().contains("List"))) {
-                    if (inexpr.getMethod().getName().equals("next")
-                            && inexpr.getBase().getType().toString().contains("Iterator")) {
-                        // App.p("xxxxxxx " + this);
-                    }
-
-                    cvlop = ContextSensitiveValue.getCValue(context,
-                            ((JAssignStmt) stmt).getLeftOp());
-                    out.clearDefinition(cvlop);
+                String tstr = inexpr.getBase().getType().toString();
+                String mstr = inexpr.getMethod().getName();
+                if ((mstr.equals("iterator") && (tstr.contains("List") || tstr.contains("Set")))
+                        || (mstr.equals("next") && tstr.contains("Iterator"))
+                        || (mstr.equals("get") && tstr.contains("List"))
+                        || (mstr.equals("get") && tstr.contains("Map"))) {
+                    cvlop = ContextSensitiveValue.getCValue(context, ((JAssignStmt) stmt).getLeftOp());
                     cvrop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
-                    Set<Definition> defs = out.getDefinitionsByCV(cvrop);
-                    out.putDefinition(cvlop, defs);
-                    return true;
+                    handled = true;
                 }
             }
+            if (handled) {
+                // defs.addAll(out.getDefinitionsByCV(cvrop));
+                Set<RefBasedAddress> unames = out.getUniqueNamesForCollection(cvrop);
+                for (RefBasedAddress uname : unames) {
+                    defs.addAll(out.getCurrMapping().get(uname));
+                }
+                Set<Definition> currDefs = new HashSet<>();
+                for (Definition def : defs) {
+                    currDefs.add(Definition.getDefinition(def.definedValue, this));
+                }
+                out.clearDefinition(cvlop);
+                out.putDefinition(cvlop, currDefs);
+            }
         }
-        return false;
+        return handled;
     }
 
     @Override
@@ -192,13 +225,14 @@ public class IdentityNode extends IPNode {
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
             } else {
                 for (ContextSensitiveValue cvrop : cvuses) {
-                    Set<Definition> defs = new HashSet<>();
-                    for (AbstractAddress ra : out.getCurrMapping().keySet()) {
-                        if (ra.getBase().equals(cvrop)) {
-                            defs.addAll(out.getCurrMapping().get(ra));
-                        }
-                    }
-                    // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
+                    // Set<Definition> defs = new HashSet<>();
+                    // Set<RefBasedAddress> unames = out.getUniqueNamesForRef(cvlop);
+                    // for (AbstractAddress ra : out.getCurrMapping().keySet()) {
+                    // if (ra.getBase().equals(cvrop)) {
+                    // defs.addAll(out.getCurrMapping().get(ra));
+                    // }
+                    // }
+                    Set<Definition> defs = out.getDefinitionsByCV(cvrop);
                     Set<Definition> newdefs = new HashSet<>();
                     for (Definition def : defs) {
                         newdefs.add(Definition.getDefinition(def.getDefinedValue(), this));
