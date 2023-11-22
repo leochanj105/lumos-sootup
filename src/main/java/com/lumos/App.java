@@ -32,6 +32,7 @@ import com.lumos.backtracking.TracePoint;
 // import com.lumos.common.TracePoint;
 import com.lumos.common.Dependency.DepType;
 import com.lumos.compile.CompileUtils;
+import com.lumos.forward.AbstractAddress;
 import com.lumos.forward.CallSite;
 import com.lumos.forward.ContextSensitiveInfo;
 import com.lumos.forward.ContextSensitiveValue;
@@ -507,9 +508,9 @@ public class App {
                 // Set<Definition> satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
                 Set<Definition> satisfiedDefs = new HashSet<>();
 
-                Map<RefBasedAddress, Set<Definition>> currMem = fia.getBefore(node).getCurrMapping();
+                Map<AbstractAddress, Set<Definition>> currMem = fia.getBefore(node).getCurrMapping();
                 if (node instanceof IdentityNode && !((IdentityNode) node).isSingleIdAssign()) {
-                    for (RefBasedAddress ra : currMem.keySet()) {
+                    for (AbstractAddress ra : currMem.keySet()) {
                         if (ra.getBase().equals(cv)) {
                             satisfiedDefs.addAll(currMem.get(ra));
                         }

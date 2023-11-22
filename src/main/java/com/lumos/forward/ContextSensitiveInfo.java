@@ -3,6 +3,8 @@ package com.lumos.forward;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.lumos.forward.node.IPNode;
+
 public class ContextSensitiveInfo {
     public IPNode firstNode;
     public List<IPNode> retNodes;

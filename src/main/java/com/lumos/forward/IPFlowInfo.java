@@ -20,19 +20,9 @@ import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JInstanceFieldRef;
 
 public class IPFlowInfo {
-    // Map<ContextSensitiveValue, Set<UniqueName>> uniqueNames;
-    Map<RefBasedAddress, Set<Definition>> currMapping;
-    // IPNode ipnode;
+    Map<AbstractAddress, Set<Definition>> currMapping;
 
-    // public IPNode getIpnode() {
-    // return ipnode;
-    // }
-
-    // public void setIpnode(IPNode ipnode) {
-    // this.ipnode = ipnode;
-    // }
-
-    public Map<RefBasedAddress, Set<Definition>> getCurrMapping() {
+    public Map<AbstractAddress, Set<Definition>> getCurrMapping() {
         return currMapping;
     }
 
@@ -61,21 +51,20 @@ public class IPFlowInfo {
         return true;
     }
 
-    public void setCurrMapping(Map<RefBasedAddress, Set<Definition>> currMapping) {
+    public void setCurrMapping(Map<AbstractAddress, Set<Definition>> currMapping) {
         this.currMapping = currMapping;
     }
 
     public IPFlowInfo() {
-        // this.uniqueNames = new HashMap<>();
         this.currMapping = new HashMap<>();
     }
 
     public IPFlowInfo(IPFlowInfo other) {
         this();
 
-        Map<RefBasedAddress, Set<Definition>> mappings = other.getCurrMapping();
+        Map<AbstractAddress, Set<Definition>> mappings = other.getCurrMapping();
 
-        for (RefBasedAddress un : mappings.keySet()) {
+        for (AbstractAddress un : mappings.keySet()) {
             Set<Definition> unames = new HashSet<>();
             for (Definition un2 : mappings.get(un)) {
                 unames.add(un2);
@@ -222,7 +211,7 @@ public class IPFlowInfo {
         // result += "\n";
         // }
         result += "\nMapping:\n";
-        for (RefBasedAddress un : currMapping.keySet()) {
+        for (AbstractAddress un : currMapping.keySet()) {
             result += un + ": " + currMapping.get(un);
             result += "\n";
         }
@@ -240,7 +229,7 @@ public class IPFlowInfo {
         // result += "\n";
         // }
         result += "\nMapping:\n";
-        for (RefBasedAddress un : currMapping.keySet()) {
+        for (AbstractAddress un : currMapping.keySet()) {
             if (un.toString().contains(target)) {
                 result += un + ": " + currMapping.get(un);
                 result += "\n";

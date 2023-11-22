@@ -3,7 +3,7 @@ package com.lumos.backtracking;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lumos.forward.IPNode;
+import com.lumos.forward.node.IPNode;
 
 import soot.SootFieldRef;
 

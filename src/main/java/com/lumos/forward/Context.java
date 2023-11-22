@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
+import com.lumos.forward.node.IPNode;
 
 import polyglot.ast.Call;
 import soot.SootMethod;

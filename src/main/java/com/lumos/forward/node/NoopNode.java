@@ -1,9 +1,12 @@
-package com.lumos.forward;
+package com.lumos.forward.node;
 
 import java.util.Collections;
 import java.util.Set;
 
 import com.lumos.App;
+import com.lumos.forward.Context;
+import com.lumos.forward.ContextSensitiveValue;
+import com.lumos.forward.IPFlowInfo;
 
 import soot.jimple.Stmt;
 

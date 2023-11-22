@@ -1,4 +1,4 @@
-package com.lumos.forward;
+package com.lumos.forward.node;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,10 @@ import java.util.Set;
 
 import com.lumos.App;
 import com.lumos.analysis.MethodInfo;
+import com.lumos.forward.Context;
+import com.lumos.forward.ContextSensitiveValue;
+import com.lumos.forward.IPFlowInfo;
+import com.lumos.forward.InterProcedureGraph;
 
 // import fj.data.Set;
 import soot.jimple.Stmt;

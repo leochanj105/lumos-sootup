@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 
 import com.lumos.App;
 import com.lumos.common.Dependency;
+import com.lumos.forward.node.IPNode;
 
 import fj.P;
 import java_cup.terminal;
@@ -78,7 +79,6 @@ public class ForwardIPAnalysis {
             // HashSet<IPNode> visitedNodes = new HashSet<>();
             // while (!queue.isEmpty()) {
             IPNode node = workList.iterator().next();
-            // App.p("!!! " + node);
             workList.remove(node);
             if (!node.equals(firstNode)) {
                 boolean isReady = true;
@@ -87,7 +87,6 @@ public class ForwardIPAnalysis {
                             && !unreacheableNodes.contains(pred)) {
                         if (!(pred.stmt.toString().contains("if") || pred.stmt.toString().contains("goto")
                                 || pred.stmt.toString().contains("return"))) {
-                            // App.p("!!!!!!!!! " + node + ", " + pred);
                         }
                         isReady = false;
                         break;
@@ -111,23 +110,6 @@ public class ForwardIPAnalysis {
 
             IPFlowInfo out = copy(in);
             node.flow(out);
-
-            // if (node.getStmt().toString().contains(
-            // "interfaceinvoke $stack37.<java.util.Iterator: java.lang.Object next()>()"))
-            // {
-            // App.p("xxxxxxxxxxx " + node);
-            // in.getDefinitionsByCV(ContextSensitiveValue.getCValue(node.getContext(),
-            // ((InstanceInvokeExpr) node.getStmt().getInvokeExpr()).getBase())).forEach(d
-            // -> {
-            // App.p(d.d());
-            // });
-            // App.p("-----------");
-            // out.getDefinitionsByCV(ContextSensitiveValue.getCValue(node.getContext(),
-            // ((InstanceInvokeExpr) node.getStmt().getInvokeExpr()).getBase())).forEach(d
-            // -> {
-            // App.p(d.d());
-            // });
-            // }
 
             if (isNotEqual(out, liveOut.get(node)) || node.equals(firstNode)) {
                 for (IPNode succ : node.getSuccessors()) {
@@ -174,8 +156,8 @@ public class ForwardIPAnalysis {
     private IPFlowInfo merge(IPFlowInfo f1, IPFlowInfo f2) {
         IPFlowInfo f3 = copy(f1);
 
-        for (RefBasedAddress un : f2.getCurrMapping().keySet()) {
-            Map<RefBasedAddress, Set<Definition>> mapping = f3.getCurrMapping();
+        for (AbstractAddress un : f2.getCurrMapping().keySet()) {
+            Map<AbstractAddress, Set<Definition>> mapping = f3.getCurrMapping();
             if (!mapping.containsKey(un)) {
                 mapping.put(un, new HashSet<>());
             }

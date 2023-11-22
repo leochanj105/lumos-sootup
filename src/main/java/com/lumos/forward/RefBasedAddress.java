@@ -18,10 +18,12 @@ public class RefBasedAddress implements AbstractAddress {
         this.suffix = suffix;
     }
 
+    @Override
     public ContextSensitiveValue getBase() {
         return base;
     }
 
+    @Override
     public void setBase(ContextSensitiveValue base) {
         this.base = base;
     }

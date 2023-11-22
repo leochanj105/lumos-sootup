@@ -1,4 +1,4 @@
-package com.lumos.forward;
+package com.lumos.forward.node;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +8,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.lumos.App;
+import com.lumos.forward.AbstractAddress;
+import com.lumos.forward.Context;
+import com.lumos.forward.ContextSensitiveValue;
+import com.lumos.forward.Definition;
+import com.lumos.forward.IPFlowInfo;
+import com.lumos.forward.RefBasedAddress;
 
 import soot.Local;
 import soot.SootMethod;
@@ -103,29 +109,35 @@ public class ExitNode extends IPNode {
         ContextSensitiveValue cvcaller = getRet();
 
         if (isRemote) {
-            for (RefBasedAddress un : out.getCurrMapping().keySet()) {
-                Context original = un.getBase().getContext();
-                // App.p(original + ", " + un);
-                boolean modified = false;
-                if (!this.context.parentOf(original)) {
-                    for (Definition def : out.getCurrMapping().get(un)) {
-                        if (def.getDefinedLocation() != null) {
-                            if (this.context.strictParentOf(def.getDefinedLocation().getContext())) {
-                                modified = true;
-                                break;
+            for (AbstractAddress addr : out.getCurrMapping().keySet()) {
+                if (addr instanceof RefBasedAddress) {
+                    RefBasedAddress un = (RefBasedAddress) addr;
+                    Context original = un.getBase().getContext();
+                    // App.p(original + ", " + un);
+                    boolean modified = false;
+                    if (!this.context.parentOf(original)) {
+                        for (Definition def : out.getCurrMapping().get(un)) {
+                            if (def.getDefinedLocation() != null) {
+                                if (this.context.strictParentOf(def.getDefinedLocation().getContext())) {
+                                    modified = true;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    if (modified) {
-                        App.p("Warning: overwritting!!!!");
-                        App.p(un + ", " + out.getCurrMapping().get(un));
-                        if (un.getBase().getValue() instanceof StaticFieldRef) {
-                            continue;
-                        }
+                        if (modified) {
+                            App.p("Warning: overwritting!!!!");
+                            App.p(un + ", " + out.getCurrMapping().get(un));
+                            if (un.getBase().getValue() instanceof StaticFieldRef) {
+                                continue;
+                            }
 
-                        App.p(this.context + ", " + original);
-                        App.panicni();
+                            App.p(this.context + ", " + original);
+                            App.panicni();
+                        }
                     }
+                } else {
+                    App.p("CollectionContentAddress not implemented!");
+                    App.panicni();
                 }
             }
         }

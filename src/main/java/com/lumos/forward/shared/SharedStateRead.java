@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.lumos.App;
 import com.lumos.forward.ContextSensitiveValue;
-import com.lumos.forward.IPNode;
+import com.lumos.forward.node.IPNode;
 
 import soot.SootFieldRef;
 import soot.SootMethod;

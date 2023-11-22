@@ -1,9 +1,14 @@
-package com.lumos.forward;
+package com.lumos.forward.node;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import com.lumos.App;
+import com.lumos.forward.Context;
+import com.lumos.forward.ContextSensitiveValue;
+import com.lumos.forward.Definition;
+import com.lumos.forward.IPFlowInfo;
+import com.lumos.forward.RefBasedAddress;
 import com.lumos.utils.Utils;
 
 import soot.Local;

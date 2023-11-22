@@ -1,4 +1,4 @@
-package com.lumos.forward;
+package com.lumos.forward.node;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.lumos.App;
+import com.lumos.forward.AbstractAddress;
+import com.lumos.forward.Context;
+import com.lumos.forward.ContextSensitiveValue;
+import com.lumos.forward.Definition;
+import com.lumos.forward.IPFlowInfo;
+import com.lumos.forward.RefBasedAddress;
 import com.lumos.utils.Utils;
 import com.lumos.wire.IdentityWire;
 
@@ -189,7 +195,7 @@ public class IdentityNode extends IPNode {
             } else {
                 for (ContextSensitiveValue cvrop : cvuses) {
                     Set<Definition> defs = new HashSet<>();
-                    for (RefBasedAddress ra : out.getCurrMapping().keySet()) {
+                    for (AbstractAddress ra : out.getCurrMapping().keySet()) {
                         if (ra.getBase().equals(cvrop)) {
                             defs.addAll(out.getCurrMapping().get(ra));
                         }
