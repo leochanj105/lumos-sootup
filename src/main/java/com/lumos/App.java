@@ -142,6 +142,7 @@ public class App {
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
+    public static String jpath = "f8";
 
     public static boolean showRound = false;
     public static boolean showLineNum = true;
@@ -162,18 +163,18 @@ public class App {
     // public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
 
     public static Set<IPNode> idnodes = new HashSet<>();
-
-    public static String caseStudyPath = "cases/f13/";
+    public static int cnum = 13;
+    public static String caseStudyPath = "cases/f" + cnum + "/";
     public static String safeListPath = "safelist";
     public static Set<String> safeList = new HashSet<>();
 
     public static Set<String> initList = new HashSet<>();
 
     public static String outputTPDir = "TPnew";
-    public static String outputTPFileName = "tps13";
+    public static String outputTPFileName = "tps" + cnum;
     public static boolean outputTP = true;
 
-    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f13\\";
+    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f" + cnum + "\\";
     public static String bcodeSuffix = "\\target\\classes";
     public static String scodeSuffix = "\\src\\main\\java";
     public static Map<String, Path> sourceMap = new HashMap<>();
@@ -393,20 +394,20 @@ public class App {
             }
             swcvalues.add(currCvalues);
         }
-        // Set<SharedStateRead> streads2 = new HashSet<>();
-        // Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
-        // streads2);
+        Set<SharedStateRead> streads2 = new HashSet<>();
+        Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
+                streads2);
 
         p2("#TPs: " + tps.size());
 
-        // p2("#TPs SW: " + tpsw.size());
+        p2("#TPs SW: " + tpsw.size());
 
-        // tpsw.removeAll(tps);
-        // p2("#TPs SW (additional): " + tpsw.size());
-        // tpsw.forEach(s -> {
-        // p(s.d());
-        // });
-        // tps.addAll(tpsw);
+        tpsw.removeAll(tps);
+        p2("#TPs SW (additional): " + tpsw.size());
+        tpsw.forEach(s -> {
+            p(s.d());
+        });
+        tps.addAll(tpsw);
         if (outputTP) {
             writeTPs(tps, outputTPDir, outputTPFileName);
             writeSTReads(streads, outputTPDir, outputTPFileName);
@@ -661,6 +662,7 @@ public class App {
                 if (iexpr instanceof InstanceInvokeExpr) {
                     InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
                     SharedStateWrite swrite = new SharedStateWrite("Repository", ipnode, new HashSet<>());
+                    boolean isSave = false;
                     for (SharedStateDepedency stdep : stdeps) {
                         String storeName = stdep.storeName;
                         String writeOPName = "";
@@ -671,6 +673,8 @@ public class App {
                         }
                         if (inexpr.getMethod().getName().equals(writeOPName)
                                 && inexpr.getBase().getType().toString().contains(storeName)) {
+                            isSave = true;
+                            swrite.type = storeName;
                             // for( field: stdep.refs)
                             Value objVal = null;
                             boolean mayNotFromAnotherRepo = false;
@@ -679,7 +683,7 @@ public class App {
                                     ContextSensitiveValue.getCValue(ipnode.getContext(), inexpr.getArg(0)))) {
                                 if (def.getDefinedLocation() != null) {
                                     if (def.getDefinedLocation().getStmt().containsInvokeExpr()) {
-                                        if (!getBaseType(def.getDefinedLocation()).contains("Repository")) {
+                                        if (!getBaseType(def.getDefinedLocation()).contains(storeName)) {
                                             mayNotFromAnotherRepo = true;
                                             break;
                                         }
@@ -715,9 +719,11 @@ public class App {
                             // hasSave = true;
                         }
                     }
-                    if (swrite.fields.size() > 0) {
+                    // if (swrite.fields.size() > 0) {
+                    if (isSave) {
                         result.add(swrite);
                     }
+                    // }
                 }
             }
 
@@ -1251,19 +1257,22 @@ public class App {
             FileWriter fileWriter = new FileWriter(file);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("STreads");
-            Map<String, List<String>> readPts = new HashMap<>();
+            // Map<String, List<String>> readPts = new HashMap<>();
+            Set<String> readPts = new HashSet<>();
             for (SharedStateRead stread : streads) {
-                String sd = stread.shortd(",,");
-                if (!readPts.containsKey(sd)) {
-                    readPts.put(sd, new ArrayList<>());
-                }
+                String repoType = ((JInterfaceInvokeExpr) stread.rnode.getStmt().getInvokeExpr()).getBase().getType()
+                        .toString();
+                String sd = stread.shortd(",,") + ",," + Utils.repoNameToClassName((repoType));
+                // if (!readPts.containsKey(sd)) {
+                readPts.add(sd);
+                // }
                 // p("yyyy " + stread.refs + ", " + mergeStr(stread.refs, ","));
-                readPts.get(sd).add(mergeStr(stread.refs, ","));
+                // readPts.get(sd).add(mergeStr(stread.refs, ","));
             }
 
             List<String> lines = new ArrayList<>();
-            for (String rpt : readPts.keySet()) {
-                lines.add(rpt + ",," + readPts.get(rpt));
+            for (String rpt : readPts) {
+                lines.add(rpt);
             }
 
             lines.sort(null);
@@ -1443,7 +1452,7 @@ public class App {
             }
             classMap.put(cls.toString(), cls);
             if (compileJimpleOnly) {
-                CompileUtils.outputJimple(cls, "joutput");
+                CompileUtils.outputJimple(cls, jpath);
             }
 
         }

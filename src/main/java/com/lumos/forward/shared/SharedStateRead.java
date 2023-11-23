@@ -103,7 +103,7 @@ public class SharedStateRead {
         Value v = cvalue.getValue();
         return type + separator + App.serviceMap.get(sm.toString()) + separator + sm + separator
                 + s.getJavaSourceStartLineNumber()
-                + separator + s + separator + v;
+                + separator + s;
     }
 
 }

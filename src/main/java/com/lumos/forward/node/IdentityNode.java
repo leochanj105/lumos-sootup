@@ -65,7 +65,8 @@ public class IdentityNode extends IPNode {
                     cvuses.add(ContextSensitiveValue.getCValue(context, arg));
                 }
                 // if ((stmt instanceof JAssignStmt) && (iexpr instanceof InstanceInvokeExpr)) {
-                if (!isSingleIdAssign() && iexpr instanceof InstanceInvokeExpr) {
+                if (!isSingleIdAssign() && iexpr instanceof InstanceInvokeExpr
+                        && !(iexpr.getMethod().toString().contains("<init>"))) {
                     cvuses.add(ContextSensitiveValue.getCValue(context, ((InstanceInvokeExpr) iexpr).getBase()));
                 }
             } else {

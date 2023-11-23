@@ -43,8 +43,7 @@ public class SharedStateWrite {
         Value v = s.getInvokeExpr().getArg(0);
         return type + separator + App.serviceMap.get(sm.toString()) + separator + sm + separator
                 + s.getJavaSourceStartLineNumber()
-                + separator + s + separator + v + separator
-                + lessSuffix();
+                + separator + s;
     }
 
     @Override

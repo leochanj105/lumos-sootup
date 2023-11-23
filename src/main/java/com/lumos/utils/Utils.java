@@ -46,7 +46,30 @@ public class Utils {
 
     public static boolean isCompositeType(String tstr) {
         return (tstr.contains("List") || (tstr.contains("Set") || (tstr.contains("Map"))))
-                || (tstr.contains("[]"));
+                || (tstr.contains("[]") || (tstr.contains("ValueOperations")));
+    }
+
+    public static String repoNameToClassName(String repoName) {
+        if (repoName.contains("inside_payment.repository.AddMoneyRepository")) {
+            return "inside_payment.domain.AddMoney";
+        } else if (repoName.contains("inside_payment.repository.PaymentRepository")) {
+            return "inside_payment.domain.Payment";
+        } else if (repoName.contains("other.repository.OrderOtherRepository")) {
+            return "other.domain.Order";
+        } else if (repoName.contains("order.repository.OrderRepository")) {
+            return "order.domain.Order";
+        } else if (repoName.contains("com.trainticket.repository.PaymentRepository")) {
+            return "com.trainticket.domain.Payment";
+        } else if (repoName.contains("com.trainticket.repository.AddMoneyRepository")) {
+            return "com.trainticket.domain.AddMoney";
+        } else if (repoName.contains("sso.repository.AccountRepository")) {
+            return "sso.domain.Account";
+        } else if (repoName.contains("sso.repository.LoginUserListRepository")) {
+            return "sso.domain.LoginValue";
+        } else if (repoName.contains("ValueOperations")) {
+            return "java.lang.String";
+        }
+        return "";
     }
 
     public static String getReqTypeString(Object req) {
