@@ -41,9 +41,9 @@ public class SharedStateWrite {
         SootMethod sm = wnode.getContext().getStackLast().sm;
         Stmt s = wnode.stmt;
         Value v = s.getInvokeExpr().getArg(0);
-        return type + separator + App.serviceMap.get(sm.toString()) + separator + sm + separator
+        return App.serviceMap.get(sm.toString()) + separator + sm + separator
                 + s.getJavaSourceStartLineNumber()
-                + separator + s;
+                + separator + s + separator + type;
     }
 
     @Override

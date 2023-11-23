@@ -18,3 +18,13 @@ other.queue.MsgSendingBean: void sendLoginInfoToSso(other.domain.ChangeOrderResu
 cancel.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)
 changeOrderResult
 changeOrderResult
+order.controller.OrderController: order.domain.VerifyResult verifySsoLogin
+155
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken
+loginToken
+token
+cancel.controller.CancelController: cancel.domain.VerifyResult verifySsoLogin
+64
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken
+loginToken
+token
