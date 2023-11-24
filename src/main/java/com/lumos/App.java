@@ -139,10 +139,11 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
+    public static int cnum = 11;
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
-    public static String jpath = "f8";
+    public static String jpath = "f" + cnum;
 
     public static boolean showRound = false;
     public static boolean showLineNum = true;
@@ -163,7 +164,7 @@ public class App {
     // public static String exclude = "goto [?= $stack66 = $stack62 & $stack68]";
 
     public static Set<IPNode> idnodes = new HashSet<>();
-    public static int cnum = 13;
+
     public static String caseStudyPath = "cases/f" + cnum + "/";
     public static String safeListPath = "safelist";
     public static Set<String> safeList = new HashSet<>();
@@ -182,7 +183,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            "ts-launcher",
+            // "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -196,7 +197,7 @@ public class App {
             // "ts-admin-user-service",
             // "ts-assurance-service",
             // "ts-basic-service",
-            "ts-config-service",
+            // "ts-config-service",
             // "ts-consign-price-service",
             // "ts-consign-service",
             // "ts-contacts-service",
@@ -204,7 +205,7 @@ public class App {
             // "ts-food-map-service",
             // "ts-food-service",
             "ts-login-service",
-            // "ts-notification-service",
+            "ts-notification-service",
             // "ts-preserve-other-service",
             // "ts-preserve-service",
             // "ts-price-service",
@@ -230,24 +231,14 @@ public class App {
         List<String> paths = new ArrayList<>();
         for (String str : services) {
             String complete = base + str + bcodeSuffix;
-            // String complete = "xxxx";
             pathMap.put(str, complete);
             paths.add(complete);
         }
 
         analyzePath(pathMap);
         App.p("Class file analysis finished");
-
-        // analyzePath("xxxx\\classes");
         getSourceCodes();
         App.p("Source code analysis finished");
-        // if (1 - 2 < 0) {
-        // getSourceCodes();
-        // for (String s : methodMap.keySet()) {
-        // p("! " + s + ", " + methodMap.get(s).sm.getDeclaringClass());
-        // }
-        // return;
-        // }
 
         if (compileJimpleOnly)
             return;
@@ -256,7 +247,7 @@ public class App {
             p("Analyzing Repo");
             // analyzeRepo();
             // analyzeDBFlow();
-            analyzeRedisFlow();
+            // analyzeRedisFlow();
             return;
         }
 
@@ -267,8 +258,6 @@ public class App {
             return;
         }
 
-        // readTPs("TP", "tps");
-
         // Safelist contains a list of lib methods
         // that don't modify >1 args, and obeying
         // the basic template of R/Ws
@@ -277,10 +266,6 @@ public class App {
         });
 
         InterProcedureGraph igraph = new InterProcedureGraph(methodMap);
-
-        // if (true) {
-        // return;
-        // }
 
         List<String> graphConfig = Utils.readFrom(caseStudyPath + "graph");
         String entryMethod = graphConfig.get(0).trim();
@@ -299,41 +284,42 @@ public class App {
         App.p("Analysis finished");
 
         long analysisDuration = System.currentTimeMillis() - start;
-
-        if (showInitOnly) {
-            p("+++++++++++++++++++++");
-            initList.forEach(m -> {
-                p(m);
-            });
+        if (true) {
             return;
         }
+        // if (showInitOnly) {
+        // p("+++++++++++++++++++++");
+        // initList.forEach(m -> {
+        // p(m);
+        // });
+        // return;
+        // }
 
-        if (showIDNodesOnly) {
-            p("+++++++++++++++++++++");
-            Set<String> safeMethods = new HashSet<>();
-            for (IPNode node : idnodes) {
-                // p(node.getStmt().getInvokeExpr().getMethod());
-                safeMethods.add(node.getStmt().getInvokeExpr().getMethod().getSignature());
-            }
-            safeMethods.forEach(m -> {
-                p(m);
-            });
-            return;
-        }
+        // if (showIDNodesOnly) {
+        // p("+++++++++++++++++++++");
+        // Set<String> safeMethods = new HashSet<>();
+        // for (IPNode node : idnodes) {
+        // safeMethods.add(node.getStmt().getInvokeExpr().getMethod().getSignature());
+        // }
+        // safeMethods.forEach(m -> {
+        // p(m);
+        // });
+        // return;
+        // }
 
         IPNode ipnode = igraph.searchNode(symptomStmt.split(","));
         p("Symptom node is: " + ipnode.stmt.toString());
 
         List<ContextSensitiveValue> symptomCvalues = new ArrayList<>();
         // f13
-        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(),
-                ((JAssignStmt) ipnode.getStmt()).getLeftOp());
+        // ContextSensitiveValue cvalue =
+        // ContextSensitiveValue.getCValue(ipnode.getContext(),
+        // ((JAssignStmt) ipnode.getStmt()).getLeftOp());
 
         // f8
-        // Value symptom = getFieldRef(((JReturnStmt) ipnode.getStmt()).getOp(),
-        // "refund");
-        // ContextSensitiveValue cvalue =
-        // ContextSensitiveValue.getCValue(ipnode.getContext(), symptom);
+        Value symptom = getFieldRef(((JReturnStmt) ipnode.getStmt()).getOp(),
+                "refund");
+        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(), symptom);
 
         // f8login
         // ContextSensitiveValue cvalue =
@@ -344,8 +330,6 @@ public class App {
         p("Symptom values are: " + cvalue);
         p2("Analysis time: " + analysisDuration);
 
-        // if (true)
-        // return;
         // List<IPNode> DBreads = new ArrayList<>();
         // List<String> fields = new ArrayList<>();
         Set<SharedStateRead> streads = new HashSet<>();
@@ -354,11 +338,6 @@ public class App {
 
         Set<SharedStateDepedency> stdeps = new HashSet<>();
         streads.forEach(stread -> {
-            // App.p(stread);
-            // App.p(stread.hashCode());
-            // App.p(stread.type.hashCode() + ", " + stread.rnode.hashCode() + ", " +
-            // stread.cvalue.hashCode() + ","
-            // + stread.refs.hashCode());
             String storeName = "";
             IPNode rnode = stread.rnode;
             InvokeExpr iexpr = rnode.getStmt().getInvokeExpr();

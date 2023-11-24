@@ -127,6 +127,12 @@ public class ExitNode extends IPNode {
                         if (modified) {
                             App.p("Warning: overwritting!!!!");
                             App.p(un + ", " + out.getCurrMapping().get(un));
+                            for (Definition def : out.getCurrMapping().get(un)) {
+                                App.p(def.getDefinedLocation() + ", " + def.getDefinedValue());
+                                if (def.getDefinedLocation() != null) {
+                                    App.p(def.getDefinedLocation().getDescription());
+                                }
+                            }
                             if (un.getBase().getValue() instanceof StaticFieldRef) {
                                 continue;
                             }

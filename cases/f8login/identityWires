@@ -1,0 +1,15 @@
+org.springframework.http.ResponseEntity,getBody
+org.springframework.messaging.support.MessageBuilder,build
+org.springframework.messaging.support.MessageBuilder,withPayload
+java.lang.Boolean,booleanValue
+java.lang.Boolean,valueOf(boolean)
+org.springframework.scheduling.'annotation'.AsyncResult,void <init>(java.lang.Object)
+java.util.concurrent.Future,get
+java.lang.Double,parseDouble
+java.lang.Double,doubleOf(double)
+java.math.BigDecimal,<init>(java.lang.String)
+java.lang.RuntimeException,void <init>(java.lang.String)
+java.lang.String,toString
+java.util.UUID,fromString
+java.lang.Object,clone
+java.lang.Double,doubleValue

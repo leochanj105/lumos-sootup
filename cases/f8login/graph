@@ -1,0 +1,3 @@
+login.controller.AccountLoginController: login.domain.LoginResult login
+if YsbCaptcha == null goto
+interfaceinvoke $stack50.<org.springframework.data.redis.core.ValueOperations: void set(java.lang.Object,java.lang.Object)>(loginId, $stack48),identity

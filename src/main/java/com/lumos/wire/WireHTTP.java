@@ -31,7 +31,9 @@ public class WireHTTP {
                     +currStmt.getJavaSourceStartLineNumber());
 
             for (String address : App.remoteMap.keySet()) {
-                // App.p(address + ": " + remoteMap.get(address));
+                // if (currStmt.toString().contains("login-service")) {
+                // App.p(address + ": " + App.remoteMap.get(address));
+                // }
                 if (srcLine.contains(address)) {
                     App.p(srcLine);
                     SootMethod wiredMethod = App.remoteMap.get(address);
@@ -73,6 +75,8 @@ public class WireHTTP {
                                 }
                             }
                         }
+                    } else if (wiredMethod.getParameterCount() == 0) {
+                        return hwire;
                     }
                     // App.p(expr.getArgs());
                 }

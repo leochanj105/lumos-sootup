@@ -1,0 +1,10 @@
+cancel.controller.CancelController: cancel.domain.CalculateRefundResult calculate
+30
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyVIPToken
+loginToken
+token
+login.service.AccountLoginServiceImpl: login.domain.LoginResult login
+39
+com.trainticket.verificationcode.controller.VerificationCodeController: boolean verifyCode
+ 
+ 

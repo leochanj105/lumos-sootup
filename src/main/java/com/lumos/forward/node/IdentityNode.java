@@ -150,6 +150,7 @@ public class IdentityNode extends IPNode {
                     handled = true;
                 } else if (mstr.equals("put")
                         && (tstr.contains("Map"))) {
+
                     cvlop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
                     cvrop = ContextSensitiveValue.getCValue(context, inexpr.getArg(1));
                     handled = true;
@@ -169,6 +170,9 @@ public class IdentityNode extends IPNode {
                 for (RefBasedAddress uname : unames) {
                     out.putDefinition(uname, currDefs);
                 }
+                App.p("!!! " + this.stmt);
+                App.p(currDefs + "");
+                App.p(unames + "");
             }
         }
         if (stmt instanceof JAssignStmt) {
@@ -215,7 +219,7 @@ public class IdentityNode extends IPNode {
         if (handleCollection(out)) {
             return;
         }
-
+        // App.p("??? " + this.stmt);
         for (ContextSensitiveValue cvlop : cvdefs) {
             if (isSafeOverwrite()) {
                 out.clearDefinition(cvlop);
