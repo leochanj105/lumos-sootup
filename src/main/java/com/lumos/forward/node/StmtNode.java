@@ -1,5 +1,6 @@
 package com.lumos.forward.node;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -96,7 +97,8 @@ public class StmtNode extends IPNode {
                     if (collectionDefs != null) {
                         defs.addAll(collectionDefs);
                     } else {
-                        defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop), this));
+                        defs.add(Definition.getDefinition(
+                                RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()), this));
                     }
                 }
                 Set<Definition> newdefs = new HashSet<>();
@@ -120,6 +122,7 @@ public class StmtNode extends IPNode {
                 }
                 Set<RefBasedAddress> unames = out.getUniqueNamesForCollection(cvlop);
                 for (RefBasedAddress uname : unames) {
+                    assert (uname.getSuffix() != null);
                     out.putDefinition(uname, currDefs);
                 }
                 return;
@@ -137,7 +140,6 @@ public class StmtNode extends IPNode {
             }
 
             if (rop instanceof StaticFieldRef) {
-
                 cvrop = ContextSensitiveValue.getCValue(Context.emptyContext(), rop);
             } else {
                 cvrop = ContextSensitiveValue.getCValue(getContext(), rop);
@@ -149,14 +151,18 @@ public class StmtNode extends IPNode {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
             } else if (rop instanceof NewArrayExpr
                     || (rop instanceof NewExpr && (Utils.isCompositeType(lop.getType().toString())))) {
-                defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
-                        ContextSensitiveValue.getCValue(cvlop.getContext(),
-                                Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
-                                        cvlop.getValue().getType()))),
+                // defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
+                // ContextSensitiveValue.getCValue(cvlop.getContext(),
+                // Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
+                // cvlop.getValue().getType())),
+                // Collections.emptyList()),
+                // this));
+                defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()),
                         this));
             } else {
                 // App.p("xxxx " + this.stmt);
-                defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop), this));
+                defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()),
+                        this));
             }
             // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
             if ((lop instanceof Local) || (lop instanceof StaticFieldRef)) {
@@ -187,7 +193,7 @@ public class StmtNode extends IPNode {
                 // App.p(defs.size());
                 // }
             } else if (lop instanceof JInstanceFieldRef) {
-                Set<RefBasedAddress> unames = out.getUniqueNamesForRef(cvlop);
+                Set<RefBasedAddress> unames = out.getRefBasedAaddressesForRef(cvlop);
 
                 Set<Definition> possibleDefinitions = out.getDefinitionsByCV(cvrop);
                 // if (context.toString().contains("doErrorQueue,sendOrderCancel,<init>")) {
@@ -203,6 +209,7 @@ public class StmtNode extends IPNode {
                     currDefs.add(Definition.getDefinition(def.definedValue, this));
                 }
                 for (RefBasedAddress uname : unames) {
+                    assert (uname.getSuffix() != null);
                     if (unames.size() == 1) {
                         out.clearDefinition(uname);
                         out.putDefinition(uname, currDefs);

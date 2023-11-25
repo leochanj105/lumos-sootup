@@ -184,15 +184,17 @@ public class ExitNode extends IPNode {
         for (AbstractAddress addr : out.getCurrMapping().keySet()) {
             if (addr instanceof RefBasedAddress) {
                 RefBasedAddress raddr = (RefBasedAddress) addr;
-                if (raddr.getSuffix().size() == 0) {
+                if (raddr.getSuffix() == null) {
                     ContextSensitiveValue cv = raddr.getBase();
+                    assert (cv.getValue() instanceof Local);
                     Context calleeContext = this.getReturnStmtNodes().get(0).getContext();
                     if (cv.getValue() instanceof Local) {
                         if (calleeContext.parentOf(cv.getContext())) {
-                            Set<Definition> vdefs = out.getCurrMapping().get(addr);
-                            ContextSensitiveValue onlyVal = vdefs.iterator().next().getDefinedValue().getBase();
+                            // Set<Definition> vdefs = out.getCurrMapping().get(addr);
+                            // ContextSensitiveValue onlyVal =
+                            // vdefs.iterator().next().getDefinedValue().getBase();
                             // if (!(vdefs.size() == 1 && )) {
-                            // toEvict.add(raddr);
+                            toEvict.add(raddr);
                             // }
                         }
                     }

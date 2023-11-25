@@ -114,27 +114,11 @@ public class EnterNode extends IPNode {
 
     @Override
     public void flow(Memory out) {
-        // EnterNode enode = (EnterNode) node;
-
         for (List<ContextSensitiveValue> aliasp : getAliasPairs()) {
             ContextSensitiveValue cv1 = aliasp.get(0);
             ContextSensitiveValue cv2 = aliasp.get(1);
 
-            // if (!isRemote()) {
-            // if (true) {
             Set<Definition> defs = out.getDefinitionsByCV(cv1);
-            // out.clearDefinition(cv2);
-            // if (cv2.toString().contains("info")) {
-            // for (UniqueName unn : out.currMapping.keySet()) {
-            // if (unn.toString().contains("info")) {
-            // App.p(unn + ", " + out.currMapping.get(unn) + ", " + unn.getBase().hashCode()
-            // + ", "
-            // + ((Local) unn.getBase().getValue()).equivHashCode() + ", "
-            // + ((Local) unn.getBase().getValue()).getName() + ", " +
-            // ((Local) unn.getBase().getValue()).getType());
-            // }
-            // }
-            // }
             out.clearDefinition(cv2);
             out.putDefinition(cv2, defs);
 
@@ -142,24 +126,13 @@ public class EnterNode extends IPNode {
                 for (Definition def : defs) {
                     // App.p("Enter: " + cv1 + ", " + cv2 + ", " + def.d());
                 }
-                // App.panicni();
             }
-
-            // } else {
-
-            // Set<Definition> newdefs = new HashSet<>();
-            // for(Definition def: defs){
-            // newdefs.add(Definition.getDefinition(null, null))
-            // }
-            // out.putDefinition(cv2);
-            // }
         }
 
     }
 
     @Override
     public Set<ContextSensitiveValue> getUsed() {
-        // TODO Auto-generated method stub
         return Collections.emptySet();
     }
 

@@ -1,6 +1,7 @@
 package com.lumos.forward.node;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -222,7 +223,8 @@ public class IdentityNode extends IPNode {
                     if (collectionDefs != null) {
                         defs.addAll(collectionDefs);
                     } else {
-                        defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop), this));
+                        defs.add(Definition.getDefinition(
+                                RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()), this));
                     }
                 }
                 Set<Definition> currDefs = new HashSet<>();
@@ -256,14 +258,18 @@ public class IdentityNode extends IPNode {
             // }
             if (idMode.equals("CONSERVATIVE") || ((cvuses.size() > 1 || cvuses.size() == 0)
                     || !isSingleIdAssign())) {
-                RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cvlop);
+                RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList());
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
                 if (Utils.isCompositeType(cvlop.getValue())) {
-                    out.putDefinition(cvlop, Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
-                            ContextSensitiveValue.getCValue(cvlop.getContext(),
-                                    Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
-                                            cvlop.getValue().getType()))),
-                            this));
+                    // out.putDefinition(cvlop,
+                    // Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
+                    // ContextSensitiveValue.getCValue(cvlop.getContext(),
+                    // Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
+                    // cvlop.getValue().getType())),
+                    // Collections.emptyList()),
+                    // this));
+                    out.putDefinition(cvlop, Definition
+                            .getDefinition(RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()), this));
                 }
             } else {
                 for (ContextSensitiveValue cvrop : cvuses) {

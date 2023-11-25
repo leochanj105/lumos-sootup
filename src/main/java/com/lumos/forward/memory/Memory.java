@@ -2,6 +2,7 @@ package com.lumos.forward.memory;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -97,12 +98,13 @@ public class Memory {
         Set<RefBasedAddress> unames = new HashSet<>();
         for (Definition def : baseDefs) {
             RefBasedAddress unref = def.getDefinedValue();
+            assert (unref.getSuffix() != null);
             unames.add(unref);
         }
         return unames;
     }
 
-    public Set<RefBasedAddress> getUniqueNamesForRef(ContextSensitiveValue cv) {
+    public Set<RefBasedAddress> getRefBasedAaddressesForRef(ContextSensitiveValue cv) {
         JInstanceFieldRef ref = (JInstanceFieldRef) cv.getValue();
         Set<Definition> baseDefs = getDefinitionsByCV(cv.getContext(), ref.getBase());
 
@@ -121,7 +123,8 @@ public class Memory {
         Set<Definition> resultDefs = new HashSet<>();
 
         if (cv.getValue() instanceof JInstanceFieldRef) {
-            for (RefBasedAddress unref : getUniqueNamesForRef(cv)) {
+            for (RefBasedAddress unref : getRefBasedAaddressesForRef(cv)) {
+                assert (unref.getSuffix() != null);
                 Set<Definition> definitions = new HashSet<>();
                 Set<Definition> heapDefs = currMapping.get(unref);
                 if (heapDefs != null) {
@@ -135,7 +138,7 @@ public class Memory {
             }
             return resultDefs;
         } else {
-            String tstr = cv.getValue().getType().toString();
+            // String tstr = cv.getValue().getType().toString();
             // if (tstr.contains("List")
             // || tstr.contains("Set")
             // || tstr.contains("Iterator")
@@ -165,7 +168,8 @@ public class Memory {
         Set<Definition> defs = currMapping.get(un);
         if (defs == null || defs.isEmpty()) {
             currMapping.put(un, new HashSet<>());
-            resultDefs.add(Definition.getDefinition(un, null));
+            resultDefs.add(Definition
+                    .getDefinition(RefBasedAddress.getRefBasedAddress(un.getBase(), Collections.emptyList()), null));
         } else {
             resultDefs.addAll(defs);
         }
@@ -229,28 +233,19 @@ public class Memory {
         putDefinition(cv, defs);
     }
 
-    public void putDefinition(Context c, Value v) {
-        ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
-        putDefinition(cv, RefBasedAddress.getRefBasedAddress(cv, null));
-    }
-
-    public void putDefinition(ContextSensitiveValue cv) {
-        putDefinition(cv, RefBasedAddress.getRefBasedAddress(cv, null));
-    }
-
-    // public Map<ContextSensitiveValue, Set<UniqueName>> getUniqueNames() {
-    // return uniqueNames;
+    // public void putDefinition(Context c, Value v) {
+    // ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
+    // putDefinition(cv, RefBasedAddress.getRefBasedAddress(cv, null));
     // }
 
-    // public void setUniqueNames(Map<ContextSensitiveValue, Set<UniqueName>>
-    // original) {
-    // this.uniqueNames = original;
+    // public void putDefinition(ContextSensitiveValue cv) {
+    // putDefinition(cv, RefBasedAddress.getRefBasedAddress(cv, null));
     // }
 
     @Override
     public String toString() {
         String result = "";
-        result += "IPFlowInfo: \n";
+        result += "Memory: \n";
         // result += "UniqueNames:\n";
         // for (ContextSensitiveValue cv : uniqueNames.keySet()) {
         // result += cv + ": " + uniqueNames.get(cv);
@@ -268,7 +263,7 @@ public class Memory {
     // @Override
     public String ssimple(String target) {
         String result = "";
-        result += "IPFlowInfo: \n";
+        result += "Memory: \n";
         // result += "UniqueNames:\n";
         // for (ContextSensitiveValue cv : uniqueNames.keySet()) {
         // result += cv + ": " + uniqueNames.get(cv);

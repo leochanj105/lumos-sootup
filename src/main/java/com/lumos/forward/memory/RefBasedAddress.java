@@ -16,6 +16,8 @@ public class RefBasedAddress implements AbstractAddress {
     public ContextSensitiveValue base;
     public List<SootFieldRef> suffix;
 
+    // public String tag;
+
     public static Map<ContextSensitiveValue, Map<List<SootFieldRef>, RefBasedAddress>> cache = new HashMap<>();
 
     public static RefBasedAddress getRefBasedAddress(RefBasedAddress un, SootFieldRef ref) {
@@ -24,13 +26,15 @@ public class RefBasedAddress implements AbstractAddress {
         ContextSensitiveValue rbase = un.getBase();
         List<SootFieldRef> sfs = un.getSuffix();
         List<SootFieldRef> newsfs = new ArrayList<>();
-        newsfs.addAll(sfs);
+        if (sfs != null) {
+            newsfs.addAll(sfs);
+        }
         newsfs.add(ref);
         return getRefBasedAddress(rbase, newsfs);
     }
 
     public static RefBasedAddress getRefBasedAddress(ContextSensitiveValue cv) {
-        return getRefBasedAddress(cv, Collections.emptyList());
+        return getRefBasedAddress(cv, null);
     }
 
     public static RefBasedAddress getRefBasedAddress(ContextSensitiveValue base, List<SootFieldRef> suffix) {
@@ -68,10 +72,12 @@ public class RefBasedAddress implements AbstractAddress {
 
     private RefBasedAddress(ContextSensitiveValue base, List<SootFieldRef> suffix) {
         this.base = base;
-        this.suffix = new ArrayList<>();
-        if (suffix != null) {
-            this.suffix.addAll(suffix);
-        }
+        this.suffix = suffix;
+        // this.suffix = new ArrayList<>();
+        // if (suffix != null) {
+        // this.suffix.addAll(suffix);
+        // }
+        // this.tag = tag;
     }
 
     // public RefBasedAddress(RefBasedAddress un, SootFieldRef ref) {
@@ -92,9 +98,12 @@ public class RefBasedAddress implements AbstractAddress {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((base == null) ? 0 : base.hashCode());
-        List<String> names = new ArrayList<>();
-        for (SootFieldRef ref : suffix) {
-            names.add(ref.name());
+        List<String> names = null;
+        if (suffix != null) {
+            names = new ArrayList<>();
+            for (SootFieldRef ref : suffix) {
+                names.add(ref.name());
+            }
         }
         result = prime * result + ((names == null) ? 0 : names.hashCode());
         return result;
@@ -118,6 +127,8 @@ public class RefBasedAddress implements AbstractAddress {
             if (other.suffix != null)
                 return false;
         } else {
+            if (other.suffix == null)
+                return false;
             for (int i = 0; i < suffix.size(); i++) {
                 if (!suffix.get(i).name().equals(other.suffix.get(i).name()))
                     return false;
@@ -130,8 +141,12 @@ public class RefBasedAddress implements AbstractAddress {
     public String toString() {
         String result = "";
         result += base;
-        for (SootFieldRef sref : suffix) {
-            result += "." + sref.name();
+        if (suffix != null) {
+            result += "[";
+            for (SootFieldRef sref : suffix) {
+                result += "." + sref.name();
+            }
+            result += "]";
         }
         return result;
     }

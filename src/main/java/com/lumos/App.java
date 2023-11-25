@@ -141,7 +141,7 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static int cnum = 13;
+    public static int cnum = 11;
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
@@ -185,7 +185,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            "ts-launcher",
+            // "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -313,25 +313,27 @@ public class App {
         p("Symptom node is: " + spnode.stmt.toString());
 
         List<ContextSensitiveValue> symptomCvalues = new ArrayList<>();
-        // f13
-        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(spnode.getContext(),
-                ((JAssignStmt) spnode.getStmt()).getLeftOp());
+        ContextSensitiveValue cvalue = null;
 
-        // f8
-        // Value symptom = getFieldRef(((JReturnStmt) spnode.getStmt()).getOp(),
-        // "refund");
-        // ContextSensitiveValue cvalue =
-        // ContextSensitiveValue.getCValue(spnode.getContext(), symptom);
+        if (cnum == 13) {
+            // f13
+            cvalue = ContextSensitiveValue.getCValue(spnode.getContext(),
+                    ((JAssignStmt) spnode.getStmt()).getLeftOp());
+        } else if (cnum == 8) {
 
-        // f8login
-        // ContextSensitiveValue cvalue =
-        // ContextSensitiveValue.getCValue(spnode.getContext(),
-        // spnode.getStmt().getInvokeExpr().getArg(0));
+            // f8
+            Value symptom = getFieldRef(((JReturnStmt) spnode.getStmt()).getOp(),
+                    "refund");
+            cvalue = ContextSensitiveValue.getCValue(spnode.getContext(), symptom);
 
-        // f11
-        // ContextSensitiveValue cvalue =
-        // ContextSensitiveValue.getCValue(spnode.getContext(),
-        // ((JAssignStmt) spnode.getStmt()).getLeftOp());
+            // f8login
+            // ContextSensitiveValue cvalue =
+            // ContextSensitiveValue.getCValue(spnode.getContext(),
+            // spnode.getStmt().getInvokeExpr().getArg(0));
+        } else if (cnum == 11) {
+            // f11
+            cvalue = ContextSensitiveValue.getCValue(spnode.getContext(), ((JAssignStmt) spnode.getStmt()).getLeftOp());
+        }
 
         Memory currMem = fia.getBefore(spnode);
         // if (stmt.toString().contains("stack106")) {
@@ -344,6 +346,7 @@ public class App {
         // }
 
         symptomCvalues.add(cvalue);
+
         p("Symptom values are: " + cvalue);
         p2("Analysis time: " + analysisDuration);
 

@@ -1,2 +1,4 @@
 STreads
 ts-order-other-service,,<other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById(other.domain.GetOrderByIdInfo)>,,317,,$stack7 = interfaceinvoke $stack4.<other.repository.OrderOtherRepository: other.domain.Order findById(java.util.UUID)>($stack6),,Repository,,other.domain.Order
+ts-order-service,,<order.service.OrderServiceImpl: order.domain.GetOrderResult getOrderById(order.domain.GetOrderByIdInfo)>,,308,,$stack7 = interfaceinvoke $stack4.<order.repository.OrderRepository: order.domain.Order findById(java.util.UUID)>($stack6),,Repository,,order.domain.Order
+ts-sso-service,,<sso.service.AccountSsoServiceImpl: sso.domain.VerifyResult verifyLoginToken(java.lang.String)>,,161,,$stack10 = interfaceinvoke $stack9.<sso.repository.LoginUserListRepository: sso.domain.LoginValue findByloginToken(java.lang.String)>(verifyToken),,Repository,,sso.domain.LoginValue
