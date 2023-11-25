@@ -276,7 +276,6 @@ public class InterProcedureGraph {
                         ret = ((JAssignStmt) stmt).getLeftOp();
                     }
                     ExitNode exit = new ExitNode(context, stmt);
-
                     enter.setExitNode(exit);
                     exit.setEnterNode(enter);
 

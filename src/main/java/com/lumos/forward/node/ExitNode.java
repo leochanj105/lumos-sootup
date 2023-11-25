@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.glassfish.jaxb.core.v2.model.core.Ref;
+
 import com.lumos.App;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
@@ -115,10 +117,13 @@ public class ExitNode extends IPNode {
                     Context original = un.getBase().getContext();
                     // App.p(original + ", " + un);
                     boolean modified = false;
-                    if (!this.context.parentOf(original)) {
+                    // if (!this.context.parentOf(original)) {
+                    if (!this.context.strictParentOf(original)) {
                         for (Definition def : out.getCurrMapping().get(un)) {
                             if (def.getDefinedLocation() != null) {
-                                if (this.context.strictParentOf(def.getDefinedLocation().getContext())) {
+                                Context remoteContext = this.getReturnStmtNodes().get(0).getContext();
+                                // if (this.context.strictParentOf(def.getDefinedLocation().getContext())) {
+                                if (remoteContext.parentOf(def.getDefinedLocation().getContext())) {
                                     modified = true;
                                     break;
                                 }
@@ -126,9 +131,9 @@ public class ExitNode extends IPNode {
                         }
                         if (modified) {
                             App.p("Warning: overwritting!!!!");
-                            App.p(un + ", " + out.getCurrMapping().get(un));
+                            App.p("Curr value: " + un + ", " + out.getCurrMapping().get(un));
                             for (Definition def : out.getCurrMapping().get(un)) {
-                                App.p(def.getDefinedLocation() + ", " + def.getDefinedValue());
+                                App.p("Def of curr: " + def.getDefinedLocation() + ", " + def.getDefinedValue());
                                 if (def.getDefinedLocation() != null) {
                                     App.p(def.getDefinedLocation().getDescription());
                                 }
@@ -137,7 +142,8 @@ public class ExitNode extends IPNode {
                                 continue;
                             }
 
-                            App.p(this.context + ", " + original);
+                            App.p("original base context: " + original);
+                            App.p("This node is: " + this);
                             App.panicni();
                         }
                     }
@@ -169,7 +175,23 @@ public class ExitNode extends IPNode {
                 }
             }
         }
+        gc(out);
 
+    }
+
+    public void gc(Memory out) {
+        Set<AbstractAddress> toEvict = new HashSet<>();
+        for (AbstractAddress addr : out.getCurrMapping().keySet()) {
+            if (addr instanceof RefBasedAddress) {
+                RefBasedAddress raddr = (RefBasedAddress) addr;
+                if (raddr.getSuffix().size() == 0) {
+                    ContextSensitiveValue cv = raddr.getBase();
+
+                }
+            } else {
+                App.panicni();
+            }
+        }
     }
 
     @Override

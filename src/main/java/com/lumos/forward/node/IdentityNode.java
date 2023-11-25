@@ -251,9 +251,9 @@ public class IdentityNode extends IPNode {
         }
         // App.p("??? " + this.stmt);
         for (ContextSensitiveValue cvlop : cvdefs) {
-            if (isSafeOverwrite()) {
-                out.clearDefinition(cvlop);
-            }
+            // if (isSafeOverwrite()) {
+            out.clearDefinition(cvlop);
+            // }
             if (idMode.equals("CONSERVATIVE") || ((cvuses.size() > 1 || cvuses.size() == 0)
                     || !isSingleIdAssign())) {
                 RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cvlop);

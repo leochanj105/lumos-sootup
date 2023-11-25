@@ -33,7 +33,7 @@ public class Context {
 
     @Override
     public String toString() {
-        return (parent == null ? "" : parent.toString()) + "," + lastCallSite.getSm().getName();
+        return (parent == null ? "" : (parent.toString() + ",")) + lastCallSite.getSm().getName();
     }
 
     public Context(Context parent, CallSite lastCallSite, InterProcedureGraph igraph) {

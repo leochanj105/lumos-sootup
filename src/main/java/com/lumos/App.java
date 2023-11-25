@@ -185,7 +185,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            // "ts-launcher",
+            "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
