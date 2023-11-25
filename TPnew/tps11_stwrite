@@ -1,0 +1,2 @@
+STwrites
+ts-order-other-service,,<other.service.OrderOtherServiceImpl: other.domain.ChangeOrderResult saveChanges(other.domain.Order)>,,188,,interfaceinvoke $stack22.<other.repository.OrderOtherRepository: java.lang.Object save(java.lang.Object)>($stack5),,other.repository.OrderOtherRepository

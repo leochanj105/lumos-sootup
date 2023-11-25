@@ -141,7 +141,7 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static int cnum = 11;
+    public static int cnum = 13;
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
@@ -314,9 +314,8 @@ public class App {
 
         List<ContextSensitiveValue> symptomCvalues = new ArrayList<>();
         // f13
-        // ContextSensitiveValue cvalue =
-        // ContextSensitiveValue.getCValue(spnode.getContext(),
-        // ((JAssignStmt) spnode.getStmt()).getLeftOp());
+        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(spnode.getContext(),
+                ((JAssignStmt) spnode.getStmt()).getLeftOp());
 
         // f8
         // Value symptom = getFieldRef(((JReturnStmt) spnode.getStmt()).getOp(),
@@ -330,8 +329,9 @@ public class App {
         // spnode.getStmt().getInvokeExpr().getArg(0));
 
         // f11
-        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(spnode.getContext(),
-                ((JAssignStmt) spnode.getStmt()).getLeftOp());
+        // ContextSensitiveValue cvalue =
+        // ContextSensitiveValue.getCValue(spnode.getContext(),
+        // ((JAssignStmt) spnode.getStmt()).getLeftOp());
 
         Memory currMem = fia.getBefore(spnode);
         // if (stmt.toString().contains("stack106")) {

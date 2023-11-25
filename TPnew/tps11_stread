@@ -1,0 +1,2 @@
+STreads
+ts-order-other-service,,<other.service.OrderOtherServiceImpl: other.domain.GetOrderResult getOrderById(other.domain.GetOrderByIdInfo)>,,317,,$stack7 = interfaceinvoke $stack4.<other.repository.OrderOtherRepository: other.domain.Order findById(java.util.UUID)>($stack6),,Repository,,other.domain.Order
