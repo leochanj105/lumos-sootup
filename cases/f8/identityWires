@@ -13,3 +13,4 @@ java.lang.String,toString
 java.util.UUID,fromString
 java.lang.Object,clone
 java.lang.Double,doubleValue
+iterator()

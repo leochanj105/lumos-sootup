@@ -53,6 +53,7 @@ import com.lumos.utils.Utils;
 import com.lumos.wire.Banned;
 
 import fj.P;
+import polyglot.ast.Assign;
 import soot.Body;
 // import soot.toolkits.scalar.ForwardFlowAnalysis;
 // import sootup.java.sourcecode.frontend.WalaIRToJimpleConverter;
@@ -89,6 +90,7 @@ import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.AbstractInstanceInvokeExpr;
 import soot.jimple.internal.AbstractInvokeExpr;
+import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JCastExpr;
 import soot.jimple.internal.JGotoStmt;
@@ -197,7 +199,7 @@ public class App {
             // "ts-admin-user-service",
             // "ts-assurance-service",
             // "ts-basic-service",
-            // "ts-config-service",
+            "ts-config-service",
             // "ts-consign-price-service",
             // "ts-consign-service",
             // "ts-contacts-service",
@@ -373,20 +375,20 @@ public class App {
             }
             swcvalues.add(currCvalues);
         }
-        Set<SharedStateRead> streads2 = new HashSet<>();
-        Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
-                streads2);
+        // Set<SharedStateRead> streads2 = new HashSet<>();
+        // Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
+        // streads2);
 
-        p2("#TPs: " + tps.size());
+        // p2("#TPs: " + tps.size());
 
-        p2("#TPs SW: " + tpsw.size());
+        // p2("#TPs SW: " + tpsw.size());
 
-        tpsw.removeAll(tps);
-        p2("#TPs SW (additional): " + tpsw.size());
-        tpsw.forEach(s -> {
-            p(s.d());
-        });
-        tps.addAll(tpsw);
+        // tpsw.removeAll(tps);
+        // p2("#TPs SW (additional): " + tpsw.size());
+        // tpsw.forEach(s -> {
+        // p(s.d());
+        // });
+        // tps.addAll(tpsw);
         if (outputTP) {
             writeTPs(tps, outputTPDir, outputTPFileName);
             writeSTReads(streads, outputTPDir, outputTPFileName);
@@ -447,30 +449,10 @@ public class App {
                 unresolvedNodes.add(new PendingBackTracking(cfnode, "normal"));
             }
 
-            // if (ptrack.getMode().equals("cfonly")) {
-            // p("Not continueing value deps for cfonly query: " + node);
-            // continue;
-            // }
-            // else if (ptrack.getMode().equals("list")) {
-            // p("Handling list definition");
-            // if (!(node.getStmt() instanceof JAssignStmt)) {
-            // if (node.getStmt().containsInvokeExpr()) {
-            // if
-            // (node.getStmt().getInvokeExpr().getMethod().getSignature().contains("add")) {
-            // Value ele = node.getStmt().getInvokeExpr().getArg(0);
-
-            // }
-            // }
-            // continue;
-            // } else {
-            // p("List def is assignment, treating as normal");
-            // }
-            // }
             Set<ContextSensitiveValue> implicits = new HashSet<>();
             Set<ContextSensitiveValue> alluses = node.getUsed(implicits);
             alluses.addAll(implicits);
             for (ContextSensitiveValue cv : alluses) {
-                boolean isImplicit = implicits.contains(cv);
 
                 // Test if this is a constant with a deterministic value
                 boolean isConstant = false;
@@ -488,18 +470,41 @@ public class App {
                 // Set<Definition> satisfiedDefs = fia.getBefore(node).getDefinitionsByCV(cv);
                 Set<Definition> satisfiedDefs = new HashSet<>();
 
-                Map<AbstractAddress, Set<Definition>> currMem = fia.getBefore(node).getCurrMapping();
-                // if (node instanceof IdentityNode && !((IdentityNode)
-                // node).isSingleIdAssign()) {
-                // for (AbstractAddress ra : currMem.keySet()) {
-                // if (ra.getBase().equals(cv)) {
-                // satisfiedDefs.addAll(currMem.get(ra));
-                // }
-                // }
-                // } else {
-                satisfiedDefs.addAll((fia.getBefore(node).getDefinitionsByCV(cv)));
-                // }
+                boolean isImplicit = implicits.contains(cv);
+                boolean isTypeBanned = Banned.isTypeBanned(cv.getValue().getType().toString());
+                boolean isBase = ptrack.getMode().equals("base");
+                boolean isCompositeType = Utils.isCompositeType(cv.getValue().getType().toString());
+                boolean isSingleIdAssign = node.isSingleIdAssign();
 
+                // Get definitions
+                Memory currMem = fia.getBefore(node);
+                satisfiedDefs.addAll((currMem.getDefinitionsByCV(cv)));
+
+                if (Utils.isCompositeType(cv.getValue()) && !isSingleIdAssign) {
+                    boolean traceCollection = false;
+                    if (node instanceof IdentityNode) {
+                        // InstanceInvokeExpr inexpr = (InstanceInvokeExpr) stmt.getInvokeExpr();
+                        String mname = stmt.getInvokeExpr().getMethod().getName();
+                        if (mname.contains("next") || mname.contains("get")) {
+                            traceCollection = true;
+                        }
+                    } else if (stmt instanceof AssignStmt) {
+                        if (((AssignStmt) stmt).getRightOp() instanceof JArrayRef) {
+                            traceCollection = true;
+                        }
+                    }
+                    if (traceCollection) {
+                        Set<RefBasedAddress> unames = currMem.getUniqueNamesForCollection(cv);
+                        for (RefBasedAddress uname : unames) {
+                            Set<Definition> cdefs = currMem.getCurrMapping().get(uname);
+                            if (cdefs != null) {
+                                satisfiedDefs.addAll(cdefs);
+                            }
+                        }
+                    }
+                }
+
+                // Handles whether we want to trace the value
                 if (!isConstant) {
                     if (satisfiedDefs.size() == 1) {
                         Definition onlyDef = satisfiedDefs.iterator().next();
@@ -510,24 +515,6 @@ public class App {
                     }
                 }
 
-                // if (cv.getValue() instanceof JInstanceFieldRef) {
-                // p("Adding cf dep queries for base: " + cv);
-                // Set<Definition> baseDefs =
-                // fia.getBefore(node).getDefinitionsByCV(getBaseCV(cv));
-                // for (Definition def : baseDefs) {
-                // if (def.getDefinedLocation() != null) {
-                // unresolvedNodes.add(new PendingBackTracking(def.getDefinedLocation(),
-                // "cfonly"));
-                // }
-                // }
-                // }
-
-                boolean isTypeBanned = Banned.isTypeBanned(cv.getValue().getType().toString());
-                boolean isBase = ptrack.getMode().equals("base");
-                // boolean isCFOnly = node.isSingleIdAssign() &&
-                // ptrack.getMode().equals("cfonly");
-                boolean isCompositeType = Utils.isCompositeType(cv.getValue().getType().toString());
-                boolean isSingleIdAssign = node.isSingleIdAssign();
                 if (!cv.getValue().toString().equals("null")) {
                     if (isSingleIdAssign) {
                         p("Not tracing uses of a identity assignment node: " + node);
@@ -560,7 +547,8 @@ public class App {
                         // unresolved = false;
                         // String nmode = isTypeBanned || (isSingleIdAssign && isBase) || isImplicit ?
                         // "base" : "normal";
-                        String nmode = ((isSingleIdAssign || isCompositeType) && isBase) ? "base" : "normal";
+                        String nmode = ((isSingleIdAssign || isCompositeType || isImplicit) && isBase) ? "base"
+                                : "normal";
                         unresolvedNodes.add(new PendingBackTracking(satdef.getDefinedLocation(), nmode));
                         checkSTread(satdef, streads, Collections.emptyList());
                         App.p("Added Next Backtracking " + cv + " at " + satdef.d() + " with mode " + nmode);
@@ -1069,15 +1057,19 @@ public class App {
                 ContextSensitiveValue cvread = ContextSensitiveValue.getCValue(satdef.getDefinedLocation().getContext(),
                         ((JAssignStmt) defStmt).getLeftOp());
                 SharedStateRead stread = new SharedStateRead("Repository", defLocation, cvread, refs);
+                App.p("Addinng STread: " + defLocation + ", " + stread);
                 streads.add(stread);
 
             } else if (ism.getDeclaringClass().getName().contains("ValueOperations") &&
                     ism.getName().contains("get")) {
                 ContextSensitiveValue cvread = ContextSensitiveValue.getCValue(satdef.getDefinedLocation().getContext(),
                         ((JAssignStmt) defStmt).getLeftOp());
-                streads.add(new SharedStateRead("ValueOperations", defLocation, cvread, refs));
+                SharedStateRead stread = new SharedStateRead("ValueOperations", defLocation, cvread, refs);
+                App.p("Addinng STread: " + defLocation + ", " + stread);
+                streads.add(stread);
             }
         }
+
     }
 
     public static void readTPs(String path, String name) {
@@ -1219,7 +1211,7 @@ public class App {
                 printWriter.println(l);
             }
             printWriter.close();
-            System.out.printf("TP data is saved in " + file.getAbsolutePath());
+            System.out.println("TP data is saved in " + file.getAbsolutePath());
         } catch (IOException i) {
             i.printStackTrace();
         }
@@ -1259,7 +1251,7 @@ public class App {
                 printWriter.println(l);
             }
             printWriter.close();
-            System.out.printf("STread data is saved in " + file.getAbsolutePath());
+            System.out.println("STread data is saved in " + file.getAbsolutePath());
         } catch (IOException i) {
             i.printStackTrace();
         }
@@ -1291,7 +1283,7 @@ public class App {
             // printWriter.println(stwrite.d(",,"));
             // }
             printWriter.close();
-            System.out.printf("STwrite data is saved in " + file.getAbsolutePath());
+            System.out.println("STwrite data is saved in " + file.getAbsolutePath());
         } catch (IOException i) {
             i.printStackTrace();
         }

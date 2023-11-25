@@ -42,6 +42,7 @@
 <java.lang.Double: double parseDouble(java.lang.String)>
 <org.springframework.http.HttpEntity: void <init>(java.lang.Object,org.springframework.util.MultiValueMap)>
 <inside_payment.repository.PaymentRepository: java.lang.Object save(java.lang.Object)>
+<inside_payment.repository.DrawBackRepository: java.lang.Object save(java.lang.Object)>
 <java.lang.StringBuilder: java.lang.String toString()>
 <org.springframework.web.client.RestTemplate: org.springframework.http.ResponseEntity exchange(java.lang.String,org.springframework.http.HttpMethod,org.springframework.http.HttpEntity,java.lang.Class,java.lang.Object[])>
 <com.google.gson.Gson: java.lang.Object fromJson(java.lang.String,java.lang.Class)>
@@ -66,6 +67,7 @@
 <javax.servlet.http.Cookie: java.lang.String getName()>
 <java.io.PrintStream: void println(java.lang.String)>
 <java.io.PrintStream: void println(java.lang.Object)>
+<java.io.PrintStream: void println()>
 <inside_payment.repository.AddMoneyRepository: java.util.List findByUserId(java.lang.String)>
 <sso.repository.AccountRepository: sso.domain.Account findById(java.util.UUID)>
 <org.springframework.messaging.support.MessageBuilder: org.springframework.messaging.Message build()>

@@ -13,6 +13,9 @@ import java.util.Scanner;
 
 import com.lumos.App;
 
+import soot.Type;
+import soot.Value;
+
 public class Utils {
     public static List<String> readFrom(String file) {
         List<String> list = new ArrayList<>();
@@ -44,9 +47,17 @@ public class Utils {
         return str;
     }
 
+    public static boolean isCompositeType(Value value) {
+        return isCompositeType(value.getType());
+    }
+
+    public static boolean isCompositeType(Type type) {
+        return isCompositeType(type.toString());
+    }
+
     public static boolean isCompositeType(String tstr) {
         return (tstr.contains("List") || (tstr.contains("Set") || (tstr.contains("Map"))))
-                || (tstr.contains("[]") || (tstr.contains("ValueOperations")));
+                || (tstr.contains("[]") || (tstr.contains("ValueOperations")) || (tstr.contains("Iterator")));
     }
 
     public static String repoNameToClassName(String repoName) {

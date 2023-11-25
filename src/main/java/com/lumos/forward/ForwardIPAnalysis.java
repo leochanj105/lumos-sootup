@@ -108,6 +108,7 @@ public class ForwardIPAnalysis {
             if (isNotEqual(in, liveIn.get(node))) {
                 // fixed = false;
                 liveIn.put(node, in);
+                // System.gc();
             }
 
             Memory out = copy(in);
@@ -121,6 +122,7 @@ public class ForwardIPAnalysis {
                     // }
                 }
                 liveOut.put(node, out);
+                // System.gc();
             }
 
         }

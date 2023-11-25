@@ -17,6 +17,9 @@ import soot.RefLikeType;
 import soot.Value;
 import soot.ValueBox;
 import soot.jimple.Constant;
+import soot.jimple.Jimple;
+import soot.jimple.NewArrayExpr;
+import soot.jimple.NewExpr;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JArrayRef;
@@ -80,6 +83,7 @@ public class StmtNode extends IPNode {
             ContextSensitiveValue cvrop = null;
 
             Set<Definition> defs = new HashSet<>();
+
             if (rop instanceof JArrayRef) {
                 Value base = ((JArrayRef) rop).getBase();
                 cvlop = ContextSensitiveValue.getCValue(context, lop);
@@ -87,7 +91,13 @@ public class StmtNode extends IPNode {
                 out.clearDefinition(cvlop);
                 Set<RefBasedAddress> unames = out.getUniqueNamesForCollection(cvrop);
                 for (RefBasedAddress uname : unames) {
-                    defs.addAll(out.getCurrMapping().get(uname));
+                    // defs.addAll(out.getCurrMapping().get(uname));
+                    Set<Definition> collectionDefs = out.getCurrMapping().get(uname);
+                    if (collectionDefs != null) {
+                        defs.addAll(collectionDefs);
+                    } else {
+                        defs.add(Definition.getDefinition(new RefBasedAddress(cvlop), this));
+                    }
                 }
                 Set<Definition> newdefs = new HashSet<>();
                 for (Definition def : defs) {
@@ -102,6 +112,7 @@ public class StmtNode extends IPNode {
                 Value base = ((JArrayRef) lop).getBase();
                 cvlop = ContextSensitiveValue.getCValue(context, base);
                 cvrop = ContextSensitiveValue.getCValue(context, rop);
+
                 defs.addAll(out.getDefinitionsByCV(cvrop));
                 Set<Definition> currDefs = new HashSet<>();
                 for (Definition def : defs) {
@@ -113,6 +124,11 @@ public class StmtNode extends IPNode {
                 }
                 return;
             }
+
+            // RefBasedAddress rb = new RefBasedAddress(
+            // ContextSensitiveValue.getCValue(context,
+            // Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
+            // cvlop.getValue().getType())));
             // Make sure a field variable is "static"
             if (lop instanceof StaticFieldRef) {
                 cvlop = ContextSensitiveValue.getCValue(Context.emptyContext(), lop);
@@ -131,6 +147,13 @@ public class StmtNode extends IPNode {
             if ((rop instanceof Local) || (rop instanceof JInstanceFieldRef) || (rop instanceof Constant)
                     || (rop instanceof StaticFieldRef)) {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
+            } else if (rop instanceof NewArrayExpr
+                    || (rop instanceof NewExpr && (Utils.isCompositeType(lop.getType().toString())))) {
+                defs.add(Definition.getDefinition(new RefBasedAddress(
+                        ContextSensitiveValue.getCValue(cvlop.getContext(),
+                                Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
+                                        cvlop.getValue().getType()))),
+                        this));
             } else {
                 // App.p("xxxx " + this.stmt);
                 defs.add(Definition.getDefinition(new RefBasedAddress(cvlop), this));

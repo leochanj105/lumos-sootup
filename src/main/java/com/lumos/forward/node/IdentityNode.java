@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.glassfish.jaxb.runtime.v2.schemagen.Util;
+
 import com.lumos.App;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
@@ -22,6 +24,7 @@ import soot.Value;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.InvokeStmt;
+import soot.jimple.Jimple;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
@@ -167,12 +170,19 @@ public class IdentityNode extends IPNode {
                 for (Definition def : defs) {
                     currDefs.add(Definition.getDefinition(def.definedValue, this));
                 }
+                // App.p("!!! " + this.stmt);
+                // App.p(currDefs + "");
+                // for (Definition def : out.getDefinitionsByCV(cvlop)) {
+                // App.p(def.getDefinedLocation() + ", " + def.getDefinedValue());
+                // }
+
                 for (RefBasedAddress uname : unames) {
                     out.putDefinition(uname, currDefs);
+                    // App.p(out.getCurrMapping().get(uname));
                 }
-                App.p("!!! " + this.stmt);
-                App.p(currDefs + "");
-                App.p(unames + "");
+                // App.p(unames);
+                // App.p(unames + "");
+
             }
         }
         if (stmt instanceof JAssignStmt) {
@@ -180,10 +190,24 @@ public class IdentityNode extends IPNode {
                 InstanceInvokeExpr inexpr = (InstanceInvokeExpr) iexpr;
                 String tstr = inexpr.getBase().getType().toString();
                 String mstr = inexpr.getMethod().getName();
-                if ((mstr.equals("iterator") && (tstr.contains("List") || tstr.contains("Set")))
-                        || (mstr.equals("next") && tstr.contains("Iterator"))
+                // if (mstr.equals("iterator") && (tstr.contains("List") ||
+                // tstr.contains("Set"))) {
+                // cvlop = ContextSensitiveValue.getCValue(context, ((JAssignStmt)
+                // stmt).getLeftOp());
+                // cvrop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
+                // defs.addAll(out.getDefinitionsByCV(cvrop));
+                // Set<Definition> currDefs = new HashSet<>();
+                // for (Definition def : defs) {
+                // currDefs.add(Definition.getDefinition(def.definedValue, this));
+                // }
+                // out.clearDefinition(cvlop);
+                // out.putDefinition(cvlop, currDefs);
+                // return true;
+                // } else
+                if (((mstr.equals("next") && tstr.contains("Iterator"))
+
                         || (mstr.equals("get") && tstr.contains("List"))
-                        || (mstr.equals("get") && tstr.contains("Map"))) {
+                        || (mstr.equals("get") && tstr.contains("Map")))) {
                     cvlop = ContextSensitiveValue.getCValue(context, ((JAssignStmt) stmt).getLeftOp());
                     cvrop = ContextSensitiveValue.getCValue(context, inexpr.getBase());
                     handled = true;
@@ -193,7 +217,13 @@ public class IdentityNode extends IPNode {
                 // defs.addAll(out.getDefinitionsByCV(cvrop));
                 Set<RefBasedAddress> unames = out.getUniqueNamesForCollection(cvrop);
                 for (RefBasedAddress uname : unames) {
-                    defs.addAll(out.getCurrMapping().get(uname));
+                    Set<Definition> collectionDefs = out.getCurrMapping().get(uname);
+
+                    if (collectionDefs != null) {
+                        defs.addAll(collectionDefs);
+                    } else {
+                        defs.add(Definition.getDefinition(new RefBasedAddress(cvlop), this));
+                    }
                 }
                 Set<Definition> currDefs = new HashSet<>();
                 for (Definition def : defs) {
@@ -228,6 +258,13 @@ public class IdentityNode extends IPNode {
                     || !isSingleIdAssign())) {
                 RefBasedAddress un = new RefBasedAddress(cvlop);
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
+                if (Utils.isCompositeType(cvlop.getValue())) {
+                    out.putDefinition(cvlop, Definition.getDefinition(new RefBasedAddress(
+                            ContextSensitiveValue.getCValue(cvlop.getContext(),
+                                    Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
+                                            cvlop.getValue().getType()))),
+                            this));
+                }
             } else {
                 for (ContextSensitiveValue cvrop : cvuses) {
                     // Set<Definition> defs = new HashSet<>();
