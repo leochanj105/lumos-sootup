@@ -190,11 +190,23 @@ public class ExitNode extends IPNode {
                     Context calleeContext = this.getReturnStmtNodes().get(0).getContext();
                     if (cv.getValue() instanceof Local) {
                         if (calleeContext.parentOf(cv.getContext())) {
-                            // Set<Definition> vdefs = out.getCurrMapping().get(addr);
+                            Set<Definition> vdefs = out.getCurrMapping().get(addr);
+                            boolean hasRepo = false;
+                            for (Definition rd : vdefs) {
+                                if (rd.getDefinedLocation() != null) {
+                                    if (rd.getDefinedLocation().stmt.toString().contains("Repository")) {
+                                        hasRepo = true;
+                                        break;
+                                    }
+                                }
+                            }
+
                             // ContextSensitiveValue onlyVal =
                             // vdefs.iterator().next().getDefinedValue().getBase();
                             // if (!(vdefs.size() == 1 && )) {
-                            toEvict.add(raddr);
+                            if (!hasRepo) {
+                                toEvict.add(raddr);
+                            }
                             // }
                         }
                     }

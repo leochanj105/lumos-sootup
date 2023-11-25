@@ -573,7 +573,7 @@ public class App {
                         // unresolved = false;
                         // String nmode = isTypeBanned || (isSingleIdAssign && isBase) || isImplicit ?
                         // "base" : "normal";
-                        String nmode = ((isSingleIdAssign || isCompositeType || isImplicit) && isBase) ? "base"
+                        String nmode = (((isSingleIdAssign || isCompositeType) && isBase) || isImplicit) ? "base"
                                 : "normal";
                         unresolvedNodes.add(new PendingBackTracking(satdef.getDefinedLocation(), nmode));
                         checkSTread(satdef, streads, Collections.emptyList());
