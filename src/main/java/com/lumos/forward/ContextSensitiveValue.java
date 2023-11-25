@@ -28,7 +28,7 @@ public class ContextSensitiveValue {
         return cache.get(context).get(value);
     }
 
-    public ContextSensitiveValue(Context context, Value value) {
+    private ContextSensitiveValue(Context context, Value value) {
         this.context = context;
         this.value = value;
     }

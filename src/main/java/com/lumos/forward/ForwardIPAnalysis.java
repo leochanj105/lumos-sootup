@@ -105,25 +105,41 @@ public class ForwardIPAnalysis {
                 in = merge(in, liveOut.get(pred));
             }
 
-            if (isNotEqual(in, liveIn.get(node))) {
+            Memory oldIn = liveIn.get(node);
+
+            if (isNotEqual(in, oldIn)) {
                 // fixed = false;
+                liveIn.put(node, null);
                 liveIn.put(node, in);
+                oldIn.destroy();
                 // System.gc();
+            } else {
+                in.destroy();
+                in = oldIn;
             }
+            oldIn = null;
 
             Memory out = copy(in);
             node.flow(out);
-
-            if (isNotEqual(out, liveOut.get(node)) || node.equals(firstNode)) {
+            Memory oldOut = liveOut.get(node);
+            if (isNotEqual(out, oldOut) || node.equals(firstNode)) {
                 for (IPNode succ : node.getSuccessors()) {
                     // if (!workList.contains(succ)) {
                     workList.add(succ);
                     // App.p("!!! " + succ);
                     // }
                 }
+
+                liveOut.put(node, null);
                 liveOut.put(node, out);
+                oldOut.destroy();
+
                 // System.gc();
+            } else {
+                out.destroy();
+                out = null;
             }
+            oldOut = null;
 
         }
 

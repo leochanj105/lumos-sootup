@@ -159,7 +159,8 @@ public class ExitNode extends IPNode {
 
                     // if (cvcallee.getValue() instanceof NullConstant) {
                     if (cvcallee.getValue() instanceof Constant) {
-                        out.putDefinition(cvcallee, Definition.getDefinition(new RefBasedAddress(cvcallee), retNode));
+                        out.putDefinition(cvcallee,
+                                Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvcallee), retNode));
                     }
                     for (Definition def : defs) {
                         retdefs.add(Definition.getDefinition(def.definedValue, retNode));

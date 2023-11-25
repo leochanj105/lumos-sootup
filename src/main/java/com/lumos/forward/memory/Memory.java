@@ -29,6 +29,13 @@ public class Memory {
         return currMapping;
     }
 
+    public void destroy() {
+        for (AbstractAddress a : currMapping.keySet()) {
+            currMapping.get(a).clear();
+        }
+        currMapping.clear();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -103,7 +110,8 @@ public class Memory {
 
         for (Definition def : baseDefs) {
             RefBasedAddress unref = null;
-            unref = new RefBasedAddress(def.getDefinedValue(), ref.getFieldRef());
+            // unref = new RefBasedAddress(def.getDefinedValue(), ref.getFieldRef());
+            unref = RefBasedAddress.getRefBasedAddress(def.getDefinedValue(), ref.getFieldRef());
             unames.add(unref);
         }
         return unames;
@@ -147,10 +155,11 @@ public class Memory {
             // return resultDefs;
             // }
         }
-        RefBasedAddress un = new RefBasedAddress(cv);
+        RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cv);
 
         if (cv.getValue() instanceof StaticFieldRef) {
-            un = new RefBasedAddress(ContextSensitiveValue.getCValue(Context.emptyContext(), cv.getValue()));
+            un = RefBasedAddress
+                    .getRefBasedAddress(ContextSensitiveValue.getCValue(Context.emptyContext(), cv.getValue()));
         }
 
         Set<Definition> defs = currMapping.get(un);
@@ -174,7 +183,7 @@ public class Memory {
     }
 
     public void clearDefinition(ContextSensitiveValue cv) {
-        clearDefinition(new RefBasedAddress(cv));
+        clearDefinition(RefBasedAddress.getRefBasedAddress(cv));
     }
 
     public void putDefinition(RefBasedAddress un, Definition def) {
@@ -192,7 +201,7 @@ public class Memory {
     }
 
     public void putDefinition(ContextSensitiveValue cv, Definition def) {
-        RefBasedAddress un = new RefBasedAddress(cv);
+        RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cv);
         putDefinition(un, def);
     }
 
@@ -211,7 +220,7 @@ public class Memory {
     }
 
     public void putDefinition(ContextSensitiveValue cv, Set<Definition> defs) {
-        RefBasedAddress un = new RefBasedAddress(cv);
+        RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cv);
         putDefinition(un, defs);
     }
 
@@ -222,11 +231,11 @@ public class Memory {
 
     public void putDefinition(Context c, Value v) {
         ContextSensitiveValue cv = ContextSensitiveValue.getCValue(c, v);
-        putDefinition(cv, new RefBasedAddress(cv, null));
+        putDefinition(cv, RefBasedAddress.getRefBasedAddress(cv, null));
     }
 
     public void putDefinition(ContextSensitiveValue cv) {
-        putDefinition(cv, new RefBasedAddress(cv, null));
+        putDefinition(cv, RefBasedAddress.getRefBasedAddress(cv, null));
     }
 
     // public Map<ContextSensitiveValue, Set<UniqueName>> getUniqueNames() {

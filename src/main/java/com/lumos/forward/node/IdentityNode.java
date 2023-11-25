@@ -222,7 +222,7 @@ public class IdentityNode extends IPNode {
                     if (collectionDefs != null) {
                         defs.addAll(collectionDefs);
                     } else {
-                        defs.add(Definition.getDefinition(new RefBasedAddress(cvlop), this));
+                        defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop), this));
                     }
                 }
                 Set<Definition> currDefs = new HashSet<>();
@@ -256,10 +256,10 @@ public class IdentityNode extends IPNode {
             }
             if (idMode.equals("CONSERVATIVE") || ((cvuses.size() > 1 || cvuses.size() == 0)
                     || !isSingleIdAssign())) {
-                RefBasedAddress un = new RefBasedAddress(cvlop);
+                RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cvlop);
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
                 if (Utils.isCompositeType(cvlop.getValue())) {
-                    out.putDefinition(cvlop, Definition.getDefinition(new RefBasedAddress(
+                    out.putDefinition(cvlop, Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
                             ContextSensitiveValue.getCValue(cvlop.getContext(),
                                     Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
                                             cvlop.getValue().getType()))),

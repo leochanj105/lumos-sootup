@@ -96,7 +96,7 @@ public class StmtNode extends IPNode {
                     if (collectionDefs != null) {
                         defs.addAll(collectionDefs);
                     } else {
-                        defs.add(Definition.getDefinition(new RefBasedAddress(cvlop), this));
+                        defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop), this));
                     }
                 }
                 Set<Definition> newdefs = new HashSet<>();
@@ -149,14 +149,14 @@ public class StmtNode extends IPNode {
                 defs.addAll(out.getDefinitionsByCV(cvrop));
             } else if (rop instanceof NewArrayExpr
                     || (rop instanceof NewExpr && (Utils.isCompositeType(lop.getType().toString())))) {
-                defs.add(Definition.getDefinition(new RefBasedAddress(
+                defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
                         ContextSensitiveValue.getCValue(cvlop.getContext(),
                                 Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
                                         cvlop.getValue().getType()))),
                         this));
             } else {
                 // App.p("xxxx " + this.stmt);
-                defs.add(Definition.getDefinition(new RefBasedAddress(cvlop), this));
+                defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop), this));
             }
             // Set<Definition> defs = out.getDefinitionsByCV(cvrop);
             if ((lop instanceof Local) || (lop instanceof StaticFieldRef)) {
@@ -211,7 +211,6 @@ public class StmtNode extends IPNode {
                             App.p2(uname);
                             App.p(this.getContext());
                             App.p2(stmt.getJavaSourceStartLineNumber() + ": " + this.stmt);
-
                         }
                         out.putDefinition(uname, currDefs);
                     }

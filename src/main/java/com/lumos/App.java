@@ -286,9 +286,9 @@ public class App {
         App.p("Analysis finished");
 
         long analysisDuration = System.currentTimeMillis() - start;
-        if (true) {
-            return;
-        }
+        // if (true) {
+        // return;
+        // }
         // if (showInitOnly) {
         // p("+++++++++++++++++++++");
         // initList.forEach(m -> {
@@ -309,24 +309,39 @@ public class App {
         // return;
         // }
 
-        IPNode ipnode = igraph.searchNode(symptomStmt.split(","));
-        p("Symptom node is: " + ipnode.stmt.toString());
+        IPNode spnode = igraph.searchNode(symptomStmt.split(","));
+        p("Symptom node is: " + spnode.stmt.toString());
 
         List<ContextSensitiveValue> symptomCvalues = new ArrayList<>();
         // f13
         // ContextSensitiveValue cvalue =
-        // ContextSensitiveValue.getCValue(ipnode.getContext(),
-        // ((JAssignStmt) ipnode.getStmt()).getLeftOp());
+        // ContextSensitiveValue.getCValue(spnode.getContext(),
+        // ((JAssignStmt) spnode.getStmt()).getLeftOp());
 
         // f8
-        Value symptom = getFieldRef(((JReturnStmt) ipnode.getStmt()).getOp(),
-                "refund");
-        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(ipnode.getContext(), symptom);
+        // Value symptom = getFieldRef(((JReturnStmt) spnode.getStmt()).getOp(),
+        // "refund");
+        // ContextSensitiveValue cvalue =
+        // ContextSensitiveValue.getCValue(spnode.getContext(), symptom);
 
         // f8login
         // ContextSensitiveValue cvalue =
-        // ContextSensitiveValue.getCValue(ipnode.getContext(),
-        // ipnode.getStmt().getInvokeExpr().getArg(0));
+        // ContextSensitiveValue.getCValue(spnode.getContext(),
+        // spnode.getStmt().getInvokeExpr().getArg(0));
+
+        // f11
+        ContextSensitiveValue cvalue = ContextSensitiveValue.getCValue(spnode.getContext(),
+                ((JAssignStmt) spnode.getStmt()).getLeftOp());
+
+        Memory currMem = fia.getBefore(spnode);
+        // if (stmt.toString().contains("stack106")) {
+        // for (AbstractAddress a : currMem.getCurrMapping().keySet()) {
+        // App.p("^^ " + a + "::: ");
+        // for (Definition dd : currMem.getCurrMapping().get(a)) {
+        // App.p(" " + dd.d());
+        // }
+        // }
+        // }
 
         symptomCvalues.add(cvalue);
         p("Symptom values are: " + cvalue);
@@ -335,7 +350,7 @@ public class App {
         // List<IPNode> DBreads = new ArrayList<>();
         // List<String> fields = new ArrayList<>();
         Set<SharedStateRead> streads = new HashSet<>();
-        Set<TracePoint> tps = getDependency(igraph, fia, Collections.singletonList(ipnode),
+        Set<TracePoint> tps = getDependency(igraph, fia, Collections.singletonList(spnode),
                 Collections.singletonList(symptomCvalues), streads);
 
         Set<SharedStateDepedency> stdeps = new HashSet<>();
@@ -379,7 +394,7 @@ public class App {
         // Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
         // streads2);
 
-        // p2("#TPs: " + tps.size());
+        p2("#TPs: " + tps.size());
 
         // p2("#TPs SW: " + tpsw.size());
 
@@ -478,6 +493,14 @@ public class App {
 
                 // Get definitions
                 Memory currMem = fia.getBefore(node);
+                // if (stmt.toString().contains("stack106")) {
+                // for (AbstractAddress a : currMem.getCurrMapping().keySet()) {
+                // App.p("^^ " + a + "::: ");
+                // for (Definition dd : currMem.getCurrMapping().get(a)) {
+                // App.p(" " + dd.d());
+                // }
+                // }
+                // }
                 satisfiedDefs.addAll((currMem.getDefinitionsByCV(cv)));
 
                 if (Utils.isCompositeType(cv.getValue()) && !isSingleIdAssign) {

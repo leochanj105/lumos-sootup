@@ -1,16 +1,52 @@
 package com.lumos.forward.memory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.lumos.forward.ContextSensitiveValue;
 
 import soot.SootFieldRef;
+import soot.Value;
 
 public class RefBasedAddress implements AbstractAddress {
 
     public ContextSensitiveValue base;
     public List<SootFieldRef> suffix;
+
+    public static Map<ContextSensitiveValue, Map<List<SootFieldRef>, RefBasedAddress>> cache = new HashMap<>();
+
+    public static RefBasedAddress getRefBasedAddress(RefBasedAddress un, SootFieldRef ref) {
+        // this(un.getBase(), un.getSuffix());
+        // this.append(ref);
+        ContextSensitiveValue rbase = un.getBase();
+        List<SootFieldRef> sfs = un.getSuffix();
+        List<SootFieldRef> newsfs = new ArrayList<>();
+        newsfs.addAll(sfs);
+        newsfs.add(ref);
+        return getRefBasedAddress(rbase, newsfs);
+    }
+
+    public static RefBasedAddress getRefBasedAddress(ContextSensitiveValue cv) {
+        return getRefBasedAddress(cv, Collections.emptyList());
+    }
+
+    public static RefBasedAddress getRefBasedAddress(ContextSensitiveValue base, List<SootFieldRef> suffix) {
+        // App.p(context);
+        Map<List<SootFieldRef>, RefBasedAddress> map1 = cache.get(base);
+        if (map1 == null) {
+            map1 = new HashMap<>();
+            cache.put(base, map1);
+        }
+        if (!map1.containsKey(suffix)) {
+            // ContextSensitiveValue cvalue = new ContextSensitiveValue(v, value);
+            RefBasedAddress ra = new RefBasedAddress(base, suffix);
+            map1.put(suffix, ra);
+        }
+        return cache.get(base).get(suffix);
+    }
 
     public List<SootFieldRef> getSuffix() {
         return suffix;
@@ -30,7 +66,7 @@ public class RefBasedAddress implements AbstractAddress {
         this.base = base;
     }
 
-    public RefBasedAddress(ContextSensitiveValue base, List<SootFieldRef> suffix) {
+    private RefBasedAddress(ContextSensitiveValue base, List<SootFieldRef> suffix) {
         this.base = base;
         this.suffix = new ArrayList<>();
         if (suffix != null) {
@@ -38,14 +74,14 @@ public class RefBasedAddress implements AbstractAddress {
         }
     }
 
-    public RefBasedAddress(RefBasedAddress un, SootFieldRef ref) {
-        this(un.getBase(), un.getSuffix());
-        this.append(ref);
-    }
+    // public RefBasedAddress(RefBasedAddress un, SootFieldRef ref) {
+    // this(un.getBase(), un.getSuffix());
+    // this.append(ref);
+    // }
 
-    public RefBasedAddress(ContextSensitiveValue cv) {
-        this(cv, null);
-    }
+    // public RefBasedAddress(ContextSensitiveValue cv) {
+    // this(cv, null);
+    // }
 
     public void append(SootFieldRef fref) {
         suffix.add(fref);
