@@ -50,8 +50,8 @@ public class SharedStateWrite {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        // result = prime * result + ((wnode == null) ? 0 : wnode.hashCode());
-        result = prime * result + ((wnode == null) ? 0 : wnode.getStmt().hashCode());
+        result = prime * result + ((wnode == null) ? 0 : wnode.hashCode());
+        // result = prime * result + ((wnode == null) ? 0 : wnode.getStmt().hashCode());
         result = prime * result + ((fields == null) ? 0 : fields.hashCode());
         return result;
     }
@@ -68,8 +68,8 @@ public class SharedStateWrite {
         if (wnode == null) {
             if (other.wnode != null)
                 return false;
-            // } else if (!wnode.equals(other.wnode))
-        } else if (!wnode.getStmt().equals(other.wnode.getStmt()))
+        } else if (!wnode.equals(other.wnode))
+            // } else if (!wnode.getStmt().equals(other.wnode.getStmt()))
             return false;
         if (fields == null) {
             if (other.fields != null)

@@ -141,7 +141,7 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static int cnum = 11;
+    public static int cnum = 13;
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
@@ -185,7 +185,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            // "ts-launcher",
+            "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -336,48 +336,66 @@ public class App {
         }
 
         Memory currMem = fia.getBefore(spnode);
-        // if (stmt.toString().contains("stack106")) {
-        // for (AbstractAddress a : currMem.getCurrMapping().keySet()) {
-        // App.p("^^ " + a + "::: ");
-        // for (Definition dd : currMem.getCurrMapping().get(a)) {
-        // App.p(" " + dd.d());
-        // }
-        // }
-        // }
-
         symptomCvalues.add(cvalue);
 
         p("Symptom values are: " + cvalue);
         p2("Analysis time: " + analysisDuration);
 
-        // List<IPNode> DBreads = new ArrayList<>();
-        // List<String> fields = new ArrayList<>();
-        Set<SharedStateRead> streads = new HashSet<>();
-        Set<TracePoint> tps = getDependency(igraph, fia, Collections.singletonList(spnode),
-                Collections.singletonList(symptomCvalues), streads);
+        Set<TracePoint> finalTps = new HashSet<>();
+        List<List<ContextSensitiveValue>> currQueries = Collections.singletonList(symptomCvalues);
+        List<IPNode> currNodes = Collections.singletonList(spnode);
+        Set<SharedStateRead> finalReads = new HashSet<>();
+        Set<SharedStateWrite> finalSavedNodes = new HashSet<>();
+        int round = 0;
+        while (true) {
+            round += 1;
+            App.p("================= Round " + round + " =================");
+            Set<SharedStateRead> streads = new HashSet<>();
+            Set<TracePoint> tps = getDependency(igraph, fia, currNodes, currQueries, streads);
+            finalReads.addAll(streads);
+            p2("#TPs: " + tps.size());
+            tps.removeAll(finalTps);
+            p2("#TPs (additional): " + tps.size());
+            tps.forEach(s -> {
+                p(s.d());
+            });
+            finalTps.addAll(tps);
 
-        Set<SharedStateDepedency> stdeps = new HashSet<>();
-        streads.forEach(stread -> {
-            String storeName = "";
-            IPNode rnode = stread.rnode;
-            InvokeExpr iexpr = rnode.getStmt().getInvokeExpr();
-            if (iexpr instanceof InstanceInvokeExpr) {
-                storeName = ((InstanceInvokeExpr) iexpr).getBase().getType().toString();
+            Set<SharedStateDepedency> stdeps = stReadsToDeps(streads);
+            Set<SharedStateWrite> saveNodes = getSaveNodes(igraph, fia, stdeps);
+            if (finalSavedNodes.containsAll(saveNodes)) {
+                break;
             }
-            stdeps.add(new SharedStateDepedency(storeName, stread.refs));
-        });
+            finalSavedNodes.addAll(saveNodes);
+            p("Now tracking shared state write dependencies");
+            List<List<ContextSensitiveValue>> swcvalues = new ArrayList<>();
+            List<IPNode> swnodes = getSTWrites(saveNodes, swcvalues);
 
-        stdeps.forEach(stdep -> {
-            // p(stdep);
-        });
-        Set<SharedStateWrite> saveNodes = getSaveNodes(igraph, fia, stdeps);
+            currQueries = swcvalues;
+            currNodes = swnodes;
+        }
+
+        // Set<SharedStateRead> streads2 = new HashSet<>();
+        // Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
+        // streads2);
+
+        // p2("#TPs: " + tps.size());
+
+        if (outputTP) {
+            writeTPs(finalTps, outputTPDir, outputTPFileName);
+            writeSTReads(finalReads, outputTPDir, outputTPFileName);
+            writeSTWrites(finalSavedNodes, outputTPDir, outputTPFileName);
+        }
+    }
+
+    private static List<IPNode> getSTWrites(Set<SharedStateWrite> saveNodes,
+            List<List<ContextSensitiveValue>> swcvalues) {
         List<IPNode> swnodes = new ArrayList<>();
-        List<List<ContextSensitiveValue>> swcvalues = new ArrayList<>();
-        p("Now tracking shared state write dependencies");
         for (SharedStateWrite sw : saveNodes) {
-            // App.p(sw.wnode.getStmt().getInvokeExpr().getArgs());
-
             swnodes.add(sw.wnode);
+            App.p("^^^^ " + sw.wnode.getDescription());
+            // App.p(sw.wnode.getContext().fullTrace());
+            // sw.wnode.getContext().
             List<ContextSensitiveValue> currCvalues = new ArrayList<>();
             // p(getRepoName(sw.wnode));
             if (getBaseType(sw.wnode).contains("Repository")) {
@@ -393,25 +411,29 @@ public class App {
             }
             swcvalues.add(currCvalues);
         }
-        // Set<SharedStateRead> streads2 = new HashSet<>();
-        // Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
-        // streads2);
+        return swnodes;
+    }
 
-        p2("#TPs: " + tps.size());
-
-        // p2("#TPs SW: " + tpsw.size());
-
-        // tpsw.removeAll(tps);
-        // p2("#TPs SW (additional): " + tpsw.size());
-        // tpsw.forEach(s -> {
-        // p(s.d());
-        // });
-        // tps.addAll(tpsw);
-        if (outputTP) {
-            writeTPs(tps, outputTPDir, outputTPFileName);
-            writeSTReads(streads, outputTPDir, outputTPFileName);
-            writeSTWrites(saveNodes, outputTPDir, outputTPFileName);
+    private static Set<SharedStateDepedency> stReadsToDeps(Set<SharedStateRead> streads) {
+        Set<SharedStateDepedency> stdeps = new HashSet<>();
+        for (SharedStateRead stread : streads) {
+            String storeName = "";
+            IPNode rnode = stread.rnode;
+            Stmt rstmt = rnode.getStmt();
+            if (rstmt.containsInvokeExpr()) {
+                InvokeExpr iexpr = rstmt.getInvokeExpr();
+                if (iexpr instanceof InstanceInvokeExpr) {
+                    storeName = ((InstanceInvokeExpr) iexpr).getBase().getType().toString();
+                }
+            } else if (rstmt instanceof JAssignStmt) {
+                Value v = ((JAssignStmt) rstmt).getRightOp();
+                if (v instanceof JInstanceFieldRef) {
+                    storeName = ((JInstanceFieldRef) v).getField().getName().toString();
+                }
+            }
+            stdeps.add(new SharedStateDepedency(storeName, stread.refs));
         }
+        return stdeps;
     }
 
     public static String getBaseType(IPNode ipnode) {
@@ -663,6 +685,8 @@ public class App {
                             writeOPName = "save";
                         } else if (storeName.contains("ValueOperations")) {
                             writeOPName = "set";
+                        } else if (storeName.contains("AtomicInteger")) {
+                            writeOPName = "incrementAndGet";
                         }
                         if (inexpr.getMethod().getName().equals(writeOPName)
                                 && inexpr.getBase().getType().toString().contains(storeName)) {
@@ -691,9 +715,9 @@ public class App {
                                 objVal = inexpr.getArg(0);
                             }
                             ContextSensitiveValue cvobj = ContextSensitiveValue.getCValue(ipnode.getContext(), objVal);
-                            p("-----");
+                            // p("-----");
                             // p(method + ":");
-                            p(ipnode);
+                            // p(ipnode.getDescription());
 
                             boolean resolved = false;
                             for (Definition def : cmap.getDefinitionsByCV(cvobj)) {
@@ -703,7 +727,7 @@ public class App {
                                 }
                             }
                             if (mayNotFromAnotherRepo || resolved) {
-                                p("Resolved for :" + cvobj);
+                                // p("Resolved for :" + cvobj);
                                 swrite.fields.add(strRefs);
                             }
 
@@ -718,17 +742,28 @@ public class App {
                     }
                     // }
                 }
+            } else if (stmt instanceof JAssignStmt) {
+                Value v = ((JAssignStmt) stmt).getLeftOp();
+                if (v instanceof JInstanceFieldRef) {
+                    SharedStateWrite swrite = new SharedStateWrite("", ipnode, new HashSet<>());
+                    boolean isSave = false;
+                    for (SharedStateDepedency stdep : stdeps) {
+                        String storeName = stdep.storeName;
+                        if (!(storeName.contains("Repository") || storeName.contains("AtomicInteger"))) {
+                            if (((JInstanceFieldRef) v).getField().getName().contains(storeName)) {
+                                isSave = true;
+                                swrite.type = storeName;
+                            }
+                        }
+                    }
+                    if (isSave) {
+                        result.add(swrite);
+                    }
+                }
             }
-
-            // String field = "status";
-            // String setterName = "set" + field.substring(0, 1).toUpperCase() +
-            // field.substring(1);
-            // String oclass = "order.domain.Order";
-            // p(setterName);
-
         }
-        return result;
 
+        return result;
     }
 
     public static List<String> refToString(List<SootFieldRef> refs) {
@@ -1083,6 +1118,7 @@ public class App {
                 ContextSensitiveValue cvread = ContextSensitiveValue.getCValue(satdef.getDefinedLocation().getContext(),
                         ((JAssignStmt) defStmt).getLeftOp());
                 SharedStateRead stread = new SharedStateRead("Repository", defLocation, cvread, refs);
+
                 App.p("Addinng STread: " + defLocation + ", " + stread);
                 streads.add(stread);
 
@@ -1093,6 +1129,30 @@ public class App {
                 SharedStateRead stread = new SharedStateRead("ValueOperations", defLocation, cvread, refs);
                 App.p("Addinng STread: " + defLocation + ", " + stread);
                 streads.add(stread);
+            } else if (ism.getDeclaringClass().getName().contains("AtomicInteger") &&
+                    ism.getName().contains("incrementAndGet")) {
+                ContextSensitiveValue cvread = ContextSensitiveValue.getCValue(satdef.getDefinedLocation().getContext(),
+                        ((JAssignStmt) defStmt).getLeftOp());
+                SharedStateRead stread = new SharedStateRead("AtomicInteger", defLocation, cvread, refs);
+                App.p("Addinng STread: " + defLocation + ", " + stread);
+                streads.add(stread);
+            }
+
+        } else if (defStmt instanceof JAssignStmt) {
+            Value rop = ((JAssignStmt) defStmt).getRightOp();
+            Value lop = ((JAssignStmt) defStmt).getLeftOp();
+            if (rop instanceof JInstanceFieldRef) {
+                String ltype = lop.getType().toString();
+                String rtype = ((JInstanceFieldRef) rop).getBase().getType().toString();
+                if (rtype.contains("Service") && !(ltype.contains("Repository") || ltype.contains("Controller")
+                        || ltype.contains("Template") || ltype.contains("AtomicInteger"))) {
+                    ContextSensitiveValue cvread = ContextSensitiveValue.getCValue(
+                            satdef.getDefinedLocation().getContext(),
+                            ((JAssignStmt) defStmt).getLeftOp());
+                    SharedStateRead stread = new SharedStateRead("ClassShared", defLocation, cvread, refs);
+                    App.p("Addinng STread: " + defLocation + ", " + stread);
+                    streads.add(stread);
+                }
             }
         }
 
@@ -1257,9 +1317,20 @@ public class App {
             // Map<String, List<String>> readPts = new HashMap<>();
             Set<String> readPts = new HashSet<>();
             for (SharedStateRead stread : streads) {
-                String repoType = ((JInterfaceInvokeExpr) stread.rnode.getStmt().getInvokeExpr()).getBase().getType()
-                        .toString();
-                String sd = stread.shortd(",,") + ",," + Utils.repoNameToClassName((repoType));
+                Stmt rstmt = stread.rnode.getStmt();
+                String repoType = "";
+                if (rstmt.containsInvokeExpr()) {
+                    repoType = ((InstanceInvokeExpr) stread.rnode.getStmt().getInvokeExpr()).getBase()
+                            .getType()
+                            .toString();
+                } else {
+                    repoType = ((JInstanceFieldRef) ((JAssignStmt) rstmt).getRightOp()).getField().getType().toString();
+                }
+                String otname = Utils.repoNameToClassName((repoType));
+                if (otname.equals("")) {
+                    otname = repoType;
+                }
+                String sd = stread.shortd(",,") + ",," + otname;
                 // if (!readPts.containsKey(sd)) {
                 readPts.add(sd);
                 // }
@@ -1295,11 +1366,12 @@ public class App {
             PrintWriter printWriter = new PrintWriter(fileWriter);
 
             printWriter.println("STwrites");
-            List<String> lines = new ArrayList<>();
+            Set<String> s = new HashSet<>();
             for (SharedStateWrite stwrite : stwrites) {
-                lines.add(stwrite.d(",,"));
+                s.add(stwrite.d(",,"));
             }
 
+            List<String> lines = new ArrayList<>(s);
             lines.sort(null);
             for (String l : lines) {
                 printWriter.println(l);

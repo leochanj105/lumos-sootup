@@ -36,6 +36,16 @@ public class Context {
         return (parent == null ? "" : (parent.toString() + ",")) + lastCallSite.getSm().getName();
     }
 
+    public String fullTrace() {
+        // String trace = "";
+        String ll = "";
+        if (lastCallSite.getCallingStmt() != null) {
+            ll += lastCallSite.getCallingStmt().getJavaSourceStartLineNumber();
+        }
+        return (parent == null ? "" : (parent.fullTrace() + "\n"))
+                + (lastCallSite.getSm().getName() + "," + ll);
+    }
+
     public Context(Context parent, CallSite lastCallSite, InterProcedureGraph igraph) {
         this.parent = parent;
         this.lastCallSite = lastCallSite;
