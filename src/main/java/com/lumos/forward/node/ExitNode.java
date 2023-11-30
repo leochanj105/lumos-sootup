@@ -114,7 +114,7 @@ public class ExitNode extends IPNode {
             for (AbstractAddress addr : out.getCurrMapping().keySet()) {
                 if (addr instanceof RefBasedAddress) {
                     RefBasedAddress un = (RefBasedAddress) addr;
-                    Context original = un.getBase().getContext();
+                    Context original = un.getBase().getCvalue().getContext();
                     // App.p(original + ", " + un);
                     boolean modified = false;
                     // if (!this.context.parentOf(original)) {
@@ -138,7 +138,7 @@ public class ExitNode extends IPNode {
                                     App.p(def.getDefinedLocation().getDescription());
                                 }
                             }
-                            if (un.getBase().getValue() instanceof StaticFieldRef) {
+                            if (un.getBase().getCvalue().getValue() instanceof StaticFieldRef) {
                                 continue;
                             }
 
@@ -185,8 +185,9 @@ public class ExitNode extends IPNode {
             if (addr instanceof RefBasedAddress) {
                 RefBasedAddress raddr = (RefBasedAddress) addr;
                 if (raddr.getSuffix() == null) {
-                    ContextSensitiveValue cv = raddr.getBase();
+                    ContextSensitiveValue cv = raddr.getBase().getCvalue();
                     assert (cv.getValue() instanceof Local);
+                    assert (raddr.getBase().getAllocationLoc() == null);
                     Context calleeContext = this.getReturnStmtNodes().get(0).getContext();
                     if (cv.getValue() instanceof Local) {
                         if (calleeContext.parentOf(cv.getContext())) {

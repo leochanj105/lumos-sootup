@@ -111,9 +111,7 @@ public class Memory {
         Set<RefBasedAddress> unames = new HashSet<>();
 
         for (Definition def : baseDefs) {
-            RefBasedAddress unref = null;
-            // unref = new RefBasedAddress(def.getDefinedValue(), ref.getFieldRef());
-            unref = RefBasedAddress.getRefBasedAddress(def.getDefinedValue(), ref.getFieldRef());
+            RefBasedAddress unref = RefBasedAddress.getRefBasedAddress(def.getDefinedValue(), ref.getFieldRef());
             unames.add(unref);
         }
         return unames;

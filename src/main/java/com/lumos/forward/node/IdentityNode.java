@@ -13,6 +13,7 @@ import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
 import com.lumos.forward.memory.AbstractAddress;
+import com.lumos.forward.memory.AbstractAllocation;
 import com.lumos.forward.memory.Memory;
 import com.lumos.forward.memory.RefBasedAddress;
 import com.lumos.utils.Utils;
@@ -206,7 +207,6 @@ public class IdentityNode extends IPNode {
                 // return true;
                 // } else
                 if (((mstr.equals("next") && tstr.contains("Iterator"))
-
                         || (mstr.equals("get") && tstr.contains("List"))
                         || (mstr.equals("get") && tstr.contains("Map")))) {
                     cvlop = ContextSensitiveValue.getCValue(context, ((JAssignStmt) stmt).getLeftOp());
@@ -224,7 +224,9 @@ public class IdentityNode extends IPNode {
                         defs.addAll(collectionDefs);
                     } else {
                         defs.add(Definition.getDefinition(
-                                RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()), this));
+                                RefBasedAddress.getRefBasedAddress(new AbstractAllocation(cvlop, this),
+                                        Collections.emptyList()),
+                                this));
                     }
                 }
                 Set<Definition> currDefs = new HashSet<>();
@@ -258,21 +260,11 @@ public class IdentityNode extends IPNode {
             // }
             if (idMode.equals("CONSERVATIVE") || ((cvuses.size() > 1 || cvuses.size() == 0)
                     || !isSingleIdAssign())) {
-                RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList());
+                RefBasedAddress un = RefBasedAddress.getRefBasedAddress(new AbstractAllocation(cvlop, this),
+                        Collections.emptyList());
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
-                // if (Utils.isCompositeType(cvlop.getValue())) {
-                // out.putDefinition(cvlop,
-                // Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
-                // ContextSensitiveValue.getCValue(cvlop.getContext(),
-                // Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
-                // cvlop.getValue().getType())),
-                // Collections.emptyList()),
-                // this));
-                // out.putDefinition(cvlop, Definition
-                // .getDefinition(RefBasedAddress.getRefBasedAddress(cvlop,
-                // Collections.emptyList()), this));
-                // }
             } else {
+                // Single Identity assignment
                 for (ContextSensitiveValue cvrop : cvuses) {
                     // Set<Definition> defs = new HashSet<>();
                     // Set<RefBasedAddress> unames = out.getUniqueNamesForRef(cvlop);

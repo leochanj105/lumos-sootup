@@ -3,7 +3,7 @@ package com.lumos.forward.memory;
 import com.lumos.forward.ContextSensitiveValue;
 
 public interface AbstractAddress {
-    public ContextSensitiveValue getBase();
+    public AbstractAllocation getBase();
 
-    public void setBase(ContextSensitiveValue cv);
+    public void setBase(AbstractAllocation cv);
 }
