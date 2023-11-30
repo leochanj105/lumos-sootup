@@ -141,11 +141,11 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static int cnum = 13;
+    public static String ctag = "8clab";
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
-    public static String jpath = "f" + cnum;
+    public static String jpath = "f" + ctag;
 
     public static boolean showRound = false;
     public static boolean showLineNum = true;
@@ -153,6 +153,7 @@ public class App {
     public static boolean showInitOnly = false;
     public static boolean analyzeControllerOnly = false;
     public static boolean analyzeRepoOnly = false;
+    public static boolean everyThingOnly = true;
 
     public static Map<String, MethodInfo> methodMap;
 
@@ -167,17 +168,17 @@ public class App {
 
     public static Set<IPNode> idnodes = new HashSet<>();
 
-    public static String caseStudyPath = "cases/f" + cnum + "/";
+    public static String caseStudyPath = "cases/f" + ctag + "/";
     public static String safeListPath = "safelist";
     public static Set<String> safeList = new HashSet<>();
 
     public static Set<String> initList = new HashSet<>();
 
     public static String outputTPDir = "TPnew";
-    public static String outputTPFileName = "tps" + cnum;
+    public static String outputTPFileName = "tps" + ctag;
     public static boolean outputTP = true;
 
-    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f" + cnum + "\\";
+    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f" + ctag + "\\";
     public static String bcodeSuffix = "\\target\\classes";
     public static String scodeSuffix = "\\src\\main\\java";
     public static Map<String, Path> sourceMap = new HashMap<>();
@@ -185,7 +186,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            "ts-launcher",
+            // "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -278,6 +279,11 @@ public class App {
         ContextSensitiveInfo cinfo = igraph.build(entryMethod);
         App.p("Build graph finished");
 
+        writeTPs(getEveryThing(igraph), outputTPDir, outputTPFileName + "_everything");
+        if (everyThingOnly) {
+            return;
+        }
+
         long start = System.currentTimeMillis();
         IPNode firstNode = igraph.searchNode(firstStmt.split(","));
         App.p("Starting node is: " + firstNode);
@@ -315,11 +321,11 @@ public class App {
         List<ContextSensitiveValue> symptomCvalues = new ArrayList<>();
         ContextSensitiveValue cvalue = null;
 
-        if (cnum == 13) {
+        if (ctag.contains("13")) {
             // f13
             cvalue = ContextSensitiveValue.getCValue(spnode.getContext(),
                     ((JAssignStmt) spnode.getStmt()).getLeftOp());
-        } else if (cnum == 8) {
+        } else if (ctag.contains("8")) {
 
             // f8
             Value symptom = getFieldRef(((JReturnStmt) spnode.getStmt()).getOp(),
@@ -330,7 +336,7 @@ public class App {
             // ContextSensitiveValue cvalue =
             // ContextSensitiveValue.getCValue(spnode.getContext(),
             // spnode.getStmt().getInvokeExpr().getArg(0));
-        } else if (cnum == 11) {
+        } else if (ctag.contains("11")) {
             // f11
             cvalue = ContextSensitiveValue.getCValue(spnode.getContext(), ((JAssignStmt) spnode.getStmt()).getLeftOp());
         }
@@ -388,6 +394,55 @@ public class App {
         }
     }
 
+    public static Set<TracePoint> getEveryThing(InterProcedureGraph igraph) {
+        Set<TracePoint> result = new HashSet<>();
+        // Set<SootMethod> sms = new HashSet<>();
+        // for (IPNode ipnode : igraph.nodes) {
+        // sms.add(ipnode.getMethodInfo().sm);
+        // }
+        for (IPNode ipnode : igraph.nodes) {
+            // if(ipnode instanceof)
+            Set<ContextSensitiveValue> implicits = new HashSet<>();
+            Set<ContextSensitiveValue> uses = ipnode.getUsed(implicits);
+            Set<ContextSensitiveValue> allUses = new HashSet<>();
+            if (ipnode instanceof EnterNode) {
+                InvokeExpr expr = ipnode.getStmt().getInvokeExpr();
+                for (Value v : expr.getArgs()) {
+                    TracePoint provTP = new TracePoint(ipnode.getStmt(), v, ipnode.getMethodInfo().sm);
+                    result.add(provTP);
+                }
+                if (expr instanceof InstanceInvokeExpr) {
+                    TracePoint provTP = new TracePoint(ipnode.getStmt(), ((InstanceInvokeExpr) expr).getBase(),
+                            ipnode.getMethodInfo().sm);
+                    result.add(provTP);
+                }
+            } else {
+                allUses.addAll(implicits);
+                allUses.addAll(uses);
+                for (ContextSensitiveValue cv : allUses) {
+                    TracePoint provTP = null;
+                    if (cv.getValue() instanceof JInstanceFieldRef) {
+                        JInstanceFieldRef cvref = ((JInstanceFieldRef) cv.getValue());
+                        Value vbase = cvref.getBase();
+                        List<SootFieldRef> suf = Collections.singletonList(cvref.getFieldRef());
+                        provTP = new TracePoint(ipnode.getStmt(), vbase, ipnode.getMethodInfo().sm, suf);
+                    } else {
+                        provTP = new TracePoint(ipnode.getStmt(), cv.getValue(), ipnode.getMethodInfo().sm);
+                    }
+                    result.add(provTP);
+                }
+            }
+            // if (!(ipnode.getStmt() instanceof JIdentityStmt)) {
+            for (ValueBox vbox : ipnode.getStmt().getDefBoxes()) {
+                Value v = vbox.getValue();
+                TracePoint provTP = new TracePoint(ipnode.getStmt(), v, ipnode.getMethodInfo().sm);
+                result.add(provTP);
+            }
+            // }
+        }
+        return result;
+    }
+
     private static List<IPNode> getSTWrites(Set<SharedStateWrite> saveNodes,
             List<List<ContextSensitiveValue>> swcvalues) {
         List<IPNode> swnodes = new ArrayList<>();
@@ -425,10 +480,12 @@ public class App {
                 if (iexpr instanceof InstanceInvokeExpr) {
                     storeName = ((InstanceInvokeExpr) iexpr).getBase().getType().toString();
                 }
+
             } else if (rstmt instanceof JAssignStmt) {
                 Value v = ((JAssignStmt) rstmt).getRightOp();
                 if (v instanceof JInstanceFieldRef) {
-                    storeName = ((JInstanceFieldRef) v).getField().getName().toString();
+                    // storeName = ((JInstanceFieldRef) v).getField().getName().toString();
+                    storeName = "ClassShared";
                 }
             }
             stdeps.add(new SharedStateDepedency(storeName, stread.refs));
@@ -737,7 +794,7 @@ public class App {
                         }
                     }
                     // if (swrite.fields.size() > 0) {
-                    if (isSave) {
+                    if (isSave && !swrite.type.contains("AtomicInteger")) {
                         result.add(swrite);
                     }
                     // }
@@ -1114,7 +1171,7 @@ public class App {
             SootMethod ism = iexpr.getMethod();
 
             if (ism.getDeclaringClass().getName().contains("Repository")
-                    && ism.getName().contains("findBy")) {
+                    && ism.getName().contains("findBy") || ism.getName().contains("findTop10By")) {
                 ContextSensitiveValue cvread = ContextSensitiveValue.getCValue(satdef.getDefinedLocation().getContext(),
                         ((JAssignStmt) defStmt).getLeftOp());
                 SharedStateRead stread = new SharedStateRead("Repository", defLocation, cvread, refs);

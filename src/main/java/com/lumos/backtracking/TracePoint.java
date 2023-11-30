@@ -13,6 +13,7 @@ import soot.SootMethod;
 import soot.Value;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
+import soot.jimple.internal.JIfStmt;
 
 public class TracePoint implements Serializable {
     public Stmt s;
@@ -40,6 +41,10 @@ public class TracePoint implements Serializable {
     }
 
     public String d(String separator) {
+        String stmtStr = s.toString();
+        if(s instanceof JIfStmt){
+            
+        }
         return App.serviceMap.get(sm.toString()) + separator + sm + separator + s.getJavaSourceStartLineNumber()
                 + separator + s + separator + v + separator
                 + lessSuffix();
