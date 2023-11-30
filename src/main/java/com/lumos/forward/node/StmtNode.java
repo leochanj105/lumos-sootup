@@ -8,7 +8,8 @@ import com.lumos.App;
 import com.lumos.forward.Context;
 import com.lumos.forward.ContextSensitiveValue;
 import com.lumos.forward.Definition;
-import com.lumos.forward.memory.CollectionContentAddress;
+import com.lumos.forward.memory.AbstractAllocation;
+// import com.lumos.forward.memory.CollectionContentAddress;
 import com.lumos.forward.memory.Memory;
 import com.lumos.forward.memory.RefBasedAddress;
 import com.lumos.utils.Utils;
@@ -98,7 +99,9 @@ public class StmtNode extends IPNode {
                         defs.addAll(collectionDefs);
                     } else {
                         defs.add(Definition.getDefinition(
-                                RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()), this));
+                                RefBasedAddress.getRefBasedAddress(new AbstractAllocation(cvrop, this),
+                                        Collections.emptyList()),
+                                this));
                     }
                 }
                 Set<Definition> newdefs = new HashSet<>();
@@ -157,11 +160,15 @@ public class StmtNode extends IPNode {
                 // cvlop.getValue().getType())),
                 // Collections.emptyList()),
                 // this));
-                defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()),
+                defs.add(Definition.getDefinition(
+                        RefBasedAddress.getRefBasedAddress(new AbstractAllocation(cvrop, this),
+                                Collections.emptyList()),
                         this));
             } else {
                 // App.p("xxxx " + this.stmt);
-                defs.add(Definition.getDefinition(RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()),
+                defs.add(Definition.getDefinition(
+                        RefBasedAddress.getRefBasedAddress(new AbstractAllocation(cvrop, this),
+                                Collections.emptyList()),
                         this));
             }
             // Set<Definition> defs = out.getDefinitionsByCV(cvrop);

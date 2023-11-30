@@ -141,7 +141,7 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static String ctag = "8clab";
+    public static String ctag = "13clab";
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
@@ -153,7 +153,7 @@ public class App {
     public static boolean showInitOnly = false;
     public static boolean analyzeControllerOnly = false;
     public static boolean analyzeRepoOnly = false;
-    public static boolean everyThingOnly = true;
+    public static boolean everyThingOnly = false;
 
     public static Map<String, MethodInfo> methodMap;
 
@@ -186,7 +186,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            // "ts-launcher",
+            "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -613,9 +613,9 @@ public class App {
                 if (!isConstant) {
                     if (satisfiedDefs.size() == 1) {
                         Definition onlyDef = satisfiedDefs.iterator().next();
-                        if ((onlyDef.getDefinedValue().getBase().getValue()) instanceof Constant) {
+                        if ((onlyDef.getDefinedValue().getBase().getCvalue().getValue()) instanceof Constant) {
                             isConstant = true;
-                            constval = onlyDef.getDefinedValue().getBase().getValue();
+                            constval = onlyDef.getDefinedValue().getBase().getCvalue().getValue();
                         }
                     }
                 }
@@ -1083,7 +1083,7 @@ public class App {
     public static void handleUnresolvedDeps(Definition satdef, ContextSensitiveValue cv, ForwardIPAnalysis fia,
             IPNode node, Set<PendingBackTracking> unresolvedNodes, Set<SharedStateRead> streads) {
         App.p(">>>>>Unresolved " + cv + " with " + satdef);
-        Value defVal = satdef.getDefinedValue().getBase().getValue();
+        Value defVal = satdef.getDefinedValue().getBase().getCvalue().getValue();
         if ((defVal instanceof Constant) && !(defVal instanceof NullConstant)) {
             p("Not tracking constant: " + cv + " with constant value " + defVal);
             return;
@@ -1092,7 +1092,7 @@ public class App {
         RefBasedAddress cvun = satdef.getDefinedValue();
         // if (!cvun.getBase().toString().contains("null")) {
         App.p("Try resolving base:");
-        ContextSensitiveValue cvbase = cvun.getBase();
+        ContextSensitiveValue cvbase = cvun.getBase().getCvalue();
         Set<Definition> resbasedefs = fia.getBefore(node).getDefinitionsByCV(cvbase);
         App.p(resbasedefs);
 
@@ -1104,17 +1104,20 @@ public class App {
                     alternative = true;
                     unresolvedNodes.add(new PendingBackTracking(bdef.getDefinedLocation(), "normal"));
 
-                    if (!bdef.getDefinedValue().getBase().getValue().toString().equals("null")) {
+                    if (!bdef.getDefinedValue().getBase().getCvalue().getValue().toString().equals("null")) {
                         IPNode dloc = bdef.getDefinedLocation();
                         App.p("New Provenance due to field: " + cvun + " at " +
                                 dloc + " with base " + bdef.getDefinedValue());
 
                         if (dloc.getStmt() instanceof JAssignStmt) {
+
                             JAssignStmt astmt = (JAssignStmt) bdef.getDefinedLocation().getStmt();
                             if (astmt.getRightOp() instanceof InstanceInvokeExpr) {
                                 Value basev = ((InstanceInvokeExpr) astmt.getRightOp()).getBase();
+                                App.p("!!! " + basev + ", " + basev.getType());
                                 if (basev.getType().toString()
                                         .contains("Iterator")) {
+
                                     p("This provenance is due to an iterator; resolve further...");
                                     Set<Definition> iterDefs = fia.getBefore(bdef.getDefinedLocation())
                                             .getDefinitionsByCV(

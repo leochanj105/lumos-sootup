@@ -7,23 +7,25 @@ import java.util.List;
 import java.util.Map;
 
 import com.lumos.forward.ContextSensitiveValue;
+import com.lumos.forward.node.IPNode;
 
 import soot.SootFieldRef;
 import soot.Value;
 
 public class RefBasedAddress implements AbstractAddress {
 
-    public ContextSensitiveValue base;
+    // public ContextSensitiveValue base;
+    public AbstractAllocation base;
     public List<SootFieldRef> suffix;
+
+    public IPNode allocationLoc;
 
     // public String tag;
 
-    public static Map<ContextSensitiveValue, Map<List<SootFieldRef>, RefBasedAddress>> cache = new HashMap<>();
+    public static Map<AbstractAllocation, Map<List<SootFieldRef>, RefBasedAddress>> cache = new HashMap<>();
 
     public static RefBasedAddress getRefBasedAddress(RefBasedAddress un, SootFieldRef ref) {
-        // this(un.getBase(), un.getSuffix());
-        // this.append(ref);
-        ContextSensitiveValue rbase = un.getBase();
+        AbstractAllocation rbase = un.getBase();
         List<SootFieldRef> sfs = un.getSuffix();
         List<SootFieldRef> newsfs = new ArrayList<>();
         if (sfs != null) {
@@ -34,10 +36,10 @@ public class RefBasedAddress implements AbstractAddress {
     }
 
     public static RefBasedAddress getRefBasedAddress(ContextSensitiveValue cv) {
-        return getRefBasedAddress(cv, null);
+        return getRefBasedAddress(new AbstractAllocation(cv, null), null);
     }
 
-    public static RefBasedAddress getRefBasedAddress(ContextSensitiveValue base, List<SootFieldRef> suffix) {
+    public static RefBasedAddress getRefBasedAddress(AbstractAllocation base, List<SootFieldRef> suffix) {
         // App.p(context);
         Map<List<SootFieldRef>, RefBasedAddress> map1 = cache.get(base);
         if (map1 == null) {
@@ -61,16 +63,16 @@ public class RefBasedAddress implements AbstractAddress {
     }
 
     @Override
-    public ContextSensitiveValue getBase() {
+    public AbstractAllocation getBase() {
         return base;
     }
 
     @Override
-    public void setBase(ContextSensitiveValue base) {
+    public void setBase(AbstractAllocation base) {
         this.base = base;
     }
 
-    private RefBasedAddress(ContextSensitiveValue base, List<SootFieldRef> suffix) {
+    private RefBasedAddress(AbstractAllocation base, List<SootFieldRef> suffix) {
         this.base = base;
         this.suffix = suffix;
         // this.suffix = new ArrayList<>();
