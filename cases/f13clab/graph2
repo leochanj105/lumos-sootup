@@ -1,0 +1,3 @@
+login.controller.AccountLoginController: login.domain.LoginResult login
+if YsbCaptcha == null goto
+return $stack34

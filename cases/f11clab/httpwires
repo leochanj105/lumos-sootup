@@ -1,0 +1,15 @@
+cancel.controller.CancelController: cancel.domain.VerifyResult verifySsoLogin
+69
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken
+loginToken
+token
+order.controller.OrderController: order.domain.VerifyResult verifySsoLogin
+155
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken
+loginToken
+token
+other.controller.OrderOtherController: other.domain.VerifyResult verifySsoLogin
+156
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken
+loginToken
+token

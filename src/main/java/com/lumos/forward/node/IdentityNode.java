@@ -224,7 +224,7 @@ public class IdentityNode extends IPNode {
                         defs.addAll(collectionDefs);
                     } else {
                         defs.add(Definition.getDefinition(
-                                RefBasedAddress.getRefBasedAddress(new AbstractAllocation(cvrop, this),
+                                RefBasedAddress.getRefBasedAddress(new AbstractAllocation(cvlop, this),
                                         Collections.emptyList()),
                                 this));
                     }

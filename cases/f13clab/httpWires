@@ -1,0 +1,45 @@
+java.util.concurrent.Future sendInsidePayment
+99
+inside_payment.service.InsidePaymentServiceImpl: boolean pay(inside_payment.domain.PaymentInfo,javax.servlet.http.HttpServletRequest)
+$u0,loginId
+info,$stack16
+java.util.concurrent.Future sendOrderCancel
+115
+cancel.controller.CancelController: cancel.domain.CancelOrderResult cancelTicket(cancel.domain.CancelOrderInfo,java.lang.String,java.lang.String)
+$u0,loginId,loginToken
+info,loginId,loginToken
+cancel.queue.MsgSendingBean: void sendCancelInfoToOrderOther(cancel.domain.ChangeOrderInfo)
+27
+other.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)
+changeOrderInfo
+changeOrderInfo
+other.queue.MsgSendingBean: void sendLoginInfoToSso(other.domain.ChangeOrderResult)
+27
+cancel.queue.MsgReveiceBean: void receiveQueueInfo(java.lang.Object)
+changeOrderResult
+changeOrderResult
+order.controller.OrderController: order.domain.VerifyResult verifySsoLogin
+155
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken
+loginToken
+token
+other.controller.OrderOtherController: other.domain.VerifyResult verifySsoLogin
+156
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken
+loginToken
+token
+cancel.controller.CancelController: cancel.domain.VerifyResult verifySsoLogin
+64
+sso.controller.AccountSsoController: sso.domain.VerifyResult verifyLoginToken
+loginToken
+token
+void doErrorQueue
+56
+login.controller.AccountLoginController: login.domain.LoginResult login
+$stack28
+li
+login.service.AccountLoginServiceImpl: login.domain.LoginResult login
+41
+com.trainticket.verificationcode.controller.VerificationCodeController: boolean verifyCode
+ 
+ 
