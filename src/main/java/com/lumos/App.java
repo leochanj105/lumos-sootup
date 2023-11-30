@@ -141,7 +141,7 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static String ctag = "8clab";
+    public static String ctag = "13clab";
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
@@ -153,7 +153,7 @@ public class App {
     public static boolean showInitOnly = false;
     public static boolean analyzeControllerOnly = false;
     public static boolean analyzeRepoOnly = false;
-    public static boolean everyThingOnly = true;
+    public static boolean everyThingOnly = false;
 
     public static Map<String, MethodInfo> methodMap;
 
@@ -186,7 +186,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            // "ts-launcher",
+            "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",

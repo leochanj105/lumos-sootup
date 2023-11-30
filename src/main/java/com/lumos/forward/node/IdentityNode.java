@@ -260,17 +260,18 @@ public class IdentityNode extends IPNode {
                     || !isSingleIdAssign())) {
                 RefBasedAddress un = RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList());
                 out.putDefinition(cvlop, Definition.getDefinition(un, this));
-                if (Utils.isCompositeType(cvlop.getValue())) {
-                    // out.putDefinition(cvlop,
-                    // Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
-                    // ContextSensitiveValue.getCValue(cvlop.getContext(),
-                    // Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
-                    // cvlop.getValue().getType())),
-                    // Collections.emptyList()),
-                    // this));
-                    out.putDefinition(cvlop, Definition
-                            .getDefinition(RefBasedAddress.getRefBasedAddress(cvlop, Collections.emptyList()), this));
-                }
+                // if (Utils.isCompositeType(cvlop.getValue())) {
+                // out.putDefinition(cvlop,
+                // Definition.getDefinition(RefBasedAddress.getRefBasedAddress(
+                // ContextSensitiveValue.getCValue(cvlop.getContext(),
+                // Jimple.v().newLocal("collection_" + cvlop.getValue().toString(),
+                // cvlop.getValue().getType())),
+                // Collections.emptyList()),
+                // this));
+                // out.putDefinition(cvlop, Definition
+                // .getDefinition(RefBasedAddress.getRefBasedAddress(cvlop,
+                // Collections.emptyList()), this));
+                // }
             } else {
                 for (ContextSensitiveValue cvrop : cvuses) {
                     // Set<Definition> defs = new HashSet<>();

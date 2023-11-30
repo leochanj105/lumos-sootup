@@ -1,0 +1,2 @@
+changeOrderResult = (cancel.domain.ChangeOrderResult) $stack12,cancel.queue.MsgReveiceBean
+changeOrderInfo = (other.domain.ChangeOrderInfo) $stack12,other.queue.MsgReveiceBean
