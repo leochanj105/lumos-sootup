@@ -141,7 +141,7 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static String ctag = "13clab";
+    public static String ctag = "8clab";
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
@@ -186,7 +186,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            "ts-launcher",
+            // "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -344,9 +344,10 @@ public class App {
         Memory currMem = fia.getBefore(spnode);
         symptomCvalues.add(cvalue);
 
-        p("Symptom values are: " + cvalue);
+        p2("Symptom values are: " + cvalue);
         p2("Analysis time: " + analysisDuration);
 
+        start = System.currentTimeMillis();
         Set<TracePoint> finalTps = new HashSet<>();
         List<List<ContextSensitiveValue>> currQueries = Collections.singletonList(symptomCvalues);
         List<IPNode> currNodes = Collections.singletonList(spnode);
@@ -380,6 +381,9 @@ public class App {
             currQueries = swcvalues;
             currNodes = swnodes;
         }
+        long backtrackDuration = System.currentTimeMillis()
+                - start;
+        p2("Backtrack time: " + backtrackDuration);
 
         // Set<SharedStateRead> streads2 = new HashSet<>();
         // Set<TracePoint> tpsw = getDependency(igraph, fia, swnodes, swcvalues,
@@ -672,9 +676,6 @@ public class App {
 
         }
 
-        long backtrackDuration = System.currentTimeMillis()
-                - start;
-        p2("Backtrack time: " + backtrackDuration);
         return tps;
     }
 
@@ -1716,7 +1717,7 @@ public class App {
     }
 
     public static void p(Object s) {
-        System.out.println(s);
+        // System.out.println(s);
     }
 
     public static void p2(Object s) {
