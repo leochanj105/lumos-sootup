@@ -141,7 +141,7 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static String ctag = "8clab";
+    public static String ctag = "11clab";
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
@@ -178,15 +178,17 @@ public class App {
     public static String outputTPFileName = "tps" + ctag;
     public static boolean outputTP = true;
 
-    public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f" + ctag + "\\";
-    public static String bcodeSuffix = "\\target\\classes";
-    public static String scodeSuffix = "\\src\\main\\java";
+    //public static String base = "C:\\Users\\jchen\\Desktop\\Academic\\lumos\\f" + ctag + "\\";
+
+    public static String base = "/users/leochanj/f" + ctag + "/";
+    public static String bcodeSuffix = "/target/classes";
+    public static String scodeSuffix = "/src/main/java";
     public static Map<String, Path> sourceMap = new HashMap<>();
 
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-            // "ts-launcher",
+             //"ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -290,6 +292,7 @@ public class App {
         App.p("Analysis begins");
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
         App.p("Analysis finished");
+	p2("#Nodes: " + igraph.nodes.size());
 
         long analysisDuration = System.currentTimeMillis() - start;
         // if (true) {
