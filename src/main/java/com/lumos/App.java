@@ -141,7 +141,7 @@ public class App {
     public static String outputFormat = "class";
 
     public static final String LOG_PREFIX = "LUMOS-LOG";
-    public static String ctag = "11clab";
+    public static String ctag = "13clab";
 
     public static boolean compileJimpleOnly = false;
     public static boolean compileClass = false;
@@ -168,7 +168,7 @@ public class App {
 
     public static Set<IPNode> idnodes = new HashSet<>();
 
-    public static String caseStudyPath = "cases/f" + ctag + "/";
+    public static String caseStudyPath = "/users/leochanj/lumos-sootup/cases/f" + ctag + "/";
     public static String safeListPath = "safelist";
     public static Set<String> safeList = new HashSet<>();
 
@@ -188,7 +188,7 @@ public class App {
     public static Map<String, SootMethod> remoteMap = new HashMap<>();
 
     public static String[] services = new String[] {
-             //"ts-launcher",
+             "ts-launcher",
             "ts-inside-payment-service",
             "ts-order-other-service",
             "ts-order-service",
@@ -277,24 +277,27 @@ public class App {
         String firstStmt = graphConfig.get(1);
         String symptomStmt = graphConfig.get(2);
 
+
+        long start = System.currentTimeMillis();
         App.p("Starting building graph");
         ContextSensitiveInfo cinfo = igraph.build(entryMethod);
         App.p("Build graph finished");
-
+	long buildGraphTime = System.currentTimeMillis() - start;
         writeTPs(getEveryThing(igraph), outputTPDir, outputTPFileName + "_everything");
         if (everyThingOnly) {
             return;
         }
-
-        long start = System.currentTimeMillis();
+	
         IPNode firstNode = igraph.searchNode(firstStmt.split(","));
         App.p("Starting node is: " + firstNode);
         App.p("Analysis begins");
+	start = System.currentTimeMillis();
         ForwardIPAnalysis fia = new ForwardIPAnalysis(igraph, firstNode);
-        App.p("Analysis finished");
-	p2("#Nodes: " + igraph.nodes.size());
 
         long analysisDuration = System.currentTimeMillis() - start;
+
+        App.p("Analysis finished");
+	p2("#Nodes: " + igraph.nodes.size());
         // if (true) {
         // return;
         // }
@@ -349,6 +352,7 @@ public class App {
 
         p2("Symptom values are: " + cvalue);
         p2("Analysis time: " + analysisDuration);
+        p2("BuildGraph time: " + buildGraphTime);
 
         start = System.currentTimeMillis();
         Set<TracePoint> finalTps = new HashSet<>();
@@ -1071,7 +1075,7 @@ public class App {
                             // p(spath);
                             String sfilestr = fstr.substring(spath.length() + 1);
                             sfilestr = sfilestr.substring(0, sfilestr.indexOf(".java"));
-                            sfilestr = sfilestr.replace("\\", ".");
+                            sfilestr = sfilestr.replace("/", ".");
                             sourceMap.put(sfilestr, file);
                             // if (fstr.contains("OrderOtherServiceImpl")) {
                             // p(sfilestr);
@@ -1720,7 +1724,7 @@ public class App {
     }
 
     public static void p(Object s) {
-        // System.out.println(s);
+//        System.out.println(s);
     }
 
     public static void p2(Object s) {
